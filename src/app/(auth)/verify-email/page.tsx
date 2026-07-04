@@ -30,10 +30,12 @@ async function VerifyEmailContent({ token, email }: { token?: string; email?: st
           </p>
         </div>
         {email && (
-          <form action={async () => {
-            "use server";
-            await resendVerificationAction(email);
-          }}>
+          <form
+            action={async () => {
+              "use server";
+              await resendVerificationAction(email);
+            }}
+          >
             <Button type="submit" variant="outline" className="w-full">
               Resend verification email
             </Button>

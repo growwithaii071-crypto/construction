@@ -60,9 +60,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           <p className="text-xs text-gray-400 mt-1">Redirecting to login...</p>
         </div>
         <Link href="/login">
-          <Button className="w-full bg-[#1e3a5f] hover:bg-[#162e4d] text-white">
-            Go to Login
-          </Button>
+          <Button className="w-full bg-[#1e3a5f] hover:bg-[#162e4d] text-white">Go to Login</Button>
         </Link>
       </div>
     );
@@ -119,9 +117,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
-          {errors.password && (
-            <p className="text-xs text-red-500">{errors.password.message}</p>
-          )}
+          {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
         </div>
 
         {/* Confirm Password */}

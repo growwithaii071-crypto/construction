@@ -24,7 +24,12 @@ export default async function DashboardPage() {
             </div>
           </div>
           <form action={logoutAction}>
-            <Button type="submit" variant="ghost" size="sm" className="text-gray-500 hover:text-red-600">
+            <Button
+              type="submit"
+              variant="ghost"
+              size="sm"
+              className="text-gray-500 hover:text-red-600"
+            >
               <LogOut className="w-4 h-4 mr-2" />
               Sign Out
             </Button>
@@ -54,13 +59,27 @@ export default async function DashboardPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
             {[
-              { label: "Role", value: ROLE_LABELS[user.role as UserRole], color: "bg-blue-50 text-blue-700" },
-              { label: "Email Verified", value: user.emailVerified ? "Yes" : "Pending", color: user.emailVerified ? "bg-green-50 text-green-700" : "bg-yellow-50 text-yellow-700" },
+              {
+                label: "Role",
+                value: ROLE_LABELS[user.role as UserRole],
+                color: "bg-blue-50 text-blue-700",
+              },
+              {
+                label: "Email Verified",
+                value: user.emailVerified ? "Yes" : "Pending",
+                color: user.emailVerified
+                  ? "bg-green-50 text-green-700"
+                  : "bg-yellow-50 text-yellow-700",
+              },
               { label: "Account Status", value: "Active", color: "bg-green-50 text-green-700" },
             ].map((item) => (
               <div key={item.label} className="p-4 rounded-xl border border-gray-100 bg-gray-50">
-                <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">{item.label}</p>
-                <span className={`inline-block mt-2 px-3 py-1 rounded-full text-sm font-semibold ${item.color}`}>
+                <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">
+                  {item.label}
+                </p>
+                <span
+                  className={`inline-block mt-2 px-3 py-1 rounded-full text-sm font-semibold ${item.color}`}
+                >
                   {item.value}
                 </span>
               </div>

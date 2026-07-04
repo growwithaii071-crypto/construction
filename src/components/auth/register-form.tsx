@@ -61,9 +61,7 @@ export function RegisterForm() {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Create an account</h2>
-        <p className="mt-1.5 text-sm text-gray-500">
-          Join the Construction Management System
-        </p>
+        <p className="mt-1.5 text-sm text-gray-500">Join the Construction Management System</p>
       </div>
 
       {/* Success Alert */}
@@ -149,9 +147,7 @@ export function RegisterForm() {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
-          {errors.password && (
-            <p className="text-xs text-red-500">{errors.password.message}</p>
-          )}
+          {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
 
           {/* Password strength indicators */}
           {passwordValue && (

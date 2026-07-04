@@ -98,7 +98,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return refreshAccessToken(token);
     },
 
-    async session({ session, token }: { session: import("next-auth").Session; token: import("next-auth/jwt").JWT }) {
+    async session({
+      session,
+      token,
+    }: {
+      session: import("next-auth").Session;
+      token: import("next-auth/jwt").JWT;
+    }) {
       session.user = {
         ...session.user,
         id: token.userId,

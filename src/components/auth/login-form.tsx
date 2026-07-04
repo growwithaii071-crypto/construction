@@ -59,9 +59,7 @@ export function LoginForm() {
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Welcome back</h2>
-        <p className="mt-1.5 text-sm text-gray-500">
-          Sign in to your account to continue
-        </p>
+        <p className="mt-1.5 text-sm text-gray-500">Sign in to your account to continue</p>
       </div>
 
       {/* Error Alert */}
@@ -85,9 +83,7 @@ export function LoginForm() {
             className={cn(errors.email && "border-red-400 focus-visible:ring-red-400")}
             {...register("email")}
           />
-          {errors.email && (
-            <p className="text-xs text-red-500">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
         </div>
 
         {/* Password */}
@@ -122,9 +118,7 @@ export function LoginForm() {
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
-          {errors.password && (
-            <p className="text-xs text-red-500">{errors.password.message}</p>
-          )}
+          {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
         </div>
 
         {/* Submit */}
@@ -150,10 +144,7 @@ export function LoginForm() {
       {/* Register link */}
       <p className="text-center text-sm text-gray-500">
         Don&apos;t have an account?{" "}
-        <Link
-          href="/register"
-          className="text-blue-600 hover:text-blue-700 font-semibold"
-        >
+        <Link href="/register" className="text-blue-600 hover:text-blue-700 font-semibold">
           Create one
         </Link>
       </p>

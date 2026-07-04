@@ -11,8 +11,8 @@ export default function UnauthorizedPage() {
         </div>
         <h1 className="mt-6 text-2xl font-bold text-gray-900">Access Denied</h1>
         <p className="mt-3 text-gray-500 text-sm leading-relaxed">
-          You don&apos;t have permission to view this page. Please contact your administrator
-          if you believe this is an error.
+          You don&apos;t have permission to view this page. Please contact your administrator if you
+          believe this is an error.
         </p>
         <div className="mt-8 flex flex-col gap-2">
           <Link href="/dashboard">

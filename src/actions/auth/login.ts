@@ -10,10 +10,7 @@ interface ActionResult {
   redirectTo?: string;
 }
 
-export async function loginAction(
-  formData: unknown,
-  callbackUrl?: string
-): Promise<ActionResult> {
+export async function loginAction(formData: unknown, callbackUrl?: string): Promise<ActionResult> {
   const parsed = LoginSchema.safeParse(formData);
 
   if (!parsed.success) {

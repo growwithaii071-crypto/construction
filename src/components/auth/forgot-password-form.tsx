@@ -91,9 +91,7 @@ export function ForgotPasswordForm() {
                 className={cn(errors.email && "border-red-400 focus-visible:ring-red-400")}
                 {...register("email")}
               />
-              {errors.email && (
-                <p className="text-xs text-red-500">{errors.email.message}</p>
-              )}
+              {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
             </div>
 
             <Button

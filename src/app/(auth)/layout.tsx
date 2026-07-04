@@ -55,8 +55,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               <span className="text-orange-400">Deliver Better.</span>
             </h1>
             <p className="mt-4 text-blue-200 text-lg leading-relaxed max-w-md">
-              Manage projects, track progress, coordinate teams, and deliver
-              construction projects on time and within budget.
+              Manage projects, track progress, coordinate teams, and deliver construction projects
+              on time and within budget.
             </p>
           </div>
 

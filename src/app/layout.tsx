@@ -18,7 +18,8 @@ export const metadata: Metadata = {
     template: "%s — Construction Co.",
     default: "Construction Co. | Management System",
   },
-  description: "Construction project management system for managing projects, teams, and resources.",
+  description:
+    "Construction project management system for managing projects, teams, and resources.",
 };
 
 export default function RootLayout({

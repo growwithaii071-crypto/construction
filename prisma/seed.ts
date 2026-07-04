@@ -1,7 +1,29 @@
-import { PrismaClient, UserRole, ProjectStatus, TaskStatus, TaskPriority, ContractorType, MaterialUnit, InvoiceStatus, PaymentMethod, IssueSeverity, IssueStatus, MilestoneStatus, EquipmentStatus } from "../src/generated/prisma";
+import {
+  PrismaClient,
+  UserRole,
+  ProjectStatus,
+  TaskStatus,
+  TaskPriority,
+  ContractorType,
+  MaterialUnit,
+  InvoiceStatus,
+  PaymentMethod,
+  IssueSeverity,
+  IssueStatus,
+  MilestoneStatus,
+  EquipmentStatus,
+} from "../src/generated/prisma";
 import { hashSync } from "bcryptjs";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+import * as dotenv from "dotenv";
 
-const prisma = new PrismaClient();
+dotenv.config({ path: ".env" });
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const prisma = new PrismaClient({ adapter } as any);
 
 async function main() {
   console.log("🌱 Starting database seed...");
@@ -663,7 +685,8 @@ async function main() {
     data: [
       {
         title: "Concrete honeycombing on column C4",
-        description: "Visible honeycombing defect on south face of column C4 after shuttering removal",
+        description:
+          "Visible honeycombing defect on south face of column C4 after shuttering removal",
         status: IssueStatus.IN_PROGRESS,
         severity: IssueSeverity.HIGH,
         location: "Ground Floor, Column C4",

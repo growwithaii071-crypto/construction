@@ -1,10 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import {
-  getEmailVerificationToken,
-  deleteEmailVerificationToken,
-} from "@/lib/tokens";
+import { getEmailVerificationToken, deleteEmailVerificationToken } from "@/lib/tokens";
 import { sendWelcomeEmail } from "@/lib/email";
 
 interface ActionResult {
