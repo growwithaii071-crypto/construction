@@ -10,6 +10,7 @@ import {
   ACCESS_TOKEN_EXPIRES_MS,
   REFRESH_TOKEN_EXPIRES_MS,
 } from "@/lib/tokens";
+import { authConfig } from "./auth.config";
 import type { JWT } from "next-auth/jwt";
 
 async function refreshAccessToken(token: JWT): Promise<JWT> {
@@ -21,7 +22,6 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
       return { ...token, error: "RefreshTokenExpired" };
     }
 
-    // Rotate refresh token
     const newRefreshToken = await generateRefreshToken(token.userId);
 
     return {
@@ -36,14 +36,10 @@ async function refreshAccessToken(token: JWT): Promise<JWT> {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret: process.env.AUTH_SECRET,
+  ...authConfig,
   session: {
     strategy: "jwt",
-    maxAge: REFRESH_TOKEN_EXPIRES_MS / 1000, // 7 days in seconds
-  },
-  pages: {
-    signIn: "/login",
-    error: "/login",
+    maxAge: REFRESH_TOKEN_EXPIRES_MS / 1000,
   },
   providers: [
     Credentials({
@@ -78,8 +74,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    ...authConfig.callbacks,
     async jwt({ token, user }) {
-      // Initial sign-in
       if (user) {
         const refreshToken = await generateRefreshToken(user.id);
         return {
@@ -95,12 +91,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         };
       }
 
-      // Access token still valid
       if (Date.now() < token.accessTokenExpires) {
         return token;
       }
 
-      // Access token expired — refresh
       return refreshAccessToken(token);
     },
 

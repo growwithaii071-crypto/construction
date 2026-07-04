@@ -20,7 +20,8 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/auth": ["./auth"]
+      "@/auth": ["./auth"],
+      "@/auth.config": ["./auth.config"]
     }
   },
   "include": [
