@@ -1,11 +1,7 @@
 import { PrismaClient, UserRole, ProjectStatus, TaskStatus, TaskPriority, ContractorType, MaterialUnit, InvoiceStatus, PaymentMethod, IssueSeverity, IssueStatus, MilestoneStatus, EquipmentStatus } from "../src/generated/prisma";
-import { hash } from "crypto";
+import { hashSync } from "bcryptjs";
 
 const prisma = new PrismaClient();
-
-function sha256(str: string) {
-  return hash("sha256", str, "hex");
-}
 
 async function main() {
   console.log("🌱 Starting database seed...");
@@ -17,7 +13,7 @@ async function main() {
     create: {
       name: "Rajesh Verma",
       email: "admin@construction.com",
-      password: sha256("Admin@123"),
+      password: hashSync("Admin@123", 12),
       role: UserRole.SUPER_ADMIN,
       phone: "+91-9876543210",
       isActive: true,
@@ -30,7 +26,7 @@ async function main() {
     create: {
       name: "Anil Kumar",
       email: "pm@construction.com",
-      password: sha256("PM@123"),
+      password: hashSync("PM@123", 12),
       role: UserRole.PROJECT_MANAGER,
       phone: "+91-9876543211",
       isActive: true,
@@ -43,7 +39,7 @@ async function main() {
     create: {
       name: "Priya Sharma",
       email: "engineer@construction.com",
-      password: sha256("Eng@123"),
+      password: hashSync("Eng@123", 12),
       role: UserRole.SITE_ENGINEER,
       phone: "+91-9876543212",
       isActive: true,
@@ -56,7 +52,7 @@ async function main() {
     create: {
       name: "Suresh Mehta",
       email: "accounts@construction.com",
-      password: sha256("Acc@123"),
+      password: hashSync("Acc@123", 12),
       role: UserRole.ACCOUNTANT,
       phone: "+91-9876543213",
       isActive: true,
