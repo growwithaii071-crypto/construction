@@ -28,6 +28,34 @@ const prisma = new PrismaClient({ adapter } as any);
 async function main() {
   console.log("🌱 Starting database seed...");
 
+  // ─── Cleanup (order matters due to FK constraints) ────────
+  console.log("🧹 Cleaning existing data...");
+  await prisma.notification.deleteMany();
+  await prisma.comment.deleteMany();
+  await prisma.issue.deleteMany();
+  await prisma.siteReport.deleteMany();
+  await prisma.payment.deleteMany();
+  await prisma.invoiceItem.deleteMany();
+  await prisma.invoice.deleteMany();
+  await prisma.expense.deleteMany();
+  await prisma.projectEquipment.deleteMany();
+  await prisma.projectMaterial.deleteMany();
+  await prisma.projectContractor.deleteMany();
+  await prisma.document.deleteMany();
+  await prisma.task.deleteMany();
+  await prisma.milestone.deleteMany();
+  await prisma.project.deleteMany();
+  await prisma.refreshToken.deleteMany();
+  await prisma.emailVerificationToken.deleteMany();
+  await prisma.passwordResetToken.deleteMany();
+  await prisma.clientProject.deleteMany();
+  await prisma.user.deleteMany();
+  await prisma.client.deleteMany();
+  await prisma.contractor.deleteMany();
+  await prisma.equipment.deleteMany();
+  await prisma.material.deleteMany();
+  console.log("✅ Cleanup done\n");
+
   // ─── Users ───────────────────────────────────────────────
   const adminUser = await prisma.user.upsert({
     where: { email: "admin@construction.com" },
