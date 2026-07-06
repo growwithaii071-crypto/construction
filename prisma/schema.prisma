@@ -1,5 +1,4 @@
-// Construction Management System — Prisma Schema
-// Learn more: https://pris.ly/d/prisma-schema
+// Construction Management System — Prisma Schema (MongoDB)
 
 generator client {
   provider = "prisma-client-js"
@@ -7,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
 }
 
 // ============================================================
@@ -132,7 +131,7 @@ enum IssueSeverity {
 // ============================================================
 
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
   name          String
   email         String    @unique
   emailVerified DateTime?
@@ -144,7 +143,6 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  // Relations
   managedProjects   Project[]       @relation("ProjectManager")
   assignedTasks     Task[]          @relation("TaskAssignee")
   createdTasks      Task[]          @relation("TaskCreator")
@@ -165,7 +163,7 @@ model User {
 // ============================================================
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String
   token     String   @unique
   expires   DateTime
@@ -175,7 +173,7 @@ model PasswordResetToken {
 }
 
 model EmailVerificationToken {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   email     String
   token     String   @unique
   expires   DateTime
@@ -185,9 +183,9 @@ model EmailVerificationToken {
 }
 
 model RefreshToken {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   token     String   @unique
-  userId    String
+  userId    String   @db.ObjectId
   expires   DateTime
   revoked   Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -202,25 +200,24 @@ model RefreshToken {
 // ============================================================
 
 model Client {
-  id          String  @id @default(cuid())
-  name        String
-  email       String  @unique
-  phone       String?
-  company     String?
-  address     String?
-  city        String?
-  state       String?
-  pincode     String?
-  pan         String?
-  gst         String?
-  notes       String?
-  isActive    Boolean @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String   @unique
+  phone     String?
+  company   String?
+  address   String?
+  city      String?
+  state     String?
+  pincode   String?
+  pan       String?
+  gst       String?
+  notes     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  // Relations
-  projects  Project[]
-  invoices  Invoice[]
+  projects Project[]
+  invoices Invoice[]
 
   @@map("clients")
 }
@@ -230,7 +227,7 @@ model Client {
 // ============================================================
 
 model Project {
-  id               String        @id @default(cuid())
+  id               String        @id @default(auto()) @map("_id") @db.ObjectId
   name             String
   code             String        @unique
   description      String?
@@ -238,8 +235,8 @@ model Project {
   startDate        DateTime?
   endDate          DateTime?
   estimatedEndDate DateTime?
-  budgetAmount     Decimal       @db.Decimal(15, 2) @default(0)
-  spentAmount      Decimal       @db.Decimal(15, 2) @default(0)
+  budgetAmount     Float         @default(0)
+  spentAmount      Float         @default(0)
   address          String?
   city             String?
   state            String?
@@ -251,32 +248,30 @@ model Project {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
-  // Foreign keys
-  clientId   String
-  managerId  String
+  clientId  String @db.ObjectId
+  managerId String @db.ObjectId
 
-  // Relations
-  client       Client          @relation(fields: [clientId], references: [id])
-  manager      User            @relation("ProjectManager", fields: [managerId], references: [id])
-  milestones   Milestone[]
-  tasks        Task[]
-  contractors  ProjectContractor[]
-  materials    ProjectMaterial[]
-  equipment    ProjectEquipment[]
-  documents    Document[]
-  siteReports  SiteReport[]
-  invoices     Invoice[]
-  issues       Issue[]
-  expenses     Expense[]
-  members      ClientProject[]
+  client      Client              @relation(fields: [clientId], references: [id])
+  manager     User                @relation("ProjectManager", fields: [managerId], references: [id])
+  milestones  Milestone[]
+  tasks       Task[]
+  contractors ProjectContractor[]
+  materials   ProjectMaterial[]
+  equipment   ProjectEquipment[]
+  documents   Document[]
+  siteReports SiteReport[]
+  invoices    Invoice[]
+  issues      Issue[]
+  expenses    Expense[]
+  members     ClientProject[]
 
   @@map("projects")
 }
 
 model ClientProject {
-  id        String   @id @default(cuid())
-  projectId String
-  userId    String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId String   @db.ObjectId
+  userId    String   @db.ObjectId
   role      String   @default("MEMBER")
   createdAt DateTime @default(now())
 
@@ -292,7 +287,7 @@ model ClientProject {
 // ============================================================
 
 model Milestone {
-  id          String          @id @default(cuid())
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
   status      MilestoneStatus @default(PENDING)
@@ -302,10 +297,8 @@ model Milestone {
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
 
-  // Foreign key
-  projectId String
+  projectId String @db.ObjectId
 
-  // Relations
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   tasks   Task[]
 
@@ -313,27 +306,25 @@ model Milestone {
 }
 
 model Task {
-  id          String       @id @default(cuid())
-  title       String
-  description String?
-  status      TaskStatus   @default(TODO)
-  priority    TaskPriority @default(MEDIUM)
-  startDate   DateTime?
-  dueDate     DateTime?
-  completedAt DateTime?
+  id             String       @id @default(auto()) @map("_id") @db.ObjectId
+  title          String
+  description    String?
+  status         TaskStatus   @default(TODO)
+  priority       TaskPriority @default(MEDIUM)
+  startDate      DateTime?
+  dueDate        DateTime?
+  completedAt    DateTime?
   estimatedHours Float?
   actualHours    Float?
-  order       Int          @default(0)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  order          Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
-  // Foreign keys
-  projectId   String
-  milestoneId String?
-  assigneeId  String?
-  creatorId   String
+  projectId   String  @db.ObjectId
+  milestoneId String? @db.ObjectId
+  assigneeId  String? @db.ObjectId
+  creatorId   String  @db.ObjectId
 
-  // Relations
   project   Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   milestone Milestone? @relation(fields: [milestoneId], references: [id])
   assignee  User?      @relation("TaskAssignee", fields: [assigneeId], references: [id])
@@ -348,44 +339,41 @@ model Task {
 // ============================================================
 
 model Contractor {
-  id             String         @id @default(cuid())
-  name           String
-  company        String?
-  type           ContractorType @default(GENERAL)
-  email          String?        @unique
-  phone          String?
-  address        String?
-  city           String?
-  state          String?
-  pan            String?
-  gst            String?
-  licenseNumber  String?
-  rating         Float?
-  notes          String?
-  isActive       Boolean        @default(true)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id            String         @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  company       String?
+  type          ContractorType @default(GENERAL)
+  email         String?        @unique
+  phone         String?
+  address       String?
+  city          String?
+  state         String?
+  pan           String?
+  gst           String?
+  licenseNumber String?
+  rating        Float?
+  notes         String?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
 
-  // Relations
-  projects  ProjectContractor[]
-  invoices  Invoice[]
+  projects ProjectContractor[]
+  invoices Invoice[]
 
   @@map("contractors")
 }
 
 model ProjectContractor {
-  id           String    @id @default(cuid())
-  contractValue Decimal  @db.Decimal(15, 2) @default(0)
-  startDate    DateTime?
-  endDate      DateTime?
-  notes        String?
-  createdAt    DateTime  @default(now())
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  contractValue Float     @default(0)
+  startDate     DateTime?
+  endDate       DateTime?
+  notes         String?
+  createdAt     DateTime  @default(now())
 
-  // Foreign keys
-  projectId    String
-  contractorId String
+  projectId    String @db.ObjectId
+  contractorId String @db.ObjectId
 
-  // Relations
   project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   contractor Contractor @relation(fields: [contractorId], references: [id])
 
@@ -398,39 +386,36 @@ model ProjectContractor {
 // ============================================================
 
 model Material {
-  id          String       @id @default(cuid())
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
   unit        MaterialUnit @default(PIECE)
-  unitPrice   Decimal      @db.Decimal(10, 2) @default(0)
+  unitPrice   Float        @default(0)
   stockQty    Float        @default(0)
   minStockQty Float        @default(0)
   supplier    String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
-  // Relations
   projectMaterials ProjectMaterial[]
 
   @@map("materials")
 }
 
 model ProjectMaterial {
-  id           String   @id @default(cuid())
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
   quantity     Float
-  usedQuantity Float    @default(0)
-  unitPrice    Decimal  @db.Decimal(10, 2)
-  totalCost    Decimal  @db.Decimal(15, 2)
+  usedQuantity Float     @default(0)
+  unitPrice    Float
+  totalCost    Float
   deliveryDate DateTime?
   notes        String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
-  // Foreign keys
-  projectId  String
-  materialId String
+  projectId  String @db.ObjectId
+  materialId String @db.ObjectId
 
-  // Relations
   project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   material Material @relation(fields: [materialId], references: [id])
 
@@ -442,36 +427,33 @@ model ProjectMaterial {
 // ============================================================
 
 model Equipment {
-  id           String          @id @default(cuid())
+  id           String          @id @default(auto()) @map("_id") @db.ObjectId
   name         String
   model        String?
   serialNumber String?         @unique
   status       EquipmentStatus @default(AVAILABLE)
-  dailyRate    Decimal         @db.Decimal(10, 2) @default(0)
+  dailyRate    Float           @default(0)
   purchaseDate DateTime?
   notes        String?
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 
-  // Relations
   projects ProjectEquipment[]
 
   @@map("equipment")
 }
 
 model ProjectEquipment {
-  id        String    @id @default(cuid())
-  startDate DateTime?
-  endDate   DateTime?
-  totalCost Decimal   @db.Decimal(15, 2) @default(0)
-  notes     String?
-  createdAt DateTime  @default(now())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  startDate   DateTime?
+  endDate     DateTime?
+  totalCost   Float     @default(0)
+  notes       String?
+  createdAt   DateTime  @default(now())
 
-  // Foreign keys
-  projectId   String
-  equipmentId String
+  projectId   String @db.ObjectId
+  equipmentId String @db.ObjectId
 
-  // Relations
   project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   equipment Equipment @relation(fields: [equipmentId], references: [id])
 
@@ -483,22 +465,20 @@ model ProjectEquipment {
 // ============================================================
 
 model Document {
-  id         String       @id @default(cuid())
-  name       String
-  type       DocumentType @default(OTHER)
-  fileUrl    String
-  fileSize   Int?
-  mimeType   String?
-  version    String?
-  notes      String?
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
+  id        String       @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  type      DocumentType @default(OTHER)
+  fileUrl   String
+  fileSize  Int?
+  mimeType  String?
+  version   String?
+  notes     String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
 
-  // Foreign keys
-  projectId  String
-  uploadedBy String
+  projectId  String @db.ObjectId
+  uploadedBy String @db.ObjectId
 
-  // Relations
   project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   uploader User    @relation(fields: [uploadedBy], references: [id])
 
@@ -510,24 +490,22 @@ model Document {
 // ============================================================
 
 model SiteReport {
-  id            String   @id @default(cuid())
-  reportDate    DateTime @default(now())
+  id               String   @id @default(auto()) @map("_id") @db.ObjectId
+  reportDate       DateTime @default(now())
   weatherCondition String?
-  temperature   Float?
-  workersPresent Int     @default(0)
-  summary       String?
-  progress      String?
-  issues        String?
-  safetyNotes   String?
-  photos        String[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  temperature      Float?
+  workersPresent   Int      @default(0)
+  summary          String?
+  progress         String?
+  issues           String?
+  safetyNotes      String?
+  photos           String[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  // Foreign keys
-  projectId  String
-  reporterId String
+  projectId  String @db.ObjectId
+  reporterId String @db.ObjectId
 
-  // Relations
   project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   reporter User    @relation(fields: [reporterId], references: [id])
 
@@ -539,26 +517,24 @@ model SiteReport {
 // ============================================================
 
 model Invoice {
-  id           String        @id @default(cuid())
-  invoiceNo    String        @unique
-  status       InvoiceStatus @default(DRAFT)
-  issueDate    DateTime      @default(now())
-  dueDate      DateTime?
-  subtotal     Decimal       @db.Decimal(15, 2) @default(0)
-  taxRate      Float         @default(0)
-  taxAmount    Decimal       @db.Decimal(15, 2) @default(0)
-  totalAmount  Decimal       @db.Decimal(15, 2) @default(0)
-  paidAmount   Decimal       @db.Decimal(15, 2) @default(0)
-  notes        String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  invoiceNo   String        @unique
+  status      InvoiceStatus @default(DRAFT)
+  issueDate   DateTime      @default(now())
+  dueDate     DateTime?
+  subtotal    Float         @default(0)
+  taxRate     Float         @default(0)
+  taxAmount   Float         @default(0)
+  totalAmount Float         @default(0)
+  paidAmount  Float         @default(0)
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
-  // Foreign keys
-  projectId    String
-  clientId     String?
-  contractorId String?
+  projectId    String  @db.ObjectId
+  clientId     String? @db.ObjectId
+  contractorId String? @db.ObjectId
 
-  // Relations
   project    Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
   client     Client?     @relation(fields: [clientId], references: [id])
   contractor Contractor? @relation(fields: [contractorId], references: [id])
@@ -569,35 +545,31 @@ model Invoice {
 }
 
 model InvoiceItem {
-  id          String  @id @default(cuid())
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
   description String
-  quantity    Float   @default(1)
-  unitPrice   Decimal @db.Decimal(10, 2)
-  totalPrice  Decimal @db.Decimal(15, 2)
-  order       Int     @default(0)
+  quantity    Float  @default(1)
+  unitPrice   Float
+  totalPrice  Float
+  order       Int    @default(0)
 
-  // Foreign key
-  invoiceId String
+  invoiceId String @db.ObjectId
 
-  // Relations
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@map("invoice_items")
 }
 
 model Payment {
-  id            String        @id @default(cuid())
-  amount        Decimal       @db.Decimal(15, 2)
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  amount        Float
   method        PaymentMethod @default(BANK_TRANSFER)
   transactionId String?
   paymentDate   DateTime      @default(now())
   notes         String?
   createdAt     DateTime      @default(now())
 
-  // Foreign key
-  invoiceId String
+  invoiceId String @db.ObjectId
 
-  // Relations
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@map("payments")
@@ -608,31 +580,29 @@ model Payment {
 // ============================================================
 
 model Expense {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   category    String
-  amount      Decimal  @db.Decimal(15, 2)
+  amount      Float
   expenseDate DateTime @default(now())
   description String?
   receipt     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  // Foreign key
-  projectId String
+  projectId String @db.ObjectId
 
-  // Relations
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@map("expenses")
 }
 
 // ============================================================
-// ISSUE / PUNCH LIST
+// ISSUE
 // ============================================================
 
 model Issue {
-  id          String        @id @default(cuid())
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String?
   status      IssueStatus   @default(OPEN)
@@ -644,12 +614,10 @@ model Issue {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  // Foreign keys
-  projectId  String
-  reporterId String
-  assigneeId String?
+  projectId  String  @db.ObjectId
+  reporterId String  @db.ObjectId
+  assigneeId String? @db.ObjectId
 
-  // Relations
   project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   reporter User     @relation("IssueReporter", fields: [reporterId], references: [id])
   assignee User?    @relation("IssueAssignee", fields: [assigneeId], references: [id])
@@ -663,17 +631,15 @@ model Issue {
 // ============================================================
 
 model Comment {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Foreign keys
-  authorId  String
-  taskId    String?
-  issueId   String?
+  authorId String  @db.ObjectId
+  taskId   String? @db.ObjectId
+  issueId  String? @db.ObjectId
 
-  // Relations
   author User   @relation(fields: [authorId], references: [id])
   task   Task?  @relation(fields: [taskId], references: [id], onDelete: Cascade)
   issue  Issue? @relation(fields: [issueId], references: [id], onDelete: Cascade)
@@ -686,7 +652,7 @@ model Comment {
 // ============================================================
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
   title     String
   message   String
   type      String   @default("INFO")
@@ -694,10 +660,8 @@ model Notification {
   link      String?
   createdAt DateTime @default(now())
 
-  // Foreign key
-  userId String
+  userId String @db.ObjectId
 
-  // Relations
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
