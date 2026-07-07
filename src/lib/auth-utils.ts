@@ -2,10 +2,11 @@ import { UserRole } from "@/generated/prisma";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
-// Role hierarchy — higher index = more permissions
 const ROLE_HIERARCHY: UserRole[] = [
+  UserRole.VIEWER,
   UserRole.CLIENT,
   UserRole.CONTRACTOR,
+  UserRole.FOREMAN,
   UserRole.SITE_ENGINEER,
   UserRole.ACCOUNTANT,
   UserRole.PROJECT_MANAGER,
@@ -27,53 +28,50 @@ export function isProjectManager(role: UserRole): boolean {
 
 /**
  * Server-side session guard. Redirects to /login if not authenticated.
- * Optionally checks required role.
+ * Optionally checks required role or array of allowed roles.
  */
-export async function requireAuth(requiredRole?: UserRole) {
+export async function requireAuth(allowedRoles?: UserRole | UserRole[]) {
   const session = await auth();
 
   if (!session?.user) {
     redirect("/login");
   }
 
-  if (requiredRole && !hasRole(session.user.role, requiredRole)) {
-    redirect("/unauthorized");
+  if (allowedRoles) {
+    const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+    const userRole = session.user.role as UserRole;
+    const hasAccess = roles.some((r) => hasRole(userRole, r));
+    if (!hasAccess) {
+      redirect("/unauthorized");
+    }
   }
 
   return session;
 }
 
-/**
- * Returns the current session or null (no redirect).
- */
 export async function getSession() {
   return auth();
 }
 
-/**
- * Role display labels
- */
 export const ROLE_LABELS: Record<UserRole, string> = {
   SUPER_ADMIN: "Super Admin",
   ADMIN: "Admin",
   PROJECT_MANAGER: "Project Manager",
   SITE_ENGINEER: "Site Engineer",
+  FOREMAN: "Foreman",
   ACCOUNTANT: "Accountant",
   CLIENT: "Client",
   CONTRACTOR: "Contractor",
+  VIEWER: "Viewer",
 };
 
-/**
- * Roles that can be self-registered
- */
 export const SELF_REGISTER_ROLES: UserRole[] = [UserRole.CLIENT];
 
-/**
- * Admin-assignable roles
- */
 export const ASSIGNABLE_ROLES: UserRole[] = [
+  UserRole.VIEWER,
   UserRole.CLIENT,
   UserRole.CONTRACTOR,
+  UserRole.FOREMAN,
   UserRole.SITE_ENGINEER,
   UserRole.ACCOUNTANT,
   UserRole.PROJECT_MANAGER,

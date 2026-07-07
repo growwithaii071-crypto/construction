@@ -65,17 +65,15 @@ export function ForgotPasswordForm() {
             <h3 className="font-semibold text-gray-900">Check your inbox</h3>
             <p className="mt-1.5 text-sm text-gray-500">{success}</p>
           </div>
-          <Link href="/login">
-            <Button variant="outline" className="w-full">
-              Back to login
-            </Button>
-          </Link>
+          <Button variant="outline" className="w-full" asChild>
+            <Link href="/login">Back to login</Link>
+          </Button>
         </div>
       ) : (
         <>
           {error && (
             <div className="flex items-start gap-3 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}

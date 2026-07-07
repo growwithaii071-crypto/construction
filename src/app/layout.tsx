@@ -1,35 +1,27 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import { SessionProvider } from "@/components/providers/session-provider";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    template: "%s — Construction Co.",
-    default: "Construction Co. | Management System",
+    template: "%s — BuildPro",
+    default: "BuildPro | Construction Management System",
   },
   description:
     "Construction project management system for managing projects, teams, and resources.",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+    <html lang="en" className={`${inter.variable} h-full`}>
+      <body className="min-h-full flex flex-col antialiased font-sans">
         <SessionProvider>{children}</SessionProvider>
       </body>
     </html>

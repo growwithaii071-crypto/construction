@@ -15,16 +15,12 @@ export default function UnauthorizedPage() {
           believe this is an error.
         </p>
         <div className="mt-8 flex flex-col gap-2">
-          <Link href="/dashboard">
-            <Button className="w-full bg-[#1e3a5f] hover:bg-[#162e4d] text-white">
-              Back to Dashboard
-            </Button>
-          </Link>
-          <Link href="/login">
-            <Button variant="ghost" className="w-full text-gray-500">
-              Sign in with a different account
-            </Button>
-          </Link>
+          <Button className="w-full bg-[#1e3a5f] hover:bg-[#162e4d] text-white" asChild>
+            <Link href="/dashboard">Back to Dashboard</Link>
+          </Button>
+          <Button variant="ghost" className="w-full text-gray-500" asChild>
+            <Link href="/login">Sign in with a different account</Link>
+          </Button>
         </div>
       </div>
     </div>

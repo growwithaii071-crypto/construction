@@ -59,9 +59,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           <p className="mt-1.5 text-sm text-gray-500">{success}</p>
           <p className="text-xs text-gray-400 mt-1">Redirecting to login...</p>
         </div>
-        <Link href="/login">
-          <Button className="w-full bg-[#1e3a5f] hover:bg-[#162e4d] text-white">Go to Login</Button>
-        </Link>
+        <Button className="w-full bg-[#1e3a5f] hover:bg-[#162e4d] text-white" asChild>
+          <Link href="/login">Go to Login</Link>
+        </Button>
       </div>
     );
   }
@@ -77,7 +77,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
       {error && (
         <div className="flex items-start gap-3 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
           <div>
             <span>{error}</span>
             {error.includes("expired") && (

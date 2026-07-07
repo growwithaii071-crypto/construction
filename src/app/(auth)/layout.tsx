@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { HardHat } from "lucide-react";
 
 export const metadata: Metadata = {

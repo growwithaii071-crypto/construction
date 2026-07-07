@@ -17,6 +17,7 @@ declare module "next-auth" {
       email: string;
       role: UserRole;
       avatar?: string | null;
+      phone?: string | null;
       emailVerified: Date | null;
     };
     error?: "RefreshTokenExpired" | "RefreshTokenError";

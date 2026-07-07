@@ -17,6 +17,7 @@ import { hashSync } from "bcryptjs";
 import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env" });
+dotenv.config({ path: ".env.local", override: true });
 
 const prisma = new PrismaClient();
 
@@ -179,11 +180,51 @@ async function main() {
   // ─── Materials ────────────────────────────────────────────
   await prisma.material.createMany({
     data: [
-      { name: "Cement (OPC 53 Grade)", description: "Ordinary Portland Cement 53 Grade", unit: MaterialUnit.BAG, unitPrice: 380, stockQty: 500, minStockQty: 100, supplier: "UltraTech Cement" },
-      { name: "TMT Steel Bars (Fe500)", description: "High-strength TMT steel reinforcement bars", unit: MaterialUnit.KG, unitPrice: 68, stockQty: 10000, minStockQty: 2000, supplier: "TATA Steel" },
-      { name: "Red Bricks", description: "Standard red clay bricks", unit: MaterialUnit.PIECE, unitPrice: 9, stockQty: 50000, minStockQty: 10000, supplier: "Local Kiln" },
-      { name: "River Sand (M-Sand)", description: "Fine aggregate for construction", unit: MaterialUnit.CUBIC_METER, unitPrice: 1200, stockQty: 200, minStockQty: 50, supplier: "Sand Suppliers Co." },
-      { name: "Coarse Aggregate (20mm)", description: "Crushed stone aggregate 20mm", unit: MaterialUnit.CUBIC_METER, unitPrice: 1800, stockQty: 150, minStockQty: 30, supplier: "Quarry Works Ltd" },
+      {
+        name: "Cement (OPC 53 Grade)",
+        description: "Ordinary Portland Cement 53 Grade",
+        unit: MaterialUnit.BAG,
+        unitPrice: 380,
+        stockQty: 500,
+        minStockQty: 100,
+        supplier: "UltraTech Cement",
+      },
+      {
+        name: "TMT Steel Bars (Fe500)",
+        description: "High-strength TMT steel reinforcement bars",
+        unit: MaterialUnit.KG,
+        unitPrice: 68,
+        stockQty: 10000,
+        minStockQty: 2000,
+        supplier: "TATA Steel",
+      },
+      {
+        name: "Red Bricks",
+        description: "Standard red clay bricks",
+        unit: MaterialUnit.PIECE,
+        unitPrice: 9,
+        stockQty: 50000,
+        minStockQty: 10000,
+        supplier: "Local Kiln",
+      },
+      {
+        name: "River Sand (M-Sand)",
+        description: "Fine aggregate for construction",
+        unit: MaterialUnit.CUBIC_METER,
+        unitPrice: 1200,
+        stockQty: 200,
+        minStockQty: 50,
+        supplier: "Sand Suppliers Co.",
+      },
+      {
+        name: "Coarse Aggregate (20mm)",
+        description: "Crushed stone aggregate 20mm",
+        unit: MaterialUnit.CUBIC_METER,
+        unitPrice: 1800,
+        stockQty: 150,
+        minStockQty: 30,
+        supplier: "Quarry Works Ltd",
+      },
     ],
   });
   const materials = await prisma.material.findMany({ orderBy: { createdAt: "asc" } });

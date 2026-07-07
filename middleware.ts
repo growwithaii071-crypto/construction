@@ -2,21 +2,34 @@ import NextAuth from "next-auth";
 import { authConfig } from "./auth.config";
 import { NextResponse } from "next/server";
 import type { NextAuthRequest } from "next-auth";
-import { UserRole } from "@/generated/prisma";
+
+// Define roles as plain strings to avoid Prisma WASM import in Edge runtime
+type UserRole =
+  | "SUPER_ADMIN"
+  | "ADMIN"
+  | "PROJECT_MANAGER"
+  | "SITE_ENGINEER"
+  | "ACCOUNTANT"
+  | "FOREMAN"
+  | "CONTRACTOR"
+  | "CLIENT"
+  | "VIEWER";
 
 const ROLE_ROUTES: Record<string, UserRole> = {
-  "/admin": UserRole.ADMIN,
-  "/settings/users": UserRole.ADMIN,
+  "/admin": "ADMIN",
+  "/settings/users": "ADMIN",
 };
 
 const ROLE_HIERARCHY: UserRole[] = [
-  UserRole.CLIENT,
-  UserRole.CONTRACTOR,
-  UserRole.SITE_ENGINEER,
-  UserRole.ACCOUNTANT,
-  UserRole.PROJECT_MANAGER,
-  UserRole.ADMIN,
-  UserRole.SUPER_ADMIN,
+  "VIEWER",
+  "CLIENT",
+  "CONTRACTOR",
+  "FOREMAN",
+  "SITE_ENGINEER",
+  "ACCOUNTANT",
+  "PROJECT_MANAGER",
+  "ADMIN",
+  "SUPER_ADMIN",
 ];
 
 function hasRole(userRole: UserRole, required: UserRole): boolean {

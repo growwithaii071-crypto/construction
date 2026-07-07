@@ -3,10 +3,12 @@
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"
+  previewFeatures = []
 }
 
 datasource db {
   provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 // ============================================================
@@ -18,9 +20,11 @@ enum UserRole {
   ADMIN
   PROJECT_MANAGER
   SITE_ENGINEER
+  FOREMAN
   ACCOUNTANT
   CLIENT
   CONTRACTOR
+  VIEWER
 }
 
 enum ProjectStatus {
@@ -154,6 +158,7 @@ model User {
   notifications     Notification[]
   clientProjects    ClientProject[]
   refreshTokens     RefreshToken[]
+  expenses          Expense[]       @relation("ExpenseSubmitter")
 
   @@map("users")
 }
@@ -202,7 +207,7 @@ model RefreshToken {
 model Client {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   name      String
-  email     String   @unique
+  email     String?  @unique
   phone     String?
   company   String?
   address   String?
@@ -231,15 +236,20 @@ model Project {
   name             String
   code             String        @unique
   description      String?
-  status           ProjectStatus @default(DRAFT)
+  type             String?
+  status           ProjectStatus @default(PLANNING)
   startDate        DateTime?
   endDate          DateTime?
   estimatedEndDate DateTime?
   budgetAmount     Float         @default(0)
   spentAmount      Float         @default(0)
+  contractValue    Float?
+  progress         Int           @default(0)
+  location         String?
   address          String?
   city             String?
   state            String?
+  country          String?
   pincode          String?
   latitude         Float?
   longitude        Float?
@@ -248,15 +258,16 @@ model Project {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
 
-  clientId  String @db.ObjectId
-  managerId String @db.ObjectId
+  clientId  String  @db.ObjectId
+  managerId String? @db.ObjectId
 
   client      Client              @relation(fields: [clientId], references: [id])
-  manager     User                @relation("ProjectManager", fields: [managerId], references: [id])
+  manager     User?               @relation("ProjectManager", fields: [managerId], references: [id])
   milestones  Milestone[]
   tasks       Task[]
   contractors ProjectContractor[]
   materials   ProjectMaterial[]
+  directMaterials Material[]      @relation("ProjectMaterialDirect")
   equipment   ProjectEquipment[]
   documents   Document[]
   siteReports SiteReport[]
@@ -289,8 +300,10 @@ model ClientProject {
 model Milestone {
   id          String          @id @default(auto()) @map("_id") @db.ObjectId
   name        String
+  title       String?
   description String?
   status      MilestoneStatus @default(PENDING)
+  completed   Boolean         @default(false)
   dueDate     DateTime?
   completedAt DateTime?
   order       Int             @default(0)
@@ -339,23 +352,24 @@ model Task {
 // ============================================================
 
 model Contractor {
-  id            String         @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  company       String?
-  type          ContractorType @default(GENERAL)
-  email         String?        @unique
-  phone         String?
-  address       String?
-  city          String?
-  state         String?
-  pan           String?
-  gst           String?
-  licenseNumber String?
-  rating        Float?
-  notes         String?
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  company        String?
+  type           ContractorType @default(GENERAL)
+  specialization String?
+  email          String?        @unique
+  phone          String?
+  address        String?
+  city           String?
+  state          String?
+  pan            String?
+  gst            String?
+  licenseNumber  String?
+  rating         Float?
+  notes          String?
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   projects ProjectContractor[]
   invoices Invoice[]
@@ -386,17 +400,22 @@ model ProjectContractor {
 // ============================================================
 
 model Material {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  description String?
-  unit        MaterialUnit @default(PIECE)
-  unitPrice   Float        @default(0)
-  stockQty    Float        @default(0)
-  minStockQty Float        @default(0)
-  supplier    String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id           String       @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  description  String?
+  unit         MaterialUnit @default(PIECE)
+  unitPrice    Float        @default(0)
+  stockQty     Float        @default(0)
+  minStockQty  Float        @default(0)
+  currentStock Float?
+  minimumStock Float?
+  category     String?
+  supplier     String?
+  projectId    String?      @db.ObjectId
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
+  project          Project?         @relation("ProjectMaterialDirect", fields: [projectId], references: [id])
   projectMaterials ProjectMaterial[]
 
   @@map("materials")
@@ -429,10 +448,12 @@ model ProjectMaterial {
 model Equipment {
   id           String          @id @default(auto()) @map("_id") @db.ObjectId
   name         String
+  type         String?
   model        String?
   serialNumber String?         @unique
   status       EquipmentStatus @default(AVAILABLE)
   dailyRate    Float           @default(0)
+  purchaseCost Float?
   purchaseDate DateTime?
   notes        String?
   createdAt    DateTime        @default(now())
@@ -476,11 +497,11 @@ model Document {
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
 
-  projectId  String @db.ObjectId
-  uploadedBy String @db.ObjectId
+  projectId    String @db.ObjectId
+  uploadedById String @db.ObjectId
 
-  project  Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  uploader User    @relation(fields: [uploadedBy], references: [id])
+  project    Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  uploadedBy User    @relation(fields: [uploadedById], references: [id])
 
   @@map("documents")
 }
@@ -493,11 +514,17 @@ model SiteReport {
   id               String   @id @default(auto()) @map("_id") @db.ObjectId
   reportDate       DateTime @default(now())
   weatherCondition String?
+  weather          String?
   temperature      Float?
   workersPresent   Int      @default(0)
+  totalWorkers     Int?
+  workProgress     Int?
   summary          String?
   progress         String?
+  activities       String?
   issues           String?
+  materials        String?
+  nextDayPlan      String?
   safetyNotes      String?
   photos           String[]
   createdAt        DateTime @default(now())
@@ -517,19 +544,23 @@ model SiteReport {
 // ============================================================
 
 model Invoice {
-  id          String        @id @default(auto()) @map("_id") @db.ObjectId
-  invoiceNo   String        @unique
-  status      InvoiceStatus @default(DRAFT)
-  issueDate   DateTime      @default(now())
-  dueDate     DateTime?
-  subtotal    Float         @default(0)
-  taxRate     Float         @default(0)
-  taxAmount   Float         @default(0)
-  totalAmount Float         @default(0)
-  paidAmount  Float         @default(0)
-  notes       String?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  invoiceNo     String        @unique
+  invoiceNumber String?
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime      @default(now())
+  dueDate       DateTime?
+  paidDate      DateTime?
+  subtotal      Float         @default(0)
+  taxRate       Float         @default(0)
+  taxAmount     Float         @default(0)
+  totalAmount   Float         @default(0)
+  paidAmount    Float         @default(0)
+  terms         String?
+  notes         String?
+  createdById   String?       @db.ObjectId
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   projectId    String  @db.ObjectId
   clientId     String? @db.ObjectId
@@ -580,19 +611,22 @@ model Payment {
 // ============================================================
 
 model Expense {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  title       String
-  category    String
-  amount      Float
-  expenseDate DateTime @default(now())
-  description String?
-  receipt     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  title          String
+  category       String
+  amount         Float
+  expenseDate    DateTime @default(now())
+  description    String?
+  receipt        String?
+  vendor         String?
+  submittedById  String?  @db.ObjectId
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  projectId String @db.ObjectId
+  projectId String? @db.ObjectId
 
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project       Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  submittedBy   User?    @relation("ExpenseSubmitter", fields: [submittedById], references: [id])
 
   @@map("expenses")
 }

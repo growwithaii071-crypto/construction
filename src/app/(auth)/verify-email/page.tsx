@@ -41,11 +41,9 @@ async function VerifyEmailContent({ token, email }: { token?: string; email?: st
             </Button>
           </form>
         )}
-        <Link href="/login">
-          <Button variant="ghost" className="w-full text-gray-500">
-            Back to login
-          </Button>
-        </Link>
+        <Button variant="ghost" className="w-full text-gray-500" asChild>
+          <Link href="/login">Back to login</Link>
+        </Button>
       </div>
     );
   }
@@ -62,11 +60,12 @@ async function VerifyEmailContent({ token, email }: { token?: string; email?: st
           <h2 className="text-xl font-bold text-gray-900">Email verified!</h2>
           <p className="mt-2 text-sm text-gray-500">{result.message}</p>
         </div>
-        <Link href="/login">
-          <Button className="w-full bg-[#1e3a5f] hover:bg-[#162e4d] text-white h-11 font-semibold">
-            Sign In to Your Account
-          </Button>
-        </Link>
+        <Button
+          className="w-full bg-[#1e3a5f] hover:bg-[#162e4d] text-white h-11 font-semibold"
+          asChild
+        >
+          <Link href="/login">Sign In to Your Account</Link>
+        </Button>
       </div>
     );
   }
@@ -81,16 +80,12 @@ async function VerifyEmailContent({ token, email }: { token?: string; email?: st
         <p className="mt-2 text-sm text-gray-500">{result.message}</p>
       </div>
       <div className="flex flex-col gap-2">
-        <Link href="/register">
-          <Button className="w-full bg-[#1e3a5f] hover:bg-[#162e4d] text-white">
-            Register Again
-          </Button>
-        </Link>
-        <Link href="/login">
-          <Button variant="outline" className="w-full">
-            Back to Login
-          </Button>
-        </Link>
+        <Button className="w-full bg-[#1e3a5f] hover:bg-[#162e4d] text-white" asChild>
+          <Link href="/register">Register Again</Link>
+        </Button>
+        <Button variant="outline" className="w-full" asChild>
+          <Link href="/login">Back to Login</Link>
+        </Button>
       </div>
     </div>
   );

@@ -18,7 +18,15 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-explicit-any": "warn",
     },
   },
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "node_modules/**"]),
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+    "node_modules/**",
+    "src/generated/**", // Prisma auto-generated files
+    "prisma/seed.ts", // seed uses dynamic imports
+  ]),
 ]);
 
 export default eslintConfig;

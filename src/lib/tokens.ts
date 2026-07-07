@@ -55,11 +55,10 @@ export async function deleteEmailVerificationToken(token: string) {
 // ─── Refresh Token ─────────────────────────────────────────────────────────
 
 export async function generateRefreshToken(userId: string): Promise<string> {
-  // Revoke all existing refresh tokens for this user
-  await prisma.refreshToken.updateMany({
-    where: { userId, revoked: false },
-    data: { revoked: true },
-  });
+  // Revoke all existing refresh tokens for this user (silently ignore if userId is not a valid ObjectId)
+  await prisma.refreshToken
+    .updateMany({ where: { userId, revoked: false }, data: { revoked: true } })
+    .catch(() => null);
 
   const token = generateToken();
   const expires = new Date(Date.now() + REFRESH_TOKEN_EXPIRES_MS);
@@ -86,8 +85,7 @@ export async function revokeRefreshToken(token: string) {
 }
 
 export async function revokeAllUserRefreshTokens(userId: string) {
-  return prisma.refreshToken.updateMany({
-    where: { userId },
-    data: { revoked: true },
-  });
+  return prisma.refreshToken
+    .updateMany({ where: { userId }, data: { revoked: true } })
+    .catch(() => null);
 }

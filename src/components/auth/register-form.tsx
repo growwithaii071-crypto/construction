@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, UserPlus } from "lucide-react";
@@ -33,14 +33,14 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: { name: "", email: "", password: "", confirmPassword: "", phone: "" },
   });
 
-  const passwordValue = watch("password", "");
+  const passwordValue = useWatch({ control, name: "password", defaultValue: "" });
 
   function onSubmit(data: RegisterInput) {
     setError(null);
