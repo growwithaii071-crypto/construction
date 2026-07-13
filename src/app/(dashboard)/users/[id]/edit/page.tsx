@@ -128,7 +128,7 @@ export default function EditUserPage({ params }: { params: Promise<{ id: string 
             {/* Role Selector */}
             <div className="space-y-1.5">
               <Label>Role</Label>
-              <Select value={selectedRole} onValueChange={setSelectedRole}>
+              <Select value={selectedRole} onValueChange={(v) => v && setSelectedRole(v)}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>

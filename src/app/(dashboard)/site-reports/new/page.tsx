@@ -16,42 +16,9 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { createSiteReportAction } from "@/actions/reports/create-site-report";
 
 const WEATHER_OPTIONS = ["Sunny", "Cloudy", "Rainy", "Windy", "Foggy", "Hot", "Cold"];
-
-async function submitReport(formData: FormData): Promise<{ error?: string }> {
-  "use server";
-  const { requireAuth } = await import("@/lib/auth-utils");
-  const prismaLib = await import("@/lib/prisma");
-  const session = await requireAuth();
-
-  try {
-    await prismaLib.default.siteReport.create({
-      data: {
-        projectId: formData.get("projectId") as string,
-        reporterId: session.user.id,
-        reportDate: new Date(formData.get("reportDate") as string),
-        weather: formData.get("weather") as string,
-        summary: formData.get("summary") as string,
-        workProgress: formData.get("workProgress")
-          ? parseInt(formData.get("workProgress") as string)
-          : undefined,
-        totalWorkers: formData.get("totalWorkers")
-          ? parseInt(formData.get("totalWorkers") as string)
-          : undefined,
-        activities: formData.get("activities") as string,
-        issues: formData.get("issues") as string,
-        materials: formData.get("materials") as string,
-        nextDayPlan: formData.get("nextDayPlan") as string,
-      },
-    });
-    const { revalidatePath } = await import("next/cache");
-    revalidatePath("/site-reports");
-    return {};
-  } catch (e: unknown) {
-    return { error: e instanceof Error ? e.message : "Failed to save report" };
-  }
-}
 
 export default function NewSiteReportPage() {
   const router = useRouter();
@@ -62,7 +29,7 @@ export default function NewSiteReportPage() {
     e.preventDefault();
     setPending(true);
     const fd = new FormData(e.currentTarget);
-    const result = await submitReport(fd);
+    const result = await createSiteReportAction(fd);
     if (result?.error) {
       setError(result.error);
       setPending(false);

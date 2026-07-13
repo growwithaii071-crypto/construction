@@ -23,13 +23,21 @@ export const authConfig: NextAuthConfig = {
         "/forgot-password",
         "/reset-password",
         "/verify-email",
+        "/customer/login",
+        "/customer/register",
+        "/construction/login",
+        "/construction/register",
       ];
       const PUBLIC_ROUTES = ["/", "/unauthorized", ...AUTH_ROUTES];
 
       const isPublic = PUBLIC_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
       const isAuthRoute = AUTH_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
 
-      if (isLoggedIn && isAuthRoute) return Response.redirect(new URL("/dashboard", nextUrl));
+      if (isLoggedIn && isAuthRoute) {
+        const role = (auth?.user as { role?: string } | undefined)?.role;
+        const dest = role === "CLIENT" ? "/customer/dashboard" : "/dashboard";
+        return Response.redirect(new URL(dest, nextUrl));
+      }
       if (isPublic) return true;
       if (!isLoggedIn) return false;
 

@@ -19,6 +19,7 @@ import {
   Settings,
   X,
   Zap,
+  ShieldCheck,
 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -60,6 +61,7 @@ const NAV_SECTIONS = [
   {
     label: "Admin",
     items: [
+      { href: "/admin", label: "Admin Panel", icon: ShieldCheck },
       { href: "/users", label: "Users", icon: Users },
       { href: "/settings", label: "Settings", icon: Settings },
     ],

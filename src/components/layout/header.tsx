@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { useState, useTransition } from "react";
+import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Menu, Bell, ChevronDown, User, Settings, LogOut, Zap } from "lucide-react";
@@ -11,11 +11,9 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { logoutAction } from "@/actions/auth/logout";
 import { ROLE_LABELS } from "@/lib/auth-utils";
 import { UserRole } from "@/generated/prisma";
 import { Sidebar } from "./sidebar";
@@ -46,6 +44,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/expenses": "Expenses",
   "/users": "Team Members",
   "/settings": "Settings",
+  "/admin": "Admin Panel",
 };
 
 function getPageTitle(pathname: string): string {
@@ -58,8 +57,15 @@ function getPageTitle(pathname: string): string {
 export function Header() {
   const { data: session } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [signingOut, startSignOut] = useTransition();
   const pathname = usePathname();
   const user = session?.user;
+
+  function handleSignOut() {
+    startSignOut(async () => {
+      await signOut({ callbackUrl: "/login" });
+    });
+  }
 
   const initials =
     user?.name
@@ -124,7 +130,12 @@ export function Header() {
               </Avatar>
               <div className="hidden sm:block text-left">
                 <p className="text-sm font-semibold text-slate-800 leading-none">{user?.name}</p>
-                <p className={cn("text-[10px] font-medium mt-0.5 px-1.5 py-0.5 rounded-full inline-block", roleBadgeColor)}>
+                <p
+                  className={cn(
+                    "text-[10px] font-medium mt-0.5 px-1.5 py-0.5 rounded-full inline-block",
+                    roleBadgeColor
+                  )}
+                >
                   {roleLabel}
                 </p>
               </div>
@@ -135,35 +146,35 @@ export function Header() {
               align="end"
               className="w-56 shadow-xl border-slate-200 rounded-xl p-1"
             >
-              <DropdownMenuLabel className="px-3 py-2">
-                <p className="font-semibold text-slate-900">{user?.name}</p>
-                <p className="text-xs text-slate-400 font-normal truncate">{user?.email}</p>
-              </DropdownMenuLabel>
+              {/* User info header — plain div avoids Base UI GroupLabel context requirement */}
+              <div className="px-3 py-2 mb-1">
+                <p className="font-semibold text-slate-900 text-sm">{user?.name}</p>
+                <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+              </div>
               <DropdownMenuSeparator className="bg-slate-100" />
-              <DropdownMenuItem className="rounded-lg mx-0.5 gap-2.5 cursor-pointer" asChild>
-                <Link href="/settings/profile">
-                  <User className="w-4 h-4 text-slate-500" />
-                  My Profile
-                </Link>
+              <DropdownMenuItem
+                className="rounded-lg mx-0.5 gap-2.5 cursor-pointer"
+                onClick={() => (window.location.href = "/settings/profile")}
+              >
+                <User className="w-4 h-4 text-slate-500" />
+                My Profile
               </DropdownMenuItem>
-              <DropdownMenuItem className="rounded-lg mx-0.5 gap-2.5 cursor-pointer" asChild>
-                <Link href="/settings">
-                  <Settings className="w-4 h-4 text-slate-500" />
-                  Settings
-                </Link>
+              <DropdownMenuItem
+                className="rounded-lg mx-0.5 gap-2.5 cursor-pointer"
+                onClick={() => (window.location.href = "/settings")}
+              >
+                <Settings className="w-4 h-4 text-slate-500" />
+                Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-slate-100" />
               <DropdownMenuItem
                 className="rounded-lg mx-0.5 gap-2.5 text-red-500 focus:text-red-600 focus:bg-red-50 cursor-pointer"
-                onSelect={() => {
-                  const form = document.getElementById("logout-form") as HTMLFormElement;
-                  form?.requestSubmit();
-                }}
+                onClick={handleSignOut}
+                disabled={signingOut}
               >
                 <LogOut className="w-4 h-4" />
-                Sign Out
+                {signingOut ? "Signing out…" : "Sign Out"}
               </DropdownMenuItem>
-              <form id="logout-form" action={logoutAction} className="hidden" />
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

@@ -3,8 +3,6 @@
 import { hash } from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { RegisterSchema } from "@/schemas/auth";
-import { generateEmailVerificationToken } from "@/lib/tokens";
-import { sendVerificationEmail } from "@/lib/email";
 import { UserRole } from "@/generated/prisma";
 
 interface ActionResult {
@@ -31,7 +29,7 @@ export async function registerAction(formData: unknown): Promise<ActionResult> {
 
     const hashedPassword = await hash(password, 12);
 
-    const user = await prisma.user.create({
+    await prisma.user.create({
       data: {
         name,
         email,
@@ -39,18 +37,14 @@ export async function registerAction(formData: unknown): Promise<ActionResult> {
         phone: phone ?? null,
         role: UserRole.CLIENT,
         isActive: true,
-        emailVerified: null,
+        emailVerified: new Date(),
       },
     });
 
-    // Send verification email
-    const verificationToken = await generateEmailVerificationToken(user.email);
-    await sendVerificationEmail(user.email, verificationToken.token);
-
     return {
       success: true,
-      message: "Account created! Please check your email to verify your account.",
-      data: { email: user.email },
+      message: "Account created successfully! You can now sign in.",
+      data: { email },
     };
   } catch (error) {
     console.error("[REGISTER_ACTION]", error);
