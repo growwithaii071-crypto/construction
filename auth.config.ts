@@ -28,18 +28,31 @@ export const authConfig: NextAuthConfig = {
         "/construction/login",
         "/construction/register",
       ];
+      const CONTRACTOR_ROUTES = ["/construction/dashboard", "/construction/services", "/construction/requests"];
+      const CUSTOMER_ROUTES = ["/customer/dashboard", "/customer/services"];
       const PUBLIC_ROUTES = ["/", "/unauthorized", ...AUTH_ROUTES];
 
       const isPublic = PUBLIC_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
       const isAuthRoute = AUTH_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
+      const isContractorRoute = CONTRACTOR_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
+      const isCustomerRoute = CUSTOMER_ROUTES.some((r) => pathname === r || pathname.startsWith(r + "/"));
 
       if (isLoggedIn && isAuthRoute) {
         const role = (auth?.user as { role?: string } | undefined)?.role;
-        const dest = role === "CLIENT" ? "/customer/dashboard" : "/dashboard";
+        const dest =
+          role === "CLIENT"
+            ? "/customer/dashboard"
+            : role === "CONTRACTOR"
+              ? "/construction/dashboard"
+              : "/dashboard";
         return Response.redirect(new URL(dest, nextUrl));
       }
       if (isPublic) return true;
-      if (!isLoggedIn) return false;
+      if (!isLoggedIn) {
+        if (isContractorRoute) return Response.redirect(new URL("/construction/login", nextUrl));
+        if (isCustomerRoute) return Response.redirect(new URL("/customer/login", nextUrl));
+        return false;
+      }
 
       return true;
     },

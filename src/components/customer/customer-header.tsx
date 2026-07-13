@@ -50,6 +50,7 @@ export function CustomerHeader({ user }: CustomerHeaderProps) {
           <nav className="hidden md:flex items-center gap-1">
             {[
               { href: "/customer/dashboard", label: "Dashboard" },
+              { href: "/customer/services", label: "Browse Services" },
             ].map((item) => (
               <Link
                 key={item.href}

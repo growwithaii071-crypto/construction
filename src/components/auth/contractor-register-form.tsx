@@ -11,7 +11,7 @@ import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, HardHat } from "lucide
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { registerAction } from "@/actions/auth/register";
+import { contractorRegisterAction } from "@/actions/auth/contractor-register";
 import { cn } from "@/lib/utils";
 
 const passwordSchema = z
@@ -94,14 +94,7 @@ export function ContractorRegisterForm() {
     setError(null);
     setSuccess(null);
     startTransition(async () => {
-      // Use the existing register action — company name and specialization stored in name field for now
-      const result = await registerAction({
-        name: `${data.name} (${data.companyName})`,
-        email: data.email,
-        password: data.password,
-        confirmPassword: data.confirmPassword,
-        phone: data.phone,
-      });
+      const result = await contractorRegisterAction(data);
 
       if (result.success) {
         setSuccess("Company registered! Redirecting to sign in…");

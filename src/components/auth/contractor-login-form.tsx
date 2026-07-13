@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 export function ContractorLoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") ?? "/construction/dashboard";
   const urlError = searchParams.get("error");
 
   const [showPassword, setShowPassword] = useState(false);

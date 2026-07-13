@@ -68,13 +68,21 @@ export default async function CustomerDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Welcome back, {firstName}! 👋
-        </h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Track your construction projects and stay updated in real-time.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Welcome back, {firstName}! 👋
+          </h1>
+          <p className="text-gray-500 text-sm mt-1">
+            Track your construction projects and stay updated in real-time.
+          </p>
+        </div>
+        <Link
+          href="/customer/services"
+          className="shrink-0 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm"
+        >
+          Browse Services
+        </Link>
       </div>
 
       {data ? (

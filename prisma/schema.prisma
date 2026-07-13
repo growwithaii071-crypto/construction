@@ -123,6 +123,14 @@ enum IssueStatus {
   CLOSED
 }
 
+enum ServiceRequestStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
 enum IssueSeverity {
   LOW
   MEDIUM
@@ -147,18 +155,20 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  managedProjects   Project[]       @relation("ProjectManager")
-  assignedTasks     Task[]          @relation("TaskAssignee")
-  createdTasks      Task[]          @relation("TaskCreator")
-  siteReports       SiteReport[]
-  uploadedDocuments Document[]
-  issues            Issue[]         @relation("IssueReporter")
-  issueAssignees    Issue[]         @relation("IssueAssignee")
-  comments          Comment[]
-  notifications     Notification[]
-  clientProjects    ClientProject[]
-  refreshTokens     RefreshToken[]
-  expenses          Expense[]       @relation("ExpenseSubmitter")
+  managedProjects    Project[]        @relation("ProjectManager")
+  assignedTasks      Task[]           @relation("TaskAssignee")
+  createdTasks       Task[]           @relation("TaskCreator")
+  siteReports        SiteReport[]
+  uploadedDocuments  Document[]
+  issues             Issue[]          @relation("IssueReporter")
+  issueAssignees     Issue[]          @relation("IssueAssignee")
+  comments           Comment[]
+  notifications      Notification[]
+  clientProjects     ClientProject[]
+  refreshTokens      RefreshToken[]
+  expenses           Expense[]        @relation("ExpenseSubmitter")
+  contractorServices Service[]        @relation("ContractorServices")
+  serviceRequests    ServiceRequest[] @relation("ClientRequests")
 
   @@map("users")
 }
@@ -699,4 +709,44 @@ model Notification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+// ============================================================
+// SERVICES (Contractor offers → Customer requests)
+// ============================================================
+
+model Service {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  title        String
+  description  String
+  category     String
+  priceFrom    Float?
+  priceTo      Float?
+  priceUnit    String?
+  isActive     Boolean  @default(true)
+  contractorId String   @db.ObjectId
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  contractor User             @relation("ContractorServices", fields: [contractorId], references: [id])
+  requests   ServiceRequest[]
+
+  @@map("services")
+}
+
+model ServiceRequest {
+  id        String               @id @default(auto()) @map("_id") @db.ObjectId
+  message   String?
+  location  String?
+  budget    Float?
+  status    ServiceRequestStatus @default(PENDING)
+  serviceId String               @db.ObjectId
+  clientId  String               @db.ObjectId
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  service Service @relation(fields: [serviceId], references: [id])
+  client  User    @relation("ClientRequests", fields: [clientId], references: [id])
+
+  @@map("service_requests")
 }
