@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { HardHat, Menu, X, ChevronRight } from "lucide-react";
+import { HardHat, Menu, X, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface NavbarProps {
   isLoggedIn: boolean;
@@ -10,113 +11,131 @@ interface NavbarProps {
 
 export function Navbar({ isLoggedIn }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const navLinks = [
-    { href: "#services", label: "Services" },
-    { href: "#how-it-works", label: "How It Works" },
-    { href: "#about", label: "About" },
-  ];
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
+    <header
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+        scrolled ? "bg-white shadow-md" : "bg-transparent"
+      )}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shadow-md group-hover:bg-orange-400 transition-colors">
-              <HardHat className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center shadow-sm">
+              <HardHat className="w-4 h-4 text-white" />
             </div>
-            <span className="text-gray-900 font-bold text-lg tracking-tight">
-              Build<span className="text-orange-500">Pro</span>
+            <span className={cn("font-bold text-lg tracking-tight transition-colors", scrolled ? "text-gray-900" : "text-white")}>
+              Build<span className="text-violet-400">Pro</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => (
+          <nav className="hidden md:flex items-center gap-1">
+            {[
+              { href: "#how-it-works", label: "How it works" },
+              { href: "#services", label: "Services" },
+              { href: "#about", label: "About" },
+            ].map((link) => (
               <a
                 key={link.href}
                 href={link.href}
-                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+                className={cn(
+                  "text-sm font-medium px-3 py-2 rounded-lg transition-colors",
+                  scrolled ? "text-gray-600 hover:text-gray-900 hover:bg-gray-100" : "text-white/80 hover:text-white hover:bg-white/10"
+                )}
               >
                 {link.label}
               </a>
             ))}
           </nav>
 
-          {/* Desktop CTAs */}
-          <div className="hidden md:flex items-center gap-3">
+          {/* CTAs */}
+          <div className="hidden md:flex items-center gap-2">
             {isLoggedIn ? (
               <Link
                 href="/dashboard"
-                className="flex items-center gap-1.5 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors shadow-sm"
               >
                 Go to Dashboard
-                <ChevronRight className="w-4 h-4" />
               </Link>
             ) : (
               <>
                 <Link
                   href="/customer/login"
-                  className="text-gray-700 hover:text-gray-900 border border-gray-300 hover:border-gray-400 bg-white text-sm font-medium px-4 py-2 rounded-lg transition-all"
+                  className={cn(
+                    "text-sm font-medium px-4 py-2 rounded-full transition-colors",
+                    scrolled ? "text-gray-700 hover:text-gray-900 hover:bg-gray-100" : "text-white/80 hover:text-white hover:bg-white/10"
+                  )}
                 >
-                  Customer Login
+                  Sign in
                 </Link>
                 <Link
-                  href="/construction/login"
-                  className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                  href="/customer/register"
+                  className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors shadow-sm"
                 >
-                  Contractor Login
+                  Post a job
+                </Link>
+                <Link
+                  href="/construction/register"
+                  className={cn(
+                    "text-sm font-medium px-4 py-2 rounded-full border transition-colors",
+                    scrolled
+                      ? "border-gray-300 text-gray-700 hover:bg-gray-50"
+                      : "border-white/30 text-white hover:bg-white/10"
+                  )}
+                >
+                  Find work
                 </Link>
               </>
             )}
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile toggle */}
           <button
             onClick={() => setMobileOpen((v) => !v)}
-            className="md:hidden text-gray-700 p-1.5 hover:bg-gray-100 rounded-lg"
-            aria-label="Toggle menu"
+            className={cn("md:hidden p-2 rounded-lg transition-colors", scrolled ? "text-gray-700 hover:bg-gray-100" : "text-white hover:bg-white/10")}
           >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-3 shadow-lg">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileOpen(false)}
-              className="block text-gray-600 hover:text-gray-900 text-sm font-medium py-1.5"
-            >
+        <div className="md:hidden bg-white border-t border-gray-100 px-4 py-5 space-y-2 shadow-xl">
+          {[
+            { href: "#how-it-works", label: "How it works" },
+            { href: "#services", label: "Services" },
+            { href: "#about", label: "About" },
+          ].map((link) => (
+            <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className="block text-gray-700 font-medium py-2 text-sm">
               {link.label}
             </a>
           ))}
-          <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
+          <div className="pt-3 border-t border-gray-100 space-y-2">
             {isLoggedIn ? (
-              <Link
-                href="/dashboard"
-                className="text-center bg-orange-500 text-white text-sm font-semibold px-4 py-2.5 rounded-lg"
-              >
+              <Link href="/dashboard" className="block text-center bg-violet-600 text-white font-semibold py-2.5 rounded-full text-sm">
                 Go to Dashboard
               </Link>
             ) : (
               <>
-                <Link
-                  href="/customer/login"
-                  className="text-center border border-gray-300 text-gray-700 text-sm font-medium px-4 py-2.5 rounded-lg"
-                >
-                  Customer Login
+                <Link href="/customer/register" className="block text-center bg-violet-600 text-white font-semibold py-2.5 rounded-full text-sm">
+                  Post a job
                 </Link>
-                <Link
-                  href="/construction/login"
-                  className="text-center bg-orange-500 text-white text-sm font-semibold px-4 py-2.5 rounded-lg"
-                >
-                  Contractor Login
+                <Link href="/construction/register" className="block text-center border border-gray-300 text-gray-700 font-medium py-2.5 rounded-full text-sm">
+                  Find work
+                </Link>
+                <Link href="/customer/login" className="block text-center text-violet-600 font-medium py-2 text-sm">
+                  Sign in
                 </Link>
               </>
             )}

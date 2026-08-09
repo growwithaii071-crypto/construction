@@ -62,7 +62,7 @@ export default function AddServicePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="p-4 lg:p-6 max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
         <Link href="/construction/services" className="w-9 h-9 flex items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-500 transition-colors">
           <ArrowLeft className="w-4 h-4" />

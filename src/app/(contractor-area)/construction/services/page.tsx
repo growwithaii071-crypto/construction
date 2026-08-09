@@ -30,7 +30,7 @@ export default async function ContractorServicesPage() {
     .catch(() => []);
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 lg:p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">My Services</h1>
