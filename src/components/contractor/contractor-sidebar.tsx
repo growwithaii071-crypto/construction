@@ -15,6 +15,12 @@ import {
   Home,
   User,
   ChevronRight,
+  TrendingUp,
+  Star,
+  DollarSign,
+  BarChart3,
+  FileText,
+  Users,
 } from "lucide-react";
 
 const NAV_SECTIONS = [
@@ -35,11 +41,26 @@ const NAV_SECTIONS = [
     label: "Requests",
     items: [
       { href: "/construction/requests", label: "Customer Requests", icon: ClipboardList },
+      { href: "/construction/reviews", label: "Reviews", icon: Star },
+    ],
+  },
+  {
+    label: "Finance",
+    items: [
+      { href: "/construction/earnings", label: "Earnings", icon: DollarSign },
+      { href: "/construction/invoices", label: "Invoices", icon: FileText },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [
+      { href: "/construction/analytics", label: "Analytics", icon: BarChart3 },
     ],
   },
   {
     label: "Account",
     items: [
+      { href: "/construction/team", label: "My Team", icon: Users },
       { href: "/construction/profile", label: "My Profile", icon: User },
     ],
   },
@@ -93,10 +114,10 @@ export function ContractorSidebar({ user, onClose }: ContractorSidebarProps) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-1.5">
               {section.label}
             </p>
             <div className="space-y-0.5">
@@ -128,10 +149,7 @@ export function ContractorSidebar({ user, onClose }: ContractorSidebarProps) {
 
       {/* Back to landing */}
       <div className="px-3 pb-2">
-        <Link
-          href="/"
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-        >
+        <Link href="/" className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors">
           <Home className="w-4 h-4 text-gray-400" />
           Back to Home
         </Link>
@@ -144,15 +162,11 @@ export function ContractorSidebar({ user, onClose }: ContractorSidebarProps) {
             {initials}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
+            <p className="text-sm font-semibold text-gray-900 truncate">{user.name?.split(" — ")[0] ?? user.name}</p>
             <p className="text-xs text-gray-400 truncate">{user.email}</p>
           </div>
-          <button
-            onClick={handleSignOut}
-            disabled={signingOut}
-            title="Sign out"
-            className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
-          >
+          <button onClick={handleSignOut} disabled={signingOut} title="Sign out"
+            className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0">
             <LogOut className="w-3.5 h-3.5" />
           </button>
         </div>
