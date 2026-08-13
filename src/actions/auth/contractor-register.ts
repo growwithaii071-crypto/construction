@@ -11,7 +11,7 @@ const ContractorRegisterSchema = z
     companyName: z.string().min(2),
     email: z.string().email(),
     phone: z.string().min(10),
-    specialization: z.string().min(1),
+    specialization: z.array(z.string()).min(1, "Select at least one specialization"),
     licenseNumber: z.string().optional(),
     password: z
       .string()
