@@ -205,7 +205,7 @@ export function ContractorRegisterForm() {
         </div>
 
         {/* Specializations — multi-select dropdown */}
-        <div className="space-y-1.5" ref={dropdownRef}>
+        <div className="space-y-1.5 relative" ref={dropdownRef}>
           <div className="flex items-center justify-between">
             <Label className="text-gray-700 font-medium text-sm">Specialization(s)</Label>
             {selectedSpecs.length > 0 && (
@@ -253,7 +253,7 @@ export function ContractorRegisterForm() {
 
           {/* Dropdown list */}
           {dropdownOpen && (
-            <div className="absolute z-50 mt-1 w-full max-w-sm bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+            <div className="absolute z-50 top-full left-0 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
               <div className="max-h-56 overflow-y-auto">
                 {SPECIALIZATIONS.map((spec) => {
                   const selected = selectedSpecs.includes(spec.label);
