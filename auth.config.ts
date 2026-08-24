@@ -59,10 +59,15 @@ export const authConfig: NextAuthConfig = {
       const isCustomerArea = pathname.startsWith("/customer/");
       const isAdminArea = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
 
-      // ── Logged-in user hitting a login/register page → redirect to their dashboard ──
-      if (isLoggedIn && isAuthRoute) {
-        const dest = ROLE_HOME[role] ?? "/dashboard";
-        return Response.redirect(new URL(dest, nextUrl));
+      // ── Auth routes (login/register) are always publicly accessible ──
+      // Must check this FIRST — /construction/login also matches isContractorArea
+      if (isAuthRoute) {
+        // But if already logged in, redirect to their dashboard
+        if (isLoggedIn) {
+          const dest = ROLE_HOME[role] ?? "/dashboard";
+          return Response.redirect(new URL(dest, nextUrl));
+        }
+        return true;
       }
 
       // ── Public pages are always accessible ──
