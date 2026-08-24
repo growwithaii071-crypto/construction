@@ -3,7 +3,6 @@ import { authConfig } from "./auth.config";
 import { NextResponse } from "next/server";
 import type { NextAuthRequest } from "next-auth";
 
-// Define roles as plain strings to avoid Prisma WASM import in Edge runtime
 type UserRole =
   | "SUPER_ADMIN"
   | "ADMIN"
@@ -15,10 +14,8 @@ type UserRole =
   | "CLIENT"
   | "VIEWER";
 
-const ROLE_ROUTES: Record<string, UserRole> = {
-  "/admin": "ADMIN",
-  "/settings/users": "ADMIN",
-};
+// Staff-only routes (require ADMIN or higher)
+const ADMIN_ONLY_ROUTES = ["/admin", "/settings/users"];
 
 const ROLE_HIERARCHY: UserRole[] = [
   "VIEWER",
@@ -42,16 +39,29 @@ export default auth(function middleware(req: NextAuthRequest) {
   const session = req.auth;
   const { pathname } = req.nextUrl;
 
-  if (session?.error === "RefreshTokenExpired" || session?.error === "RefreshTokenError") {
-    const loginUrl = new URL("/login", req.url);
+  // Handle expired refresh token — force re-login
+  if (
+    session?.error === "RefreshTokenExpired" ||
+    session?.error === "RefreshTokenError"
+  ) {
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    let loginUrl: URL;
+    if (role === "CLIENT") {
+      loginUrl = new URL("/customer/login", req.url);
+    } else if (role === "CONTRACTOR") {
+      loginUrl = new URL("/construction/login", req.url);
+    } else {
+      loginUrl = new URL("/login", req.url);
+    }
     loginUrl.searchParams.set("error", "SessionExpired");
     return NextResponse.redirect(loginUrl);
   }
 
-  for (const [route, requiredRole] of Object.entries(ROLE_ROUTES)) {
+  // Admin-only route enforcement
+  for (const route of ADMIN_ONLY_ROUTES) {
     if (pathname.startsWith(route) && session?.user) {
-      const userRole = session.user.role as UserRole;
-      if (!hasRole(userRole, requiredRole)) {
+      const userRole = (session.user as { role?: string }).role as UserRole;
+      if (!hasRole(userRole, "ADMIN")) {
         return NextResponse.redirect(new URL("/unauthorized", req.url));
       }
     }

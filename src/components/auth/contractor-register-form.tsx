@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, HardHat, Check } from "lucide-react";
+import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, HardHat, Check, ChevronDown, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,6 +74,18 @@ export function ContractorRegisterForm() {
   const [success, setSuccess] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [selectedSpecs, setSelectedSpecs] = useState<string[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const {
     register,
@@ -192,45 +204,91 @@ export function ContractorRegisterForm() {
           </div>
         </div>
 
-        {/* Specializations — multi-select chips */}
-        <div className="space-y-2">
+        {/* Specializations — multi-select dropdown */}
+        <div className="space-y-1.5" ref={dropdownRef}>
           <div className="flex items-center justify-between">
-            <Label className="text-gray-700 font-medium text-sm">
-              Specialization(s)
-            </Label>
+            <Label className="text-gray-700 font-medium text-sm">Specialization(s)</Label>
             {selectedSpecs.length > 0 && (
               <span className="text-xs font-semibold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">
                 {selectedSpecs.length} selected
               </span>
             )}
           </div>
-          <p className="text-xs text-gray-400">Select all that apply to your business</p>
 
-          <div className="flex flex-wrap gap-2 pt-1">
-            {SPECIALIZATIONS.map((spec) => {
-              const selected = selectedSpecs.includes(spec.label);
-              return (
-                <button
-                  key={spec.label}
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => toggleSpec(spec.label)}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-sm font-medium transition-all select-none",
-                    selected
-                      ? "bg-orange-500 text-white border-orange-500 shadow-sm"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:text-orange-600 hover:bg-orange-50"
-                  )}
-                >
-                  <span>{spec.emoji}</span>
-                  {spec.label}
-                  {selected && <Check className="w-3.5 h-3.5 shrink-0" />}
+          {/* Trigger button */}
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => setDropdownOpen((v) => !v)}
+            className={cn(
+              "w-full min-h-10 rounded-xl border bg-white px-3 py-2 text-sm text-left flex items-center justify-between gap-2 transition-all focus:outline-none focus:ring-2 focus:ring-orange-500",
+              errors.specialization ? "border-red-400" : "border-gray-200 hover:border-orange-300",
+              dropdownOpen && "ring-2 ring-orange-500 border-transparent"
+            )}
+          >
+            <div className="flex flex-wrap gap-1.5 flex-1">
+              {selectedSpecs.length === 0 ? (
+                <span className="text-gray-400">Select specialization(s)…</span>
+              ) : (
+                selectedSpecs.map((s) => {
+                  const spec = SPECIALIZATIONS.find((sp) => sp.label === s);
+                  return (
+                    <span key={s}
+                      className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 text-xs font-medium px-2 py-0.5 rounded-lg">
+                      {spec?.emoji} {s}
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); toggleSpec(s); }}
+                        className="ml-0.5 hover:text-orange-900"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  );
+                })
+              )}
+            </div>
+            <ChevronDown className={cn("w-4 h-4 text-gray-400 shrink-0 transition-transform", dropdownOpen && "rotate-180")} />
+          </button>
+
+          {/* Dropdown list */}
+          {dropdownOpen && (
+            <div className="absolute z-50 mt-1 w-full max-w-sm bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+              <div className="max-h-56 overflow-y-auto">
+                {SPECIALIZATIONS.map((spec) => {
+                  const selected = selectedSpecs.includes(spec.label);
+                  return (
+                    <button
+                      key={spec.label}
+                      type="button"
+                      onClick={() => toggleSpec(spec.label)}
+                      className={cn(
+                        "w-full flex items-center gap-3 px-4 py-2.5 text-sm text-left transition-colors",
+                        selected ? "bg-orange-50 text-orange-700" : "text-gray-700 hover:bg-gray-50"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors",
+                        selected ? "bg-orange-500 border-orange-500" : "border-gray-300"
+                      )}>
+                        {selected && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                      <span>{spec.emoji}</span>
+                      <span className="flex-1">{spec.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="border-t border-gray-100 px-4 py-2.5 flex items-center justify-between bg-gray-50/50">
+                <span className="text-xs text-gray-400">{selectedSpecs.length} selected</span>
+                <button type="button" onClick={() => setDropdownOpen(false)}
+                  className="text-xs font-semibold text-orange-600 hover:text-orange-700 transition-colors">
+                  Done
                 </button>
-              );
-            })}
-          </div>
+              </div>
+            </div>
+          )}
 
-          {/* Hidden field to register with react-hook-form */}
           <input type="hidden" {...register("specialization")} />
           {errors.specialization && (
             <p className="text-xs text-red-500">{errors.specialization.message}</p>
