@@ -38,6 +38,7 @@ export function LoginForm() {
   function onSubmit(data: LoginInput) {
     setError(null);
     startTransition(async () => {
+      // Use redirect: false first to catch wrong-password errors
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -49,9 +50,9 @@ export function LoginForm() {
         return;
       }
 
-      // Use hard redirect so session cookie is definitely set before navigation
-      // The auth.config.ts authorized callback will redirect CLIENT/CONTRACTOR to their portals
-      window.location.href = callbackUrl;
+      // Hard-reload to /dashboard — middleware will redirect CLIENT→/customer/dashboard,
+      // CONTRACTOR→/construction/dashboard, ADMIN stays at /dashboard
+      window.location.replace("/dashboard");
     });
   }
 

@@ -55,9 +55,15 @@ export const authConfig: NextAuthConfig = {
         (r) => pathname === r || pathname.startsWith(r + "/")
       );
 
-      const isContractorArea = pathname.startsWith("/construction/");
-      const isCustomerArea = pathname.startsWith("/customer/");
-      const isAdminArea = pathname.startsWith("/dashboard") || pathname.startsWith("/admin");
+      const isContractorArea = pathname.startsWith("/construction/") && !isAuthRoute;
+      const isCustomerArea = pathname.startsWith("/customer/") && !isAuthRoute;
+      const isAdminArea =
+        (pathname.startsWith("/dashboard") ||
+          pathname.startsWith("/admin") ||
+          pathname.startsWith("/projects") ||
+          pathname.startsWith("/users") ||
+          pathname.startsWith("/settings")) &&
+        !isAuthRoute;
 
       // ── Auth routes (login/register) are always publicly accessible ──
       // Must check this FIRST — /construction/login also matches isContractorArea
