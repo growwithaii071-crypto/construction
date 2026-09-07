@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, AlertCircle, LogIn } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,7 +49,17 @@ export function LoginForm() {
         return;
       }
 
-      router.push(callbackUrl);
+      // Get role from session and redirect to correct portal
+      const session = await getSession();
+      const role = (session?.user as { role?: string } | undefined)?.role;
+
+      if (role === "CLIENT") {
+        router.push("/customer/dashboard");
+      } else if (role === "CONTRACTOR") {
+        router.push("/construction/dashboard");
+      } else {
+        router.push(callbackUrl);
+      }
       router.refresh();
     });
   }

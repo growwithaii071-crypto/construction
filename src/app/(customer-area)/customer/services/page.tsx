@@ -1,7 +1,8 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { ServiceRequestForm } from "@/components/customer/service-request-form";
-import { Search, Wrench } from "lucide-react";
+import { Wrench, Search, X } from "lucide-react";
+import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Browse Services — BuildPro" };
@@ -16,12 +17,24 @@ const CATEGORY_COLORS: Record<string, string> = {
   "Plumbing & Sanitation": "bg-cyan-100 text-cyan-700",
   "Structural Engineering": "bg-indigo-100 text-indigo-700",
   "Renovation & Remodeling": "bg-orange-100 text-orange-700",
+  "Roofing & Waterproofing": "bg-sky-100 text-sky-700",
+  "Painting & Finishing": "bg-rose-100 text-rose-700",
+  "Landscaping": "bg-green-100 text-green-700",
+  "HVAC & Ventilation": "bg-blue-100 text-blue-700",
+  "Road & Pavement": "bg-stone-100 text-stone-700",
 };
 
-export default async function CustomerServicesPage() {
+export default async function CustomerServicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string; category?: string }>;
+}) {
   const session = await auth();
+  const params = await searchParams;
+  const searchQuery = params.search?.trim() ?? "";
+  const categoryFilter = params.category?.trim() ?? "";
 
-  const [services, myRequests] = await Promise.all([
+  const [allServices, myRequests] = await Promise.all([
     prisma.service
       .findMany({
         where: { isActive: true },
@@ -40,22 +53,137 @@ export default async function CustomerServicesPage() {
       .catch(() => []),
   ]);
 
+  // Filter by search query and/or category
+  const services = allServices.filter((s) => {
+    const matchesSearch =
+      !searchQuery ||
+      s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.contractor.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory = !categoryFilter || s.category === categoryFilter;
+
+    return matchesSearch && matchesCategory;
+  });
+
   const myRequestMap = new Map(myRequests.map((r) => [r.serviceId, r.status]));
 
+  // Get unique categories for filter pills
+  const categories = [...new Set(allServices.map((s) => s.category))].sort();
+
   return (
-    <div className="space-y-6">
+    <div className="p-4 lg:p-6 space-y-6">
+      {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Browse Services</h1>
         <p className="text-gray-500 text-sm mt-1">
-          Find the right contractor for your project — {services.length} services available
+          {allServices.length} services available — find the right contractor for your project
         </p>
       </div>
 
+      {/* Search bar */}
+      <form method="GET" className="flex gap-2">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            name="search"
+            defaultValue={searchQuery}
+            type="text"
+            placeholder="Search by service, category or contractor..."
+            className="w-full h-11 pl-10 pr-4 border border-gray-200 rounded-xl text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition"
+          />
+          {categoryFilter && (
+            <input type="hidden" name="category" value={categoryFilter} />
+          )}
+        </div>
+        <button
+          type="submit"
+          className="h-11 px-5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors"
+        >
+          Search
+        </button>
+        {(searchQuery || categoryFilter) && (
+          <Link
+            href="/customer/services"
+            className="h-11 px-4 border border-gray-200 hover:bg-gray-50 text-gray-600 text-sm font-medium rounded-xl flex items-center gap-1.5 transition-colors"
+          >
+            <X className="w-4 h-4" /> Clear
+          </Link>
+        )}
+      </form>
+
+      {/* Active search indicator */}
+      {searchQuery && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-500">
+            Showing <span className="font-semibold text-gray-900">{services.length}</span> results for
+          </span>
+          <span className="inline-flex items-center gap-1.5 bg-violet-100 text-violet-700 text-sm font-semibold px-3 py-1 rounded-full">
+            <Search className="w-3.5 h-3.5" />
+            {searchQuery}
+            <Link href={categoryFilter ? `/customer/services?category=${encodeURIComponent(categoryFilter)}` : "/customer/services"}>
+              <X className="w-3.5 h-3.5 hover:text-violet-900" />
+            </Link>
+          </span>
+        </div>
+      )}
+
+      {/* Category filter pills */}
+      {categories.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={searchQuery ? `/customer/services?search=${encodeURIComponent(searchQuery)}` : "/customer/services"}
+            className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+              !categoryFilter
+                ? "bg-violet-600 text-white border-violet-600"
+                : "bg-white text-gray-600 border-gray-200 hover:border-violet-300 hover:text-violet-600"
+            }`}
+          >
+            All
+          </Link>
+          {categories.map((cat) => {
+            const isActive = cat === categoryFilter;
+            const href = isActive
+              ? searchQuery ? `/customer/services?search=${encodeURIComponent(searchQuery)}` : "/customer/services"
+              : searchQuery
+              ? `/customer/services?search=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(cat)}`
+              : `/customer/services?category=${encodeURIComponent(cat)}`;
+            return (
+              <Link
+                key={cat}
+                href={href}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
+                  isActive
+                    ? "bg-violet-600 text-white border-violet-600"
+                    : "bg-white text-gray-600 border-gray-200 hover:border-violet-300 hover:text-violet-600"
+                }`}
+              >
+                {cat}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Results */}
       {services.length === 0 ? (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-14 text-center">
           <Wrench className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-gray-700 mb-1">No services yet</h2>
-          <p className="text-gray-400 text-sm">Contractors haven&apos;t listed any services yet. Check back soon!</p>
+          <h2 className="text-lg font-semibold text-gray-700 mb-1">
+            {searchQuery ? `No results for "${searchQuery}"` : "No services yet"}
+          </h2>
+          <p className="text-gray-400 text-sm mt-1">
+            {searchQuery
+              ? "Try different keywords or browse all services"
+              : "Contractors haven't listed any services yet. Check back soon!"}
+          </p>
+          {searchQuery && (
+            <Link href="/customer/services"
+              className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors">
+              ← Browse all services
+            </Link>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -75,8 +203,11 @@ export default async function CustomerServicesPage() {
                 {(service.priceFrom || service.priceTo) && (
                   <p className="text-sm font-semibold text-gray-800">
                     ₹{service.priceFrom?.toLocaleString("en-IN")}
-                    {service.priceTo && service.priceTo !== service.priceFrom ? ` – ₹${service.priceTo?.toLocaleString("en-IN")}` : ""}
-                    {service.priceUnit && <span className="text-gray-400 font-normal text-xs"> {service.priceUnit}</span>}
+                    {service.priceTo && service.priceTo !== service.priceFrom
+                      ? ` – ₹${service.priceTo?.toLocaleString("en-IN")}` : ""}
+                    {service.priceUnit && (
+                      <span className="text-gray-400 font-normal text-xs"> {service.priceUnit}</span>
+                    )}
                   </p>
                 )}
 

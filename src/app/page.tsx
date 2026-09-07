@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { auth } from "@/auth";
 import { Navbar } from "@/components/landing/navbar";
+import { HeroSearch } from "@/components/landing/hero-search";
 
 export default async function LandingPage() {
   const session = await auth();
@@ -62,27 +63,7 @@ export default async function LandingPage() {
                 Connect with verified professionals for any construction or home improvement job.
               </p>
 
-              {/* Search input */}
-              <div className="mt-8 max-w-105">
-                <label className="block text-white/70 text-sm font-medium mb-2">What&apos;s your job?</label>
-                <div className="flex gap-2">
-                  <div className="flex-1 relative">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="e.g. House construction, plumber..."
-                      className="w-full h-12 pl-10 pr-4 bg-white rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
-                    />
-                  </div>
-                  <Link
-                    href="/customer/register"
-                    className="h-12 px-5 bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap shadow-lg shadow-violet-700/30"
-                  >
-                    Get quotes
-                  </Link>
-                </div>
-                <p className="mt-2.5 text-xs text-white/30">Free to post · No obligation · Replies in hours</p>
-              </div>
+              <HeroSearch />
 
               {/* Stats */}
               <div className="mt-10 flex flex-wrap gap-6 border-t border-white/10 pt-8">

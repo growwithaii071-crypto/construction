@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Eye, EyeOff, Loader2, AlertCircle, HardHat, ArrowRight } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import { LoginSchema, type LoginInput } from "@/schemas/auth";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +39,20 @@ export function ContractorLoginForm() {
         setError("Invalid email or password. Please try again.");
         return;
       }
-      router.push(callbackUrl);
+
+      // Always redirect based on actual role (not just callbackUrl)
+      const session = await getSession();
+      const role = (session?.user as { role?: string } | undefined)?.role;
+
+      if (role === "CONTRACTOR") {
+        router.push("/construction/dashboard");
+      } else if (role === "CLIENT") {
+        router.push("/customer/dashboard");
+      } else if (role) {
+        router.push("/dashboard");
+      } else {
+        router.push(callbackUrl);
+      }
       router.refresh();
     });
   }
