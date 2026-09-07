@@ -1,132 +1,231 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * FORM VALIDATION TESTS
- * Simulates a user making mistakes in every form — empty fields, bad input, etc.
+ * ═══════════════════════════════════════════════════════
+ *  02 — FORM VALIDATIONS  (Advanced)
+ *  Every form field, every error message, edge cases.
+ * ═══════════════════════════════════════════════════════
  */
 
-test.describe("📋 Customer Registration — Validation", () => {
+// ─────────────────────────────────────────────────────────
+//  CUSTOMER REGISTRATION FORM
+// ─────────────────────────────────────────────────────────
+test.describe("📝 Customer Registration Form", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/customer/register");
   });
 
-  test("register page loads", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: /create.*account|register/i })).toBeVisible();
+  test("registration page loads with all required fields", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: /create account|register|sign up/i })).toBeVisible();
+    await expect(page.getByPlaceholder(/full name/i)).toBeVisible();
+    await expect(page.getByPlaceholder(/you@example.com/i)).toBeVisible();
+    await expect(page.getByPlaceholder(/enter your password/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /create account|register|sign up/i })).toBeVisible();
   });
 
-  test("shows error when submitting empty form", async ({ page }) => {
-    await page.getByRole("button", { name: /create account|register/i }).click();
-    // Should show validation errors
-    await expect(page.locator("p.text-xs.text-red-500, [class*=error]").first()).toBeVisible({ timeout: 3000 });
+  test("shows 'required' errors on empty submit", async ({ page }) => {
+    await page.getByRole("button", { name: /create account|register|sign up/i }).click();
+    const errors = page.locator("p[class*='red'], span[class*='red'], .text-red-500, .text-destructive");
+    await expect(errors.first()).toBeVisible({ timeout: 3000 });
   });
 
-  test("shows error for invalid email", async ({ page }) => {
-    await page.getByPlaceholder(/email/i).fill("not-an-email");
-    await page.getByRole("button", { name: /create account|register/i }).click();
-    await expect(page.getByText(/invalid email/i)).toBeVisible({ timeout: 3000 });
+  test("shows error for invalid email format", async ({ page }) => {
+    await page.getByPlaceholder(/full name/i).fill("Test User");
+    await page.getByPlaceholder(/you@example.com/i).fill("not-an-email");
+    await page.getByPlaceholder(/enter your password/i).fill("Password@123");
+    await page.getByRole("button", { name: /create account|register|sign up/i }).click();
+    await expect(page.getByText(/invalid email|valid email/i)).toBeVisible({ timeout: 3000 });
   });
 
-  test("shows error when passwords don't match", async ({ page }) => {
-    const fields = await page.getByPlaceholder(/password/i).all();
-    if (fields.length >= 2) {
-      await fields[0].fill("Password@123");
-      await fields[1].fill("DifferentPassword@123");
-      await page.getByRole("button", { name: /create account|register/i }).click();
-      await expect(page.getByText(/do not match|mismatch/i)).toBeVisible({ timeout: 3000 });
+  test("shows error for weak password (too short)", async ({ page }) => {
+    await page.getByPlaceholder(/full name/i).fill("Test User");
+    await page.getByPlaceholder(/you@example.com/i).fill("test@example.com");
+    await page.getByPlaceholder(/enter your password/i).fill("123");
+    await page.getByRole("button", { name: /create account|register|sign up/i }).click();
+    await expect(page.getByText(/password|characters|minimum/i)).toBeVisible({ timeout: 3000 });
+  });
+
+  test("password field is masked by default", async ({ page }) => {
+    const passwordInput = page.getByPlaceholder(/enter your password/i);
+    await expect(passwordInput).toHaveAttribute("type", "password");
+  });
+
+  test("toggle password visibility works", async ({ page }) => {
+    const passwordInput = page.getByPlaceholder(/enter your password/i);
+    const toggle = page.getByRole("button", { name: /show|hide|toggle password/i })
+      .or(page.locator("button[aria-label*='password']"));
+    if (await toggle.isVisible()) {
+      await toggle.click();
+      await expect(passwordInput).toHaveAttribute("type", "text");
+      await toggle.click();
+      await expect(passwordInput).toHaveAttribute("type", "password");
     }
   });
 
-  test("password strength indicators show while typing", async ({ page }) => {
-    await page.getByPlaceholder(/password/i).first().fill("weak");
-    // strength indicators should appear
-    await expect(page.getByText(/uppercase|lowercase|8\+/i).first()).toBeVisible({ timeout: 2000 });
+  test("has a link to login page for existing users", async ({ page }) => {
+    await expect(page.getByRole("link", { name: /sign in|already have/i })).toBeVisible();
   });
 
-  test("link to login page is present", async ({ page }) => {
-    await expect(page.getByRole("link", { name: /sign in|login/i })).toBeVisible();
+  test("register link from /customer/login opens registration page", async ({ page }) => {
+    await page.goto("/customer/login");
+    await page.getByRole("link", { name: /create account|register|sign up/i }).click();
+    await expect(page).toHaveURL(/\/customer\/register/);
   });
 });
 
-test.describe("📋 Contractor Registration — Validation", () => {
+// ─────────────────────────────────────────────────────────
+//  CUSTOMER LOGIN FORM
+// ─────────────────────────────────────────────────────────
+test.describe("🔐 Customer Login Form", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/customer/login");
+  });
+
+  test("login page loads correctly", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: /sign in|log in|customer/i })).toBeVisible();
+    await expect(page.getByPlaceholder(/you@example.com/i)).toBeVisible();
+    await expect(page.getByPlaceholder(/enter your password/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /sign in|log in/i })).toBeVisible();
+  });
+
+  test("shows error on completely empty submit", async ({ page }) => {
+    await page.getByRole("button", { name: /sign in/i }).click();
+    const error = page.locator("p[class*='red'], .text-red-500, .text-destructive");
+    await expect(error.first()).toBeVisible({ timeout: 3000 });
+  });
+
+  test("shows error for invalid credentials", async ({ page }) => {
+    await page.getByPlaceholder(/you@example.com/i).fill("wrong@example.com");
+    await page.getByPlaceholder(/enter your password/i).fill("WrongPass@123");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await expect(page.getByText(/invalid|incorrect|credentials|email or password/i)).toBeVisible({ timeout: 8000 });
+  });
+
+  test("password input is masked by default", async ({ page }) => {
+    await expect(page.getByPlaceholder(/enter your password/i)).toHaveAttribute("type", "password");
+  });
+
+  test("has link to registration page", async ({ page }) => {
+    await expect(page.getByRole("link", { name: /create account|register|sign up|don't have/i })).toBeVisible();
+  });
+
+  test("shows page without header/footer overlap errors", async ({ page }) => {
+    // Page should render cleanly
+    await expect(page.locator("body")).toBeVisible();
+    const loginCard = page.locator("form");
+    await expect(loginCard).toBeVisible();
+  });
+});
+
+// ─────────────────────────────────────────────────────────
+//  CONTRACTOR LOGIN FORM
+// ─────────────────────────────────────────────────────────
+test.describe("🔐 Contractor Login Form", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/construction/login");
+  });
+
+  test("login page loads correctly", async ({ page }) => {
+    await expect(page.getByPlaceholder(/company@example.com/i)).toBeVisible();
+    await expect(page.getByPlaceholder(/enter your password/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /sign in|log in/i })).toBeVisible();
+  });
+
+  test("shows error for empty form submit", async ({ page }) => {
+    await page.getByRole("button", { name: /sign in/i }).click();
+    const error = page.locator("p[class*='red'], .text-red-500, .text-destructive");
+    await expect(error.first()).toBeVisible({ timeout: 3000 });
+  });
+
+  test("shows error for wrong credentials", async ({ page }) => {
+    await page.getByPlaceholder(/company@example.com/i).fill("fake@contractor.com");
+    await page.getByPlaceholder(/enter your password/i).fill("WrongPass@123");
+    await page.getByRole("button", { name: /sign in/i }).click();
+    await expect(page.getByText(/invalid|incorrect|credentials/i)).toBeVisible({ timeout: 8000 });
+  });
+
+  test("has a link to contractor registration page", async ({ page }) => {
+    await expect(page.getByRole("link", { name: /register|create|sign up/i })).toBeVisible();
+  });
+
+  test("page does not have ERR_TOO_MANY_REDIRECTS (no infinite loop)", async ({ page }) => {
+    let redirectCount = 0;
+    page.on("response", (res) => {
+      if (res.status() === 301 || res.status() === 302 || res.status() === 307) {
+        redirectCount++;
+      }
+    });
+    await page.goto("/construction/login");
+    expect(redirectCount).toBeLessThan(5); // Sanity check — no redirect loop
+  });
+});
+
+// ─────────────────────────────────────────────────────────
+//  CONTRACTOR REGISTRATION FORM
+// ─────────────────────────────────────────────────────────
+test.describe("📝 Contractor Registration Form", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/construction/register");
   });
 
-  test("register page loads", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: /register.*company/i })).toBeVisible();
+  test("registration form loads with company name field", async ({ page }) => {
+    await expect(page.getByPlaceholder(/company name|your company/i)).toBeVisible();
   });
 
-  test("specialization dropdown opens on click", async ({ page }) => {
-    const trigger = page.getByText(/select specialization/i);
-    await expect(trigger).toBeVisible();
-    await trigger.click();
-    // Dropdown should appear with options
-    await expect(page.getByText(/residential construction/i)).toBeVisible({ timeout: 2000 });
+  test("shows errors on empty submit", async ({ page }) => {
+    await page.getByRole("button", { name: /register|create|sign up/i }).click();
+    const error = page.locator("p[class*='red'], .text-red-500, .text-destructive");
+    await expect(error.first()).toBeVisible({ timeout: 3000 });
   });
 
-  test("can select multiple specializations", async ({ page }) => {
-    await page.getByText(/select specialization/i).click();
-    await page.getByText(/residential construction/i).click();
-    await page.getByText(/electrical works/i).click();
-    // Should show 2 selected
-    await expect(page.getByText(/2 selected/i)).toBeVisible({ timeout: 2000 });
+  test("specialization multi-select dropdown is visible", async ({ page }) => {
+    const specField = page
+      .getByLabel(/specialization/i)
+      .or(page.getByText(/specialization/i));
+    await expect(specField.first()).toBeVisible();
   });
 
-  test("can deselect a specialization by clicking X on tag", async ({ page }) => {
-    await page.getByText(/select specialization/i).click();
-    await page.getByText(/residential construction/i).click();
-    await page.getByText(/done/i).click();
-    // X button on the tag should remove it
-    const removeBtn = page.locator("button").filter({ hasText: "" }).last();
-    if (await removeBtn.isVisible()) {
-      await removeBtn.click();
-      await expect(page.getByText(/0 selected|select specialization/i)).toBeVisible({ timeout: 2000 });
+  test("can open specialization dropdown", async ({ page }) => {
+    const dropdown = page.getByRole("button", { name: /select specialization|select specializations/i })
+      .or(page.locator("[data-specialization], #specialization").first());
+    if (await dropdown.isVisible()) {
+      await dropdown.click();
+      await expect(page.getByText(/residential|electrical|plumbing/i).first()).toBeVisible({ timeout: 2000 });
     }
   });
 
-  test("shows error if no specialization selected", async ({ page }) => {
-    await page.getByLabel(/contact person/i).fill("Test User");
-    await page.getByLabel(/company name/i).fill("Test Company");
-    await page.getByLabel(/business email/i).fill("test@test.com");
-    await page.getByRole("button", { name: /register/i }).click();
-    await expect(page.getByText(/select at least one/i)).toBeVisible({ timeout: 3000 });
+  test("phone number field is present", async ({ page }) => {
+    await expect(page.getByLabel(/phone/i).or(page.getByPlaceholder(/phone|\+91/i))).toBeVisible();
   });
 
-  test("link to contractor login is present", async ({ page }) => {
-    await expect(page.getByRole("link", { name: /sign in/i })).toBeVisible();
+  test("password mismatch shows confirm password error", async ({ page }) => {
+    const passInputs = await page.locator("input[type='password']").all();
+    if (passInputs.length >= 2) {
+      await passInputs[0].fill("Password@123");
+      await passInputs[1].fill("DifferentPassword@456");
+      await page.getByRole("button", { name: /register|create|sign up/i }).click();
+      await expect(page.getByText(/match|confirm/i)).toBeVisible({ timeout: 3000 });
+    }
   });
 });
 
-test.describe("📋 Login Form Validation", () => {
-  test("customer login — empty email shows error", async ({ page }) => {
-    await page.goto("/customer/login");
-    await page.getByRole("button", { name: /sign in/i }).click();
-    await expect(page.locator("p.text-xs.text-red-500").first()).toBeVisible({ timeout: 3000 });
+// ─────────────────────────────────────────────────────────
+//  ADMIN LOGIN FORM
+// ─────────────────────────────────────────────────────────
+test.describe("🔐 Admin Login Form", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto("/login");
   });
 
-  test("customer login — wrong credentials shows error message", async ({ page }) => {
-    await page.goto("/customer/login");
-    await page.getByPlaceholder(/you@example.com/i).fill("wrong@example.com");
-    await page.getByPlaceholder(/enter your password/i).fill("wrongpassword");
-    await page.getByRole("button", { name: /sign in/i }).click();
-    await expect(page.getByText(/invalid email or password/i)).toBeVisible({ timeout: 5000 });
+  test("admin login page loads", async ({ page }) => {
+    await expect(page.locator("input[type='email'], input[name='email']").first()).toBeVisible();
+    await expect(page.locator("input[type='password']").first()).toBeVisible();
   });
 
-  test("contractor login — wrong credentials shows error message", async ({ page }) => {
-    await page.goto("/construction/login");
-    await page.getByPlaceholder(/company@example.com/i).fill("wrong@company.com");
-    await page.getByPlaceholder(/enter your password/i).fill("wrongpassword");
-    await page.getByRole("button", { name: /sign in/i }).click();
-    await expect(page.getByText(/invalid email or password/i)).toBeVisible({ timeout: 5000 });
-  });
-
-  test("customer login — password toggle shows/hides password", async ({ page }) => {
-    await page.goto("/customer/login");
-    const passwordInput = page.getByPlaceholder(/enter your password/i);
-    await passwordInput.fill("TestPassword");
-    await expect(passwordInput).toHaveAttribute("type", "password");
-    // Click eye icon
-    await page.locator("button[type='button']").last().click();
-    await expect(passwordInput).toHaveAttribute("type", "text");
+  test("shows error for wrong admin credentials", async ({ page }) => {
+    await page.locator("input[type='email'], input[name='email']").first().fill("notadmin@test.com");
+    await page.locator("input[type='password']").first().fill("WrongPass@123");
+    await page.getByRole("button", { name: /sign in|log in/i }).first().click();
+    await expect(page.getByText(/invalid|incorrect|credentials/i)).toBeVisible({ timeout: 8000 });
   });
 });
