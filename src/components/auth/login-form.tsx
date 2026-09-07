@@ -49,18 +49,9 @@ export function LoginForm() {
         return;
       }
 
-      // Get role from session and redirect to correct portal
-      const session = await getSession();
-      const role = (session?.user as { role?: string } | undefined)?.role;
-
-      if (role === "CLIENT") {
-        router.push("/customer/dashboard");
-      } else if (role === "CONTRACTOR") {
-        router.push("/construction/dashboard");
-      } else {
-        router.push(callbackUrl);
-      }
-      router.refresh();
+      // Use hard redirect so session cookie is definitely set before navigation
+      // The auth.config.ts authorized callback will redirect CLIENT/CONTRACTOR to their portals
+      window.location.href = callbackUrl;
     });
   }
 

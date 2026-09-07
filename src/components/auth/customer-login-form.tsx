@@ -40,19 +40,8 @@ export function CustomerLoginForm() {
         return;
       }
 
-      // Always redirect based on actual role (not just callbackUrl)
-      const session = await getSession();
-      const role = (session?.user as { role?: string } | undefined)?.role;
-
-      if (role === "CONTRACTOR") {
-        router.push("/construction/dashboard");
-      } else if (role === "CLIENT") {
-        router.push("/customer/dashboard");
-      } else if (role) {
-        router.push("/dashboard");
-      } else {
-        router.push(callbackUrl);
-      }
+      // Customer login page — always go to customer dashboard
+      router.push("/customer/dashboard");
       router.refresh();
     });
   }
