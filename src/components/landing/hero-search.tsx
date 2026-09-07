@@ -12,9 +12,9 @@ export function HeroSearch() {
     e.preventDefault();
     const q = query.trim();
     if (q) {
-      router.push(`/customer/services?search=${encodeURIComponent(q)}`);
+      router.push(`/services?search=${encodeURIComponent(q)}`);
     } else {
-      router.push("/customer/services");
+      router.push("/services");
     }
   }
 

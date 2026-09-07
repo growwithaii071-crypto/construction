@@ -6,7 +6,7 @@ import type { NextAuthConfig } from "next-auth";
  */
 
 // Routes that anyone can visit without logging in
-const PUBLIC_ROUTES = ["/", "/unauthorized"];
+const PUBLIC_ROUTES = ["/", "/unauthorized", "/services"];
 
 // Routes that only non-logged-in users should see (login/register pages)
 const AUTH_ROUTES = [

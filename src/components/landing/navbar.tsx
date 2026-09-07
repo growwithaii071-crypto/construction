@@ -42,7 +42,7 @@ export function Navbar({ isLoggedIn }: NavbarProps) {
           <nav className="hidden md:flex items-center gap-1">
             {[
               { href: "#how-it-works", label: "How it works" },
-              { href: "#services", label: "Services" },
+              { href: "/services", label: "Services" },
               { href: "#about", label: "About" },
             ].map((link) => (
               <a
@@ -114,7 +114,7 @@ export function Navbar({ isLoggedIn }: NavbarProps) {
         <div className="md:hidden bg-white border-t border-gray-100 px-4 py-5 space-y-2 shadow-xl">
           {[
             { href: "#how-it-works", label: "How it works" },
-            { href: "#services", label: "Services" },
+            { href: "/services", label: "Services" },
             { href: "#about", label: "About" },
           ].map((link) => (
             <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className="block text-gray-700 font-medium py-2 text-sm">

@@ -767,7 +767,7 @@ export default async function LandingPage() {
                 {[
                   { label: "Post a Job", href: "/customer/register" },
                   { label: "How it Works", href: "#how-it-works" },
-                  { label: "Browse Services", href: "/customer/services" },
+                  { label: "Browse Services", href: "/services" },
                   { label: "Customer Login", href: "/customer/login" },
                   { label: "Create Account", href: "/customer/register" },
                 ].map((l) => (
