@@ -43,6 +43,16 @@ export const authConfig: NextAuthConfig = {
   },
   providers: [],
   callbacks: {
+    // ── CRITICAL: This session callback runs in Edge (middleware) too.
+    // Without it, auth.user.role is undefined in the authorized() callback.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async session({ session, token }: { session: any; token: any }) {
+      if (session.user && token) {
+        session.user.id = token.userId ?? token.sub;
+        session.user.role = token.role;
+      }
+      return session;
+    },
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       const role = ((auth?.user as { role?: string } | undefined)?.role ?? "") as string;
