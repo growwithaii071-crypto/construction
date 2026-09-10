@@ -3,7 +3,8 @@ import { LoginForm } from "@/components/auth/login-form";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sign In — Construction Co.",
+  title: "Sign In — BuildPro",
+  description: "Sign in as Admin, Client, or Contractor",
 };
 
 export default function LoginPage() {

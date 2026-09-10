@@ -235,10 +235,10 @@ test.describe("🏠 Landing — CTA Section & Footer", () => {
     await expect(page.getByText(/I'm a contractor/i)).toBeVisible();
   });
 
-  test("Customer Login footer link is clickable and navigates correctly", async ({ page }) => {
-    const loginLink = page.getByRole("link", { name: /customer login/i });
+  test("Sign In footer link is clickable and navigates correctly", async ({ page }) => {
+    const loginLink = page.getByRole("link", { name: /^sign in$/i }).last();
     await expect(loginLink).toBeVisible();
     await loginLink.click();
-    await expect(page).toHaveURL(/\/customer\/login/);
+    await expect(page).toHaveURL(/\/login/);
   });
 });

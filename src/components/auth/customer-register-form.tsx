@@ -56,7 +56,7 @@ export function CustomerRegisterForm() {
       const result = await registerAction(data);
       if (result.success) {
         setSuccess("Account created! Redirecting to sign in…");
-        setTimeout(() => router.push("/customer/login"), 2500);
+        setTimeout(() => router.push("/login"), 2500);
       } else {
         setError(result.message);
       }
@@ -251,7 +251,7 @@ export function CustomerRegisterForm() {
 
       <p className="text-center text-sm text-gray-500">
         Already have an account?{" "}
-        <Link href="/customer/login" className="text-blue-600 hover:text-blue-700 font-semibold">
+        <Link href="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
           Sign in
         </Link>
       </p>

@@ -88,14 +88,14 @@ test.describe("♿ Accessibility — Landing Page", () => {
 // ─────────────────────────────────────────────────────────
 test.describe("♿ Accessibility — Login Forms", () => {
   test("customer login form is fully keyboard navigable", async ({ page }) => {
-    await page.goto("/customer/login");
+    await page.goto("/login");
     await page.keyboard.press("Tab"); // Focus first element
     const focused = await page.evaluate(() => document.activeElement?.tagName);
     expect(["A", "BUTTON", "INPUT"]).toContain(focused);
   });
 
   test("customer login can be submitted with Enter key", async ({ page }) => {
-    await page.goto("/customer/login");
+    await page.goto("/login");
     await page.getByPlaceholder(/you@example.com/i).focus();
     await page.keyboard.type("customer@buildpro.com");
     await page.keyboard.press("Tab");
@@ -104,7 +104,7 @@ test.describe("♿ Accessibility — Login Forms", () => {
     // Should attempt login (redirect or error)
     await page.waitForTimeout(2000);
     const url = page.url();
-    expect(url).toMatch(/customer\/dashboard|customer\/login/);
+    expect(url).toMatch(/customer\/dashboard|customertoHaveURL(/toHaveURL(/\/login/);
   });
 
   test("contractor login page has no ERR_TOO_MANY_REDIRECTS", async ({ page }) => {
@@ -112,7 +112,7 @@ test.describe("♿ Accessibility — Login Forms", () => {
     page.on("response", (r) => {
       if ([301, 302, 307, 308].includes(r.status())) redirects++;
     });
-    await page.goto("/construction/login");
+    await page.goto("/login");
     expect(redirects).toBeLessThan(5);
   });
 });
@@ -199,14 +199,14 @@ test.describe("♿ Responsive — Mobile Layout", () => {
 
   test("customer login page renders on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto("/customer/login");
+    await page.goto("/login");
     await expect(page.getByPlaceholder(/you@example.com/i)).toBeVisible();
   });
 
   test("contractor login page renders on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto("/construction/login");
-    await expect(page.getByPlaceholder(/company@example.com/i)).toBeVisible();
+    await page.goto("/login");
+    await expect(page.getByPlaceholder(/you@example.com/i)).toBeVisible();
   });
 });
 
@@ -232,7 +232,7 @@ test.describe("⚡ Performance — Basic Checks", () => {
 
   test("customer login page loads within 5 seconds", async ({ page }) => {
     const start = Date.now();
-    await page.goto("/customer/login");
+    await page.goto("/login");
     await page.waitForLoadState("domcontentloaded");
     const elapsed = Date.now() - start;
     expect(elapsed).toBeLessThan(5000);
@@ -240,7 +240,7 @@ test.describe("⚡ Performance — Basic Checks", () => {
 
   test("contractor login page loads within 5 seconds", async ({ page }) => {
     const start = Date.now();
-    await page.goto("/construction/login");
+    await page.goto("/login");
     await page.waitForLoadState("domcontentloaded");
     const elapsed = Date.now() - start;
     expect(elapsed).toBeLessThan(5000);

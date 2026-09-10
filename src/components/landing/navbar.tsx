@@ -70,7 +70,7 @@ export function Navbar({ isLoggedIn }: NavbarProps) {
             ) : (
               <>
                 <Link
-                  href="/customer/login"
+                  href="/login"
                   className={cn(
                     "text-sm font-medium px-4 py-2 rounded-full transition-colors",
                     scrolled ? "text-gray-700 hover:text-gray-900 hover:bg-gray-100" : "text-white/80 hover:text-white hover:bg-white/10"
@@ -134,7 +134,7 @@ export function Navbar({ isLoggedIn }: NavbarProps) {
                 <Link href="/construction/register" className="block text-center border border-gray-300 text-gray-700 font-medium py-2.5 rounded-full text-sm">
                   Find work
                 </Link>
-                <Link href="/customer/login" className="block text-center text-violet-600 font-medium py-2 text-sm">
+                <Link href="/login" className="block text-center text-violet-600 font-medium py-2 text-sm">
                   Sign in
                 </Link>
               </>

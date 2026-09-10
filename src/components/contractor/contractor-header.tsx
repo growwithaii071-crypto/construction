@@ -25,7 +25,7 @@ export function ContractorHeader({ user }: ContractorHeaderProps) {
 
   function handleSignOut() {
     startSignOut(async () => {
-      await signOut({ callbackUrl: "/construction/login" });
+      await signOut({ callbackUrl: "/login" });
     });
   }
 

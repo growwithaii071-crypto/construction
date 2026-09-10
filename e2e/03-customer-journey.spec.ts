@@ -14,7 +14,7 @@ import { loginAsCustomer, signOut } from "./helpers";
 // ─────────────────────────────────────────────────────────
 test.describe("👤 Customer — Login", () => {
   test("can login with correct credentials and lands on /customer/dashboard", async ({ page }) => {
-    await page.goto("/customer/login");
+    await page.goto("/login");
     await page.getByPlaceholder(/you@example.com/i).fill("customer@buildpro.com");
     await page.getByPlaceholder(/enter your password/i).fill("Customer@123");
     await page.getByRole("button", { name: /sign in/i }).click();
@@ -186,13 +186,13 @@ test.describe("👤 Customer — Sign Out", () => {
   test("can sign out from customer dashboard", async ({ page }) => {
     await loginAsCustomer(page);
     await signOut(page);
-    await expect(page).toHaveURL(/\/customer\/login|\/login/, { timeout: 8000 });
+    await expect(page).toHaveURL(/toHaveURL(/\/login/|toHaveURL(/toHaveURL(/\/login/, { timeout: 8000 });
   });
 
   test("after sign out, /customer/dashboard redirects to login", async ({ page }) => {
     await loginAsCustomer(page);
     await signOut(page);
     await page.goto("/customer/dashboard");
-    await expect(page).toHaveURL(/\/customer\/login/, { timeout: 8000 });
+    await expect(page).toHaveURL(/toHaveURL(/\/login//, { timeout: 8000 });
   });
 });

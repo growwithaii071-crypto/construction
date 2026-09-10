@@ -266,7 +266,7 @@ test.describe("🧩 MCQ Modal — Unauthenticated User", () => {
     }
   });
 
-  test("'Login & Send' saves to localStorage and redirects to /customer/login", async ({ page }) => {
+  test("'Login & Send' saves to localStorage and redirects to /login", async ({ page }) => {
     await page.goto("/services");
     const getQuoteBtns = page.getByRole("button", { name: /get quote/i });
     const count = await getQuoteBtns.count();
@@ -293,8 +293,8 @@ test.describe("🧩 MCQ Modal — Unauthenticated User", () => {
       const loginSendBtn = page.getByRole("button", { name: /login.*send/i });
       if (await loginSendBtn.isVisible()) {
         await loginSendBtn.click();
-        // Should redirect to /customer/login
-        await expect(page).toHaveURL(/\/customer\/login/, { timeout: 5000 });
+        // Should redirect to /login
+        await expect(page).toHaveURL(/toHaveURL(/\/login//, { timeout: 5000 });
 
         // localStorage should have pendingServiceRequest
         const stored = await page.evaluate(() => localStorage.getItem("pendingServiceRequest"));

@@ -82,7 +82,7 @@ export function ContractorSidebar({ user, onClose }: ContractorSidebarProps) {
 
   function handleSignOut() {
     startSignOut(async () => {
-      await signOut({ callbackUrl: "/construction/login" });
+      await signOut({ callbackUrl: "/login" });
     });
   }
 

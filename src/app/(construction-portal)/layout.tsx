@@ -29,7 +29,7 @@ export default function ConstructionPortalLayout({ children }: { children: React
               ← Home
             </Link>
             <Link
-              href="/customer/login"
+              href="/login"
               className="flex items-center gap-1.5 text-sm font-semibold text-blue-400 border border-blue-400/30 bg-blue-400/10 hover:bg-blue-400/20 px-3 py-2 rounded-lg transition-colors"
             >
               <Building2 className="w-3.5 h-3.5" />
@@ -126,7 +126,7 @@ export default function ConstructionPortalLayout({ children }: { children: React
 
               {/* Below card links */}
               <div className="flex items-center justify-center gap-4 mt-5 text-sm text-white/40">
-                <Link href="/customer/login" className="hover:text-white/70 transition-colors">
+                <Link href="/login" className="hover:text-white/70 transition-colors">
                   Customer Login
                 </Link>
                 <span>·</span>
@@ -160,7 +160,7 @@ export default function ConstructionPortalLayout({ children }: { children: React
                 {[
                   { label: "Home", href: "/" },
                   { label: "Find Work", href: "/construction/register" },
-                  { label: "Customer Login", href: "/customer/login" },
+                  { label: "Sign In", href: "/login" },
                 ].map((l) => (
                   <Link key={l.label} href={l.href} className="block text-xs text-white/30 hover:text-white/60 transition-colors">{l.label}</Link>
                 ))}

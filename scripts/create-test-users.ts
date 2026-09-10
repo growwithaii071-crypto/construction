@@ -50,12 +50,12 @@ async function main() {
   console.log("👤 Customer");
   console.log("   Email   : customer@buildpro.com");
   console.log("   Password: Customer@123");
-  console.log("   URL     : http://localhost:3000/customer/login");
+  console.log("   URL     : http://localhost:3000/login");
   console.log("");
   console.log("🏗️  Contractor");
   console.log("   Email   : contractor@buildpro.com");
   console.log("   Password: Contractor@123");
-  console.log("   URL     : http://localhost:3000/construction/login");
+  console.log("   URL     : http://localhost:3000/login");
   console.log("─────────────────────────────────────────");
 }
 

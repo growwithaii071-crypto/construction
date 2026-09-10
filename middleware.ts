@@ -44,15 +44,7 @@ export default auth(function middleware(req: NextAuthRequest) {
     session?.error === "RefreshTokenExpired" ||
     session?.error === "RefreshTokenError"
   ) {
-    const role = (session?.user as { role?: string } | undefined)?.role;
-    let loginUrl: URL;
-    if (role === "CLIENT") {
-      loginUrl = new URL("/customer/login", req.url);
-    } else if (role === "CONTRACTOR") {
-      loginUrl = new URL("/construction/login", req.url);
-    } else {
-      loginUrl = new URL("/login", req.url);
-    }
+    const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("error", "SessionExpired");
     return NextResponse.redirect(loginUrl);
   }

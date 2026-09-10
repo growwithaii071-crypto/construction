@@ -495,11 +495,11 @@ export default async function AdminPage() {
             Sign up / Sign in for customers hiring contractors.
           </p>
           <Link
-            href="/customer/login"
+            href="/login"
             target="_blank"
             className="text-xs text-cyan-600 hover:text-cyan-700 font-semibold"
           >
-            Visit → /customer/login
+            Visit → /login
           </Link>
         </Card>
 
@@ -514,11 +514,11 @@ export default async function AdminPage() {
             Sign up / Sign in for construction companies.
           </p>
           <Link
-            href="/construction/login"
+            href="/login"
             target="_blank"
             className="text-xs text-orange-600 hover:text-orange-700 font-semibold"
           >
-            Visit → /construction/login
+            Visit → /login
           </Link>
         </Card>
       </div>

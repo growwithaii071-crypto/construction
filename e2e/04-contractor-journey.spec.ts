@@ -14,8 +14,8 @@ import { loginAsContractor, signOut } from "./helpers";
 // ─────────────────────────────────────────────────────────
 test.describe("🏗️ Contractor — Login", () => {
   test("can login with correct credentials", async ({ page }) => {
-    await page.goto("/construction/login");
-    await page.getByPlaceholder(/company@example.com/i).fill("contractor@buildpro.com");
+    await page.goto("/login");
+    await page.getByPlaceholder(/you@example.com/i).fill("contractor@buildpro.com");
     await page.getByPlaceholder(/enter your password/i).fill("Contractor@123");
     await page.getByRole("button", { name: /sign in/i }).click();
     await expect(page).toHaveURL(/\/construction\/dashboard/, { timeout: 10000 });
@@ -410,13 +410,13 @@ test.describe("🏗️ Contractor — Sign Out", () => {
   test("can sign out and is redirected to login page", async ({ page }) => {
     await loginAsContractor(page);
     await signOut(page);
-    await expect(page).toHaveURL(/\/construction\/login|\/login/, { timeout: 8000 });
+    await expect(page).toHaveURL(/\/login/|toHaveURL(/toHaveURL(/\/login/, { timeout: 8000 });
   });
 
   test("after sign out, /construction/dashboard requires login again", async ({ page }) => {
     await loginAsContractor(page);
     await signOut(page);
     await page.goto("/construction/dashboard");
-    await expect(page).toHaveURL(/\/construction\/login/, { timeout: 8000 });
+    await expect(page).toHaveURL(/\/constructiontoHaveURL(/toHaveURL(/\/login/, { timeout: 8000 });
   });
 });

@@ -124,7 +124,7 @@ export function ContractorRegisterForm() {
       const result = await contractorRegisterAction(data);
       if (result.success) {
         setSuccess("Company registered! Redirecting to sign in…");
-        setTimeout(() => router.push("/construction/login"), 2500);
+        setTimeout(() => router.push("/login"), 2500);
       } else {
         setError(result.message);
       }
@@ -353,7 +353,7 @@ export function ContractorRegisterForm() {
 
       <p className="text-center text-sm text-gray-500">
         Already registered?{" "}
-        <Link href="/construction/login" className="text-orange-600 hover:text-orange-700 font-semibold">Sign in</Link>
+        <Link href="/login" className="text-orange-600 hover:text-orange-700 font-semibold">Sign in</Link>
       </p>
       <p className="text-center text-xs text-gray-400">
         Are you a customer?{" "}

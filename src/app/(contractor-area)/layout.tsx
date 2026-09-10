@@ -6,7 +6,7 @@ import { ContractorTopbar } from "@/components/contractor/contractor-topbar";
 export default async function ContractorAreaLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 
-  if (!session?.user) redirect("/construction/login");
+  if (!session?.user) redirect("/login");
   if (session.user.role !== "CONTRACTOR") redirect("/dashboard");
 
   const user = { name: session.user.name, email: session.user.email };

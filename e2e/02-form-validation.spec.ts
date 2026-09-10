@@ -66,26 +66,29 @@ test.describe("📝 Customer Registration Form", () => {
     await expect(page.getByRole("link", { name: /sign in|already have/i })).toBeVisible();
   });
 
-  test("register link from /customer/login opens registration page", async ({ page }) => {
-    await page.goto("/customer/login");
-    await page.getByRole("link", { name: /create account|register|sign up/i }).click();
+  test("register link from /login opens client registration", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("link", { name: /register as client/i }).click();
     await expect(page).toHaveURL(/\/customer\/register/);
   });
 });
 
 // ─────────────────────────────────────────────────────────
-//  CUSTOMER LOGIN FORM
+//  UNIFIED LOGIN FORM
 // ─────────────────────────────────────────────────────────
-test.describe("🔐 Customer Login Form", () => {
+test.describe("🔐 Unified Login Form", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/customer/login");
+    await page.goto("/login");
   });
 
-  test("login page loads correctly", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: /sign in|log in|customer/i })).toBeVisible();
+  test("login page loads with Admin / Client / Contractor hint", async ({ page }) => {
+    await expect(page.getByRole("heading", { name: /sign in/i })).toBeVisible();
+    await expect(page.getByText(/admin/i).first()).toBeVisible();
+    await expect(page.getByText(/client/i).first()).toBeVisible();
+    await expect(page.getByText(/contractor/i).first()).toBeVisible();
     await expect(page.getByPlaceholder(/you@example.com/i)).toBeVisible();
     await expect(page.getByPlaceholder(/enter your password/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: /sign in|log in/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
   });
 
   test("shows error on completely empty submit", async ({ page }) => {
@@ -105,58 +108,18 @@ test.describe("🔐 Customer Login Form", () => {
     await expect(page.getByPlaceholder(/enter your password/i)).toHaveAttribute("type", "password");
   });
 
-  test("has link to registration page", async ({ page }) => {
-    await expect(page.getByRole("link", { name: /create account|register|sign up|don't have/i })).toBeVisible();
+  test("has Register as Client and Register as Contractor links", async ({ page }) => {
+    await expect(page.getByRole("link", { name: /register as client/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /register as contractor/i })).toBeVisible();
   });
 
-  test("shows page without header/footer overlap errors", async ({ page }) => {
-    // Page should render cleanly
-    await expect(page.locator("body")).toBeVisible();
-    const loginCard = page.locator("form");
-    await expect(loginCard).toBeVisible();
-  });
-});
-
-// ─────────────────────────────────────────────────────────
-//  CONTRACTOR LOGIN FORM
-// ─────────────────────────────────────────────────────────
-test.describe("🔐 Contractor Login Form", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/construction/login");
-  });
-
-  test("login page loads correctly", async ({ page }) => {
-    await expect(page.getByPlaceholder(/company@example.com/i)).toBeVisible();
-    await expect(page.getByPlaceholder(/enter your password/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: /sign in|log in/i })).toBeVisible();
-  });
-
-  test("shows error for empty form submit", async ({ page }) => {
-    await page.getByRole("button", { name: /sign in/i }).click();
-    const error = page.locator("p[class*='red'], .text-red-500, .text-destructive");
-    await expect(error.first()).toBeVisible({ timeout: 3000 });
-  });
-
-  test("shows error for wrong credentials", async ({ page }) => {
-    await page.getByPlaceholder(/company@example.com/i).fill("fake@contractor.com");
-    await page.getByPlaceholder(/enter your password/i).fill("WrongPass@123");
-    await page.getByRole("button", { name: /sign in/i }).click();
-    await expect(page.getByText(/invalid|incorrect|credentials/i)).toBeVisible({ timeout: 8000 });
-  });
-
-  test("has a link to contractor registration page", async ({ page }) => {
-    await expect(page.getByRole("link", { name: /register|create|sign up/i })).toBeVisible();
-  });
-
-  test("page does not have ERR_TOO_MANY_REDIRECTS (no infinite loop)", async ({ page }) => {
+  test("page does not have ERR_TOO_MANY_REDIRECTS", async ({ page }) => {
     let redirectCount = 0;
     page.on("response", (res) => {
-      if (res.status() === 301 || res.status() === 302 || res.status() === 307) {
-        redirectCount++;
-      }
+      if ([301, 302, 307].includes(res.status())) redirectCount++;
     });
-    await page.goto("/construction/login");
-    expect(redirectCount).toBeLessThan(5); // Sanity check — no redirect loop
+    await page.goto("/login");
+    expect(redirectCount).toBeLessThan(5);
   });
 });
 
@@ -206,26 +169,5 @@ test.describe("📝 Contractor Registration Form", () => {
       await page.getByRole("button", { name: /register|create|sign up/i }).click();
       await expect(page.getByText(/match|confirm/i)).toBeVisible({ timeout: 3000 });
     }
-  });
-});
-
-// ─────────────────────────────────────────────────────────
-//  ADMIN LOGIN FORM
-// ─────────────────────────────────────────────────────────
-test.describe("🔐 Admin Login Form", () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto("/login");
-  });
-
-  test("admin login page loads", async ({ page }) => {
-    await expect(page.locator("input[type='email'], input[name='email']").first()).toBeVisible();
-    await expect(page.locator("input[type='password']").first()).toBeVisible();
-  });
-
-  test("shows error for wrong admin credentials", async ({ page }) => {
-    await page.locator("input[type='email'], input[name='email']").first().fill("notadmin@test.com");
-    await page.locator("input[type='password']").first().fill("WrongPass@123");
-    await page.getByRole("button", { name: /sign in|log in/i }).first().click();
-    await expect(page.getByText(/invalid|incorrect|credentials/i)).toBeVisible({ timeout: 8000 });
   });
 });

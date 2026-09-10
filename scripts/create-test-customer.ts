@@ -28,7 +28,7 @@ async function main() {
   console.log("✅ Test customer created!");
   console.log("📧 Email:", email);
   console.log("🔑 Password:", password);
-  console.log("🔗 Login: http://localhost:3000/customer/login");
+  console.log("🔗 Login: http://localhost:3000/login");
 }
 
 main().catch(console.error).finally(() => prisma.$disconnect());

@@ -1,15 +1,15 @@
-import { Suspense } from "react";
-import type { Metadata } from "next";
-import { ContractorLoginForm } from "@/components/auth/contractor-login-form";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Contractor Sign In — BuildPro",
-};
-
-export default function ConstructionLoginPage() {
-  return (
-    <Suspense fallback={<div className="h-96 animate-pulse bg-gray-50 rounded-xl" />}>
-      <ContractorLoginForm />
-    </Suspense>
-  );
+/** Legacy URL — all logins now use the unified /login page */
+export default async function ContractorLoginRedirect({
+  searchParams,
+}: {
+  searchParams: Promise<{ callbackUrl?: string; error?: string }>;
+}) {
+  const params = await searchParams;
+  const q = new URLSearchParams();
+  if (params.callbackUrl) q.set("callbackUrl", params.callbackUrl);
+  if (params.error) q.set("error", params.error);
+  const qs = q.toString();
+  redirect(qs ? `/login?${qs}` : "/login");
 }

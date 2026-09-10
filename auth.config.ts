@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import { ROLE_HOME } from "@/lib/role-home";
 
 /**
  * Edge-compatible auth config used by middleware.
@@ -15,24 +16,11 @@ const AUTH_ROUTES = [
   "/forgot-password",
   "/reset-password",
   "/verify-email",
-  "/customer/login",
+  "/customer/login", // redirects → /login
   "/customer/register",
-  "/construction/login",
+  "/construction/login", // redirects → /login
   "/construction/register",
 ];
-
-// After login, redirect each role to their home
-const ROLE_HOME: Record<string, string> = {
-  CLIENT: "/customer/dashboard",
-  CONTRACTOR: "/construction/dashboard",
-  ADMIN: "/dashboard",
-  SUPER_ADMIN: "/dashboard",
-  PROJECT_MANAGER: "/dashboard",
-  SITE_ENGINEER: "/dashboard",
-  ACCOUNTANT: "/dashboard",
-  FOREMAN: "/dashboard",
-  VIEWER: "/dashboard",
-};
 
 export const authConfig: NextAuthConfig = {
   secret: process.env.AUTH_SECRET,
@@ -89,11 +77,11 @@ export const authConfig: NextAuthConfig = {
       // ── Public pages are always accessible ──
       if (isPublic) return true;
 
-      // ── Not logged in → redirect to the correct login page ──
+      // ── Not logged in → single unified login page ──
       if (!isLoggedIn) {
-        if (isContractorArea) return Response.redirect(new URL("/construction/login", nextUrl));
-        if (isCustomerArea) return Response.redirect(new URL("/customer/login", nextUrl));
-        return Response.redirect(new URL("/login", nextUrl));
+        const loginUrl = new URL("/login", nextUrl);
+        loginUrl.searchParams.set("callbackUrl", pathname);
+        return Response.redirect(loginUrl);
       }
 
       // ── Logged in — enforce role boundaries ──

@@ -499,7 +499,7 @@ export default async function LandingPage() {
                   Register as contractor
                 </Link>
                 <Link
-                  href="/construction/login"
+                  href="/login"
                   className="flex items-center justify-center gap-2 border border-white/20 text-white/80 hover:text-white font-semibold px-7 py-3.5 rounded-full text-sm hover:bg-white/10 transition-colors"
                 >
                   Already a member? Sign in
@@ -719,7 +719,7 @@ export default async function LandingPage() {
               </div>
               <p className="mt-5 text-xs text-white/40">
                 Already have an account?{" "}
-                <Link href="/customer/login" className="text-white/70 underline hover:text-white transition-colors">Sign in here</Link>
+                <Link href="/login" className="text-white/70 underline hover:text-white transition-colors">Sign in here</Link>
               </p>
             </div>
           </div>
@@ -768,7 +768,7 @@ export default async function LandingPage() {
                   { label: "Post a Job", href: "/customer/register" },
                   { label: "How it Works", href: "#how-it-works" },
                   { label: "Browse Services", href: "/services" },
-                  { label: "Customer Login", href: "/customer/login" },
+                  { label: "Sign In", href: "/login" },
                   { label: "Create Account", href: "/customer/register" },
                 ].map((l) => (
                   <li key={l.label}>
@@ -784,7 +784,7 @@ export default async function LandingPage() {
               <ul className="space-y-3">
                 {[
                   { label: "Find Work", href: "/construction/register" },
-                  { label: "Contractor Login", href: "/construction/login" },
+                  { label: "Sign In", href: "/login" },
                   { label: "Register Company", href: "/construction/register" },
                   { label: "Add Services", href: "/construction/services" },
                   { label: "View Requests", href: "/construction/requests" },

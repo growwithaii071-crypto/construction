@@ -55,7 +55,7 @@ export function CustomerSidebar({ user, onClose }: CustomerSidebarProps) {
 
   function handleSignOut() {
     startSignOut(async () => {
-      await signOut({ callbackUrl: "/customer/login" });
+      await signOut({ callbackUrl: "/login" });
     });
   }
 

@@ -20,7 +20,7 @@ export function CustomerHeader({ user }: CustomerHeaderProps) {
 
   function handleSignOut() {
     startSignOut(async () => {
-      await signOut({ callbackUrl: "/customer/login" });
+      await signOut({ callbackUrl: "/login" });
     });
   }
 

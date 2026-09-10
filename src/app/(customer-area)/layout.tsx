@@ -6,7 +6,7 @@ import { CustomerTopbar } from "@/components/customer/customer-topbar";
 export default async function CustomerAreaLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
 
-  if (!session?.user) redirect("/customer/login");
+  if (!session?.user) redirect("/login");
   if (session.user.role !== "CLIENT") redirect("/dashboard");
 
   const user = { name: session.user.name, email: session.user.email };
