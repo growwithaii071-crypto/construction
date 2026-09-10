@@ -5,7 +5,16 @@ import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, AlertCircle, LogIn } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  AlertCircle,
+  LogIn,
+  Shield,
+  Users,
+  HardHat,
+} from "lucide-react";
 import { signIn, getSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
@@ -49,17 +58,17 @@ export function LoginForm() {
         return;
       }
 
-      // Read role from fresh session and send user to the right dashboard
       const session = await getSession();
       const role = (session?.user as { role?: string } | undefined)?.role;
       const home = getRoleHome(role);
 
-      // Honor safe callback only for clients returning to public flow (e.g. /services)
       let dest = home;
       if (callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")) {
         const isClientCallback =
           role === "CLIENT" &&
-          (callbackUrl === "/services" || callbackUrl.startsWith("/services?") || callbackUrl.startsWith("/customer/"));
+          (callbackUrl === "/services" ||
+            callbackUrl.startsWith("/services?") ||
+            callbackUrl.startsWith("/customer/"));
         if (isClientCallback) dest = callbackUrl;
       }
 
@@ -68,48 +77,58 @@ export function LoginForm() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Sign in</h2>
-        <p className="mt-1.5 text-sm text-gray-500">
-          One login for Admin, Client &amp; Contractor
+    <div className="space-y-6">
+      <div className="text-center sm:text-left">
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Welcome back</h1>
+        <p className="mt-1.5 text-sm text-slate-500">
+          Sign in with one account — Admin, Client or Contractor
         </p>
       </div>
 
-      {/* Role hint chips */}
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {[
-          { label: "Admin", hint: "admin@…" },
-          { label: "Client", hint: "customer@…" },
-          { label: "Contractor", hint: "contractor@…" },
-        ].map((r) => (
-          <span
-            key={r.label}
-            className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-600"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-orange-500" />
-            {r.label}
-          </span>
-        ))}
+          { label: "Admin", icon: Shield, color: "text-slate-700 bg-slate-100" },
+          { label: "Client", icon: Users, color: "text-violet-700 bg-violet-50" },
+          { label: "Contractor", icon: HardHat, color: "text-orange-700 bg-orange-50" },
+        ].map((r) => {
+          const Icon = r.icon;
+          return (
+            <div
+              key={r.label}
+              className={cn(
+                "flex flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-center",
+                r.color
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              <span className="text-[11px] font-semibold">{r.label}</span>
+            </div>
+          );
+        })}
       </div>
 
       {error && (
-        <div className="flex items-start gap-3 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email address</Label>
+          <Label htmlFor="email" className="text-slate-700">
+            Email address
+          </Label>
           <Input
             id="email"
             type="email"
             placeholder="you@example.com"
             autoComplete="email"
             disabled={isPending}
-            className={cn(errors.email && "border-red-400 focus-visible:ring-red-400")}
+            className={cn(
+              "h-11 rounded-xl border-slate-200 bg-slate-50/50 focus-visible:ring-violet-500",
+              errors.email && "border-red-400 focus-visible:ring-red-400"
+            )}
             {...register("email")}
           />
           {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
@@ -117,10 +136,12 @@ export function LoginForm() {
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password" className="text-slate-700">
+              Password
+            </Label>
             <Link
               href="/forgot-password"
-              className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+              className="text-xs font-medium text-violet-600 hover:text-violet-700"
             >
               Forgot password?
             </Link>
@@ -133,7 +154,7 @@ export function LoginForm() {
               autoComplete="current-password"
               disabled={isPending}
               className={cn(
-                "pr-10",
+                "h-11 rounded-xl border-slate-200 bg-slate-50/50 pr-10 focus-visible:ring-violet-500",
                 errors.password && "border-red-400 focus-visible:ring-red-400"
               )}
               {...register("password")}
@@ -141,10 +162,10 @@ export function LoginForm() {
             <button
               type="button"
               onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
-              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
           {errors.password && <p className="text-xs text-red-500">{errors.password.message}</p>}
@@ -153,32 +174,32 @@ export function LoginForm() {
         <Button
           type="submit"
           disabled={isPending}
-          className="w-full bg-[#1e3a5f] hover:bg-[#162e4d] text-white h-11 font-semibold"
+          className="h-11 w-full rounded-xl bg-violet-600 font-semibold text-white hover:bg-violet-700"
         >
           {isPending ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Signing in...
             </>
           ) : (
             <>
-              <LogIn className="w-4 h-4 mr-2" />
+              <LogIn className="mr-2 h-4 w-4" />
               Sign In
             </>
           )}
         </Button>
       </form>
 
-      <div className="rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-center space-y-2">
-        <p className="text-sm text-gray-600 font-medium">New here? Create an account</p>
-        <div className="flex flex-col sm:flex-row gap-2 justify-center">
+      <div className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-3.5 text-center">
+        <p className="mb-2 text-sm font-medium text-slate-600">New to BuildPro?</p>
+        <div className="flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
           <Link
             href="/customer/register"
             className="text-sm font-semibold text-violet-600 hover:text-violet-700"
           >
             Register as Client
           </Link>
-          <span className="hidden sm:inline text-gray-300">·</span>
+          <span className="hidden text-slate-300 sm:inline">·</span>
           <Link
             href="/construction/register"
             className="text-sm font-semibold text-orange-600 hover:text-orange-700"
