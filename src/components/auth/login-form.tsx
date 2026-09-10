@@ -5,16 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import {
-  Eye,
-  EyeOff,
-  Loader2,
-  AlertCircle,
-  LogIn,
-  Shield,
-  Users,
-  HardHat,
-} from "lucide-react";
+import { Eye, EyeOff, Loader2, AlertCircle, LogIn } from "lucide-react";
 import { signIn, getSession } from "next-auth/react";
 
 import { Button } from "@/components/ui/button";
@@ -80,31 +71,7 @@ export function LoginForm() {
     <div className="space-y-6">
       <div className="text-center sm:text-left">
         <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">Welcome back</h1>
-        <p className="mt-1.5 text-sm text-slate-500">
-          Sign in with one account — Admin, Client or Contractor
-        </p>
-      </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { label: "Admin", icon: Shield, color: "text-slate-700 bg-slate-100" },
-          { label: "Client", icon: Users, color: "text-violet-700 bg-violet-50" },
-          { label: "Contractor", icon: HardHat, color: "text-orange-700 bg-orange-50" },
-        ].map((r) => {
-          const Icon = r.icon;
-          return (
-            <div
-              key={r.label}
-              className={cn(
-                "flex flex-col items-center gap-1 rounded-xl px-2 py-2.5 text-center",
-                r.color
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              <span className="text-[11px] font-semibold">{r.label}</span>
-            </div>
-          );
-        })}
+        <p className="mt-1.5 text-sm text-slate-500">Sign in to your BuildPro account</p>
       </div>
 
       {error && (
