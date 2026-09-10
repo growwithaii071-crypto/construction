@@ -15,6 +15,8 @@ import {
   Star,
   Home,
   ChevronRight,
+  MessageCircle,
+  Bell,
 } from "lucide-react";
 
 const NAV_SECTIONS = [
@@ -22,6 +24,7 @@ const NAV_SECTIONS = [
     label: "Overview",
     items: [
       { href: "/customer/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/customer/notifications", label: "Notifications", icon: Bell },
     ],
   },
   {
@@ -29,6 +32,7 @@ const NAV_SECTIONS = [
     items: [
       { href: "/customer/services", label: "Browse Services", icon: Wrench },
       { href: "/customer/requests", label: "My Requests", icon: ClipboardList },
+      { href: "/customer/messages", label: "Messages", icon: MessageCircle },
     ],
   },
   {
@@ -67,7 +71,7 @@ export function CustomerSidebar({ user, onClose }: CustomerSidebarProps) {
     .toUpperCase() ?? "C";
 
   return (
-    <div className="flex flex-col h-full w-64 bg-white border-r border-gray-100">
+    <div className="flex h-full min-h-0 w-64 flex-col bg-white border-r border-gray-100">
       {/* Logo */}
       <div className="flex items-center justify-between h-16 px-5 border-b border-gray-100 shrink-0">
         <Link href="/customer/dashboard" className="flex items-center gap-2.5">
@@ -87,7 +91,7 @@ export function CustomerSidebar({ user, onClose }: CustomerSidebarProps) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+      <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 space-y-6">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-2">

@@ -11,7 +11,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
     <TooltipProvider>
       <div className="flex h-screen bg-gray-50 overflow-hidden">
         {/* Desktop Sidebar */}
-        <aside className="hidden lg:flex flex-shrink-0">
+        <aside className="hidden h-screen shrink-0 overflow-hidden lg:flex">
           <Sidebar />
         </aside>
 

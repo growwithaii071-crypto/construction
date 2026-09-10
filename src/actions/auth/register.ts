@@ -4,6 +4,8 @@ import { hash } from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { RegisterSchema } from "@/schemas/auth";
 import { UserRole } from "@/generated/prisma";
+import { sendWelcomeEmail } from "@/lib/email";
+import { notifyAdmins } from "@/lib/notifications";
 
 interface ActionResult {
   success: boolean;
@@ -39,6 +41,15 @@ export async function registerAction(formData: unknown): Promise<ActionResult> {
         isActive: true,
         emailVerified: new Date(),
       },
+    });
+
+    void sendWelcomeEmail(name, email).catch(() => {});
+
+    void notifyAdmins({
+      title: "New client registered",
+      message: `${name} (${email}) joined as a client.`,
+      type: "SUCCESS",
+      link: "/clients",
     });
 
     return {

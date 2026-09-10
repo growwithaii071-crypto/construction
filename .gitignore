@@ -51,3 +51,6 @@ src/generated/
 /src/generated/prisma
 playwright-report/
 test-results/
+
+# uploaded chat attachments
+/public/uploads

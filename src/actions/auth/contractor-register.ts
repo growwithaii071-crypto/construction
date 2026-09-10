@@ -4,6 +4,8 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { UserRole } from "@/generated/prisma";
+import { sendWelcomeEmail } from "@/lib/email";
+import { notifyAdmins } from "@/lib/notifications";
 
 const ContractorRegisterSchema = z
   .object({
@@ -45,9 +47,11 @@ export async function contractorRegisterAction(formData: unknown) {
 
     const hashedPassword = await hash(password, 12);
 
+    const displayName = `${name} — ${companyName}`;
+
     await prisma.user.create({
       data: {
-        name: `${name} — ${companyName}`,
+        name: displayName,
         email,
         password: hashedPassword,
         phone,
@@ -57,6 +61,15 @@ export async function contractorRegisterAction(formData: unknown) {
         // store extra info in avatar field temporarily as JSON string
         avatar: JSON.stringify({ companyName, specialization, licenseNumber }),
       },
+    });
+
+    void sendWelcomeEmail(displayName, email).catch(() => {});
+
+    void notifyAdmins({
+      title: "New contractor registered",
+      message: `${displayName} (${email}) joined as a contractor.`,
+      type: "SUCCESS",
+      link: "/contractors",
     });
 
     return {

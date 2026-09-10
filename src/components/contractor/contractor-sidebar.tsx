@@ -21,6 +21,8 @@ import {
   BarChart3,
   FileText,
   Users,
+  MessageCircle,
+  Bell,
 } from "lucide-react";
 
 const NAV_SECTIONS = [
@@ -28,6 +30,7 @@ const NAV_SECTIONS = [
     label: "Overview",
     items: [
       { href: "/construction/dashboard", label: "Dashboard", icon: LayoutDashboard },
+      { href: "/construction/notifications", label: "Notifications", icon: Bell },
     ],
   },
   {
@@ -41,6 +44,7 @@ const NAV_SECTIONS = [
     label: "Requests",
     items: [
       { href: "/construction/requests", label: "Customer Requests", icon: ClipboardList },
+      { href: "/construction/messages", label: "Messages", icon: MessageCircle },
       { href: "/construction/reviews", label: "Reviews", icon: Star },
     ],
   },
@@ -94,7 +98,7 @@ export function ContractorSidebar({ user, onClose }: ContractorSidebarProps) {
     .toUpperCase() ?? "C";
 
   return (
-    <div className="flex flex-col h-full w-64 bg-white border-r border-gray-100">
+    <div className="flex h-full min-h-0 w-64 flex-col bg-white border-r border-gray-100">
       {/* Logo */}
       <div className="flex items-center justify-between h-16 px-5 border-b border-gray-100 shrink-0">
         <Link href="/construction/dashboard" className="flex items-center gap-2.5">
@@ -114,7 +118,7 @@ export function ContractorSidebar({ user, onClose }: ContractorSidebarProps) {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+      <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4 space-y-5">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-1.5">

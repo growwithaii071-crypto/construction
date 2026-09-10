@@ -6,15 +6,38 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, ClipboardList, Calendar, User, Cloud } from "lucide-react";
 import { format } from "date-fns";
+import { AdminSearch } from "@/components/admin/admin-search";
+import { CsvExportButton } from "@/components/admin/csv-export-button";
 import type { Metadata } from "next";
+import type { Prisma } from "@/generated/prisma";
 
 export const metadata: Metadata = { title: "Site Reports" };
 
-export default async function SiteReportsPage() {
+export default async function SiteReportsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   await requireAuth();
+  const params = await searchParams;
+  const q = (params.q ?? "").trim();
+
+  const where: Prisma.SiteReportWhereInput = q
+    ? {
+        OR: [
+          { summary: { contains: q, mode: "insensitive" } },
+          { weather: { contains: q, mode: "insensitive" } },
+          { weatherCondition: { contains: q, mode: "insensitive" } },
+          { project: { name: { contains: q, mode: "insensitive" } } },
+          { project: { code: { contains: q, mode: "insensitive" } } },
+          { reporter: { name: { contains: q, mode: "insensitive" } } },
+        ],
+      }
+    : {};
 
   const reports = await prisma.siteReport
     .findMany({
+      where,
       orderBy: { reportDate: "desc" },
       include: {
         project: { select: { id: true, name: true, code: true } },
@@ -37,15 +60,28 @@ export default async function SiteReportsPage() {
         </Button>
       </div>
 
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <AdminSearch
+          basePath="/site-reports"
+          initialQuery={q}
+          placeholder="Search project, reporter, summary…"
+        />
+        <CsvExportButton resource="site-reports" query={q} />
+      </div>
+
       {reports.length === 0 ? (
         <div className="text-center py-20">
           <ClipboardList className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-          <p className="text-gray-500 font-medium">No reports yet</p>
-          <Button className="mt-6 bg-orange-500 hover:bg-orange-600" asChild>
-            <Link href="/site-reports/new">
-              <Plus className="w-4 h-4 mr-2" /> Submit Report
-            </Link>
-          </Button>
+          <p className="text-gray-500 font-medium">
+            {q ? "No reports match your search" : "No reports yet"}
+          </p>
+          {!q && (
+            <Button className="mt-6 bg-orange-500 hover:bg-orange-600" asChild>
+              <Link href="/site-reports/new">
+                <Plus className="w-4 h-4 mr-2" /> Submit Report
+              </Link>
+            </Button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">

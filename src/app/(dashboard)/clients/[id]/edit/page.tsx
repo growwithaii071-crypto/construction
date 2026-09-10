@@ -2,27 +2,44 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
-import { ClientForm } from "@/components/clients/client-form";
-import { Button } from "@/components/ui/button";
+import { UserRole } from "@/generated/prisma";
+import { EditClientProfileForm } from "@/components/admin/edit-client-profile-form";
 import { ArrowLeft } from "lucide-react";
+import type { Metadata } from "next";
 
-export default async function EditClientPage({ params }: { params: Promise<{ id: string }> }) {
-  await requireAuth();
+export const metadata: Metadata = { title: "Edit Client Profile" };
+
+export default async function EditClientProfilePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  await requireAuth([UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.PROJECT_MANAGER]);
   const { id } = await params;
-  const client = await prisma.client.findUnique({ where: { id } }).catch(() => null);
+
+  const client = await prisma.user.findFirst({
+    where: { id, role: UserRole.CLIENT },
+    select: { id: true, name: true, email: true, phone: true, isActive: true },
+  });
+
   if (!client) notFound();
 
   return (
-    <div className="p-4 lg:p-6 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href={`/clients/${id}`}>
-            <ArrowLeft className="w-4 h-4" />
-          </Link>
-        </Button>
-        <h1 className="text-2xl font-bold text-gray-900">Edit Client</h1>
+    <div className="space-y-6 p-4 lg:p-6">
+      <div className="flex items-center gap-3">
+        <Link
+          href="/clients"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </Link>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Edit client profile</h1>
+          <p className="text-sm text-slate-500">{client.email}</p>
+        </div>
       </div>
-      <ClientForm client={client} />
+
+      <EditClientProfileForm client={client} />
     </div>
   );
 }

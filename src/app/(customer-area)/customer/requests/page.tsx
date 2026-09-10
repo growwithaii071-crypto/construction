@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { ClipboardList, Clock, CheckCircle2, XCircle, TrendingUp, Wrench, Phone, Mail } from "lucide-react";
+import { ClipboardList, Clock, CheckCircle2, XCircle, TrendingUp, Wrench, Phone, Mail, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
@@ -165,19 +165,35 @@ export default async function CustomerRequestsPage() {
                   </div>
                 </div>
 
-                {/* Status indicator */}
-                <div className={cn(
-                  "shrink-0 flex flex-col items-center justify-center w-20 h-20 rounded-2xl border",
-                  STATUS_STYLES[req.status]
-                )}>
-                  {req.status === "PENDING" && <Clock className="w-6 h-6 mb-1" />}
-                  {req.status === "ACCEPTED" && <CheckCircle2 className="w-6 h-6 mb-1" />}
-                  {req.status === "IN_PROGRESS" && <TrendingUp className="w-6 h-6 mb-1" />}
-                  {req.status === "COMPLETED" && <CheckCircle2 className="w-6 h-6 mb-1" />}
-                  {req.status === "REJECTED" && <XCircle className="w-6 h-6 mb-1" />}
-                  <p className="text-[10px] font-bold text-center leading-tight px-1">
-                    {STATUS_LABELS[req.status]}
-                  </p>
+                {/* Status + Message */}
+                <div className="shrink-0 flex flex-col items-center gap-2">
+                  <div className={cn(
+                    "flex flex-col items-center justify-center w-20 h-20 rounded-2xl border",
+                    STATUS_STYLES[req.status]
+                  )}>
+                    {req.status === "PENDING" && <Clock className="w-6 h-6 mb-1" />}
+                    {req.status === "ACCEPTED" && <CheckCircle2 className="w-6 h-6 mb-1" />}
+                    {req.status === "IN_PROGRESS" && <TrendingUp className="w-6 h-6 mb-1" />}
+                    {req.status === "COMPLETED" && <CheckCircle2 className="w-6 h-6 mb-1" />}
+                    {req.status === "REJECTED" && <XCircle className="w-6 h-6 mb-1" />}
+                    <p className="text-[10px] font-bold text-center leading-tight px-1">
+                      {STATUS_LABELS[req.status]}
+                    </p>
+                  </div>
+                  {(req.status === "ACCEPTED" || req.status === "IN_PROGRESS" || req.status === "COMPLETED") && (
+                    <Link
+                      href={`/customer/messages/${req.id}`}
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-700"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" />
+                      Message
+                    </Link>
+                  )}
+                  {req.status === "PENDING" && (
+                    <p className="max-w-20 text-center text-[10px] leading-tight text-gray-400">
+                      Chat unlocks after accept
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Menu, Bell, ChevronDown, User, Settings, LogOut, Zap } from "lucide-react";
+import { Menu, ChevronDown, User, Settings, LogOut, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -19,6 +19,7 @@ import { UserRole } from "@/generated/prisma";
 import { Sidebar } from "./sidebar";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 const ROLE_BADGE_COLORS: Record<string, string> = {
   SUPER_ADMIN: "bg-red-100 text-red-700",
@@ -43,8 +44,13 @@ const PAGE_TITLES: Record<string, string> = {
   "/invoices": "Invoices",
   "/expenses": "Expenses",
   "/users": "Team Members",
+  "/roles": "Roles",
   "/settings": "Settings",
+  "/settings/email": "Email / SMTP",
+  "/settings/email-templates": "Email Templates",
   "/admin": "Admin Panel",
+  "/admin/services": "Services",
+  "/notifications": "Notifications",
 };
 
 function getPageTitle(pathname: string): string {
@@ -107,15 +113,7 @@ export function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-1.5">
-          {/* Notifications */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-9 h-9 relative text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-          >
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-orange-500 rounded-full ring-2 ring-white" />
-          </Button>
+          <NotificationBell allHref="/notifications" />
 
           <div className="w-px h-6 bg-slate-200 mx-1" />
 
@@ -182,7 +180,7 @@ export function Header() {
 
       {/* Mobile Sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="p-0 w-64 border-0">
+        <SheetContent side="left" className="h-full w-64 gap-0 overflow-hidden border-0 p-0">
           <Sidebar onClose={() => setSidebarOpen(false)} />
         </SheetContent>
       </Sheet>

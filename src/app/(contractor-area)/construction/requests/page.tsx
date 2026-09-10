@@ -1,7 +1,8 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
+import Link from "next/link";
 import { updateRequestStatusAction } from "@/actions/services/update-request";
-import { ClipboardList, CheckCircle2, XCircle, PlayCircle } from "lucide-react";
+import { ClipboardList, CheckCircle2, XCircle, PlayCircle, MessageCircle } from "lucide-react";
 import { ServiceRequestStatus } from "@/generated/prisma";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -96,38 +97,44 @@ export default async function ContractorRequestsPage() {
                 </div>
 
                 {/* Actions */}
-                {req.status === "PENDING" && (
-                  <div className="flex sm:flex-col gap-2 shrink-0">
-                    <form action={updateRequestStatusAction.bind(null, req.id, ServiceRequestStatus.ACCEPTED)}>
-                      <button type="submit" className="flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors w-full justify-center">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Accept
-                      </button>
-                    </form>
-                    <form action={updateRequestStatusAction.bind(null, req.id, ServiceRequestStatus.REJECTED)}>
-                      <button type="submit" className="flex items-center gap-1.5 border border-red-200 text-red-500 hover:bg-red-50 text-xs font-semibold px-3 py-2 rounded-lg transition-colors w-full justify-center">
-                        <XCircle className="w-3.5 h-3.5" /> Reject
-                      </button>
-                    </form>
-                  </div>
-                )}
-                {req.status === "ACCEPTED" && (
-                  <div className="flex sm:flex-col gap-2 shrink-0">
+                <div className="flex sm:flex-col gap-2 shrink-0">
+                  {req.status === "PENDING" && (
+                    <>
+                      <form action={updateRequestStatusAction.bind(null, req.id, ServiceRequestStatus.ACCEPTED)}>
+                        <button type="submit" className="flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors w-full justify-center">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> Accept
+                        </button>
+                      </form>
+                      <form action={updateRequestStatusAction.bind(null, req.id, ServiceRequestStatus.REJECTED)}>
+                        <button type="submit" className="flex items-center gap-1.5 border border-red-200 text-red-500 hover:bg-red-50 text-xs font-semibold px-3 py-2 rounded-lg transition-colors w-full justify-center">
+                          <XCircle className="w-3.5 h-3.5" /> Reject
+                        </button>
+                      </form>
+                    </>
+                  )}
+                  {req.status === "ACCEPTED" && (
                     <form action={updateRequestStatusAction.bind(null, req.id, ServiceRequestStatus.IN_PROGRESS)}>
                       <button type="submit" className="flex items-center gap-1.5 bg-purple-500 hover:bg-purple-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors w-full justify-center">
                         <PlayCircle className="w-3.5 h-3.5" /> Start Work
                       </button>
                     </form>
-                  </div>
-                )}
-                {req.status === "IN_PROGRESS" && (
-                  <div className="flex sm:flex-col gap-2 shrink-0">
+                  )}
+                  {req.status === "IN_PROGRESS" && (
                     <form action={updateRequestStatusAction.bind(null, req.id, ServiceRequestStatus.COMPLETED)}>
                       <button type="submit" className="flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors w-full justify-center">
                         <CheckCircle2 className="w-3.5 h-3.5" /> Mark Complete
                       </button>
                     </form>
-                  </div>
-                )}
+                  )}
+                  {(req.status === "ACCEPTED" || req.status === "IN_PROGRESS" || req.status === "COMPLETED") && (
+                    <Link
+                      href={`/construction/messages/${req.id}`}
+                      className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors w-full justify-center"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5" /> Message
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           ))}

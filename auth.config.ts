@@ -60,6 +60,10 @@ export const authConfig: NextAuthConfig = {
           pathname.startsWith("/admin") ||
           pathname.startsWith("/projects") ||
           pathname.startsWith("/users") ||
+          pathname.startsWith("/roles") ||
+          pathname.startsWith("/notifications") ||
+          pathname.startsWith("/clients") ||
+          pathname.startsWith("/contractors") ||
           pathname.startsWith("/settings")) &&
         !isAuthRoute;
 

@@ -7,17 +7,18 @@ import bcryptjs from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
 import { UserRole } from "@/generated/prisma";
+import { STAFF_BASE_ROLES } from "@/lib/staff-roles";
 
 const CreateUserSchema = z.object({
   name: z.string().min(2, "Name required"),
   email: z.string().email("Valid email required"),
   password: z.string().min(8, "Password must be 8+ chars"),
-  role: z.nativeEnum(UserRole),
+  staffRoleId: z.string().min(1, "Select a role"),
   phone: z.string().optional(),
 });
 
 export async function createUserAction(_prevState: unknown, formData: FormData) {
-  await requireAuth();
+  await requireAuth([UserRole.ADMIN, UserRole.SUPER_ADMIN]);
   const raw = Object.fromEntries(formData.entries());
   const parsed = CreateUserSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.issues[0].message };
@@ -26,6 +27,14 @@ export async function createUserAction(_prevState: unknown, formData: FormData) 
   const exists = await prisma.user.findUnique({ where: { email: d.email } });
   if (exists) return { error: "Email already registered" };
 
+  const staffRole = await prisma.staffRole.findFirst({
+    where: { id: d.staffRoleId, isActive: true },
+  });
+  if (!staffRole) return { error: "Selected role not found or inactive." };
+  if (!STAFF_BASE_ROLES.includes(staffRole.baseRole)) {
+    return { error: "Invalid role access level." };
+  }
+
   const hashedPassword = await bcryptjs.hash(d.password, 12);
   try {
     await prisma.user.create({
@@ -33,13 +42,15 @@ export async function createUserAction(_prevState: unknown, formData: FormData) 
         name: d.name,
         email: d.email,
         password: hashedPassword,
-        role: d.role,
-        phone: d.phone,
+        role: staffRole.baseRole,
+        staffRoleId: staffRole.id,
+        phone: d.phone || null,
         isActive: true,
         emailVerified: new Date(),
       },
     });
     revalidatePath("/users");
+    revalidatePath("/roles");
     redirect("/users");
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "Failed to create user";
@@ -66,7 +77,7 @@ export async function updateProfileAction(id: string, formData: FormData) {
 const UpdateUserSchema = z.object({
   name: z.string().min(2, "Name required"),
   email: z.string().email("Valid email required"),
-  role: z.nativeEnum(UserRole),
+  staffRoleId: z.string().min(1, "Select a role"),
   phone: z.string().optional(),
 });
 
@@ -80,10 +91,21 @@ export async function updateUserAction(id: string, _prevState: unknown, formData
   const conflict = await prisma.user.findFirst({ where: { email: d.email, NOT: { id } } });
   if (conflict) return { error: "Email already in use by another user" };
 
+  const staffRole = await prisma.staffRole.findFirst({
+    where: { id: d.staffRoleId, isActive: true },
+  });
+  if (!staffRole) return { error: "Selected role not found or inactive." };
+
   try {
     await prisma.user.update({
       where: { id },
-      data: { name: d.name, email: d.email, role: d.role, phone: d.phone ?? null },
+      data: {
+        name: d.name,
+        email: d.email,
+        phone: d.phone ?? null,
+        role: staffRole.baseRole,
+        staffRoleId: staffRole.id,
+      },
     });
     revalidatePath("/users");
     redirect("/users");

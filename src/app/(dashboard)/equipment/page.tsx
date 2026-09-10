@@ -3,7 +3,10 @@ import { requireAuth } from "@/lib/auth-utils";
 import { Card } from "@/components/ui/card";
 import { Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AdminSearch } from "@/components/admin/admin-search";
+import { CsvExportButton } from "@/components/admin/csv-export-button";
 import type { Metadata } from "next";
+import type { Prisma } from "@/generated/prisma";
 
 export const metadata: Metadata = { title: "Equipment" };
 
@@ -14,11 +17,30 @@ const STATUS_COLORS: Record<string, string> = {
   RETIRED: "bg-gray-100 text-gray-500",
 };
 
-export default async function EquipmentPage() {
+export default async function EquipmentPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   await requireAuth();
+  const params = await searchParams;
+  const q = (params.q ?? "").trim();
+
+  const where: Prisma.EquipmentWhereInput = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { type: { contains: q, mode: "insensitive" } },
+          { model: { contains: q, mode: "insensitive" } },
+          { serialNumber: { contains: q, mode: "insensitive" } },
+          { notes: { contains: q, mode: "insensitive" } },
+        ],
+      }
+    : {};
 
   const equipment = await prisma.equipment
     .findMany({
+      where,
       orderBy: { name: "asc" },
     })
     .catch(() => []);
@@ -30,10 +52,21 @@ export default async function EquipmentPage() {
         <p className="text-sm text-gray-500">{equipment.length} items</p>
       </div>
 
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <AdminSearch
+          basePath="/equipment"
+          initialQuery={q}
+          placeholder="Search name, type, model, serial…"
+        />
+        <CsvExportButton resource="equipment" query={q} />
+      </div>
+
       {equipment.length === 0 ? (
         <div className="text-center py-20">
           <Truck className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-          <p className="text-gray-500 font-medium">No equipment tracked</p>
+          <p className="text-gray-500 font-medium">
+            {q ? "No equipment match your search" : "No equipment tracked"}
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">

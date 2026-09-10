@@ -7,7 +7,10 @@ import { Plus, Receipt, Building2, Calendar } from "lucide-react";
 import { InvoiceStatus } from "@/generated/prisma";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { AdminSearch } from "@/components/admin/admin-search";
+import { CsvExportButton } from "@/components/admin/csv-export-button";
 import type { Metadata } from "next";
+import type { Prisma } from "@/generated/prisma";
 
 export const metadata: Metadata = { title: "Invoices" };
 
@@ -23,13 +26,29 @@ const STATUS_STYLES: Record<string, { label: string; class: string }> = {
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; q?: string }>;
 }) {
   await requireAuth();
   const params = await searchParams;
+  const q = (params.q ?? "").trim();
 
-  const where =
-    params.status && params.status !== "ALL" ? { status: params.status as InvoiceStatus } : {};
+  const where: Prisma.InvoiceWhereInput = {
+    ...(params.status && params.status !== "ALL"
+      ? { status: params.status as InvoiceStatus }
+      : {}),
+    ...(q
+      ? {
+          OR: [
+            { invoiceNo: { contains: q, mode: "insensitive" } },
+            { invoiceNumber: { contains: q, mode: "insensitive" } },
+            { notes: { contains: q, mode: "insensitive" } },
+            { client: { name: { contains: q, mode: "insensitive" } } },
+            { project: { name: { contains: q, mode: "insensitive" } } },
+            { project: { code: { contains: q, mode: "insensitive" } } },
+          ],
+        }
+      : {}),
+  };
 
   const [invoices] = await Promise.all([
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -67,32 +86,51 @@ export default async function InvoicesPage({
       </div>
 
       {/* Status tabs */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <AdminSearch
+          basePath="/invoices"
+          initialQuery={q}
+          placeholder="Search invoice no, client, project…"
+          preserve={{ status: params.status }}
+        />
+        <CsvExportButton resource="invoices" query={q} status={params.status} />
+      </div>
+
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {["ALL", ...Object.keys(STATUS_STYLES)].map((s) => (
-          <Link key={s} href={`/invoices?status=${s}`}>
-            <button
-              className={cn(
-                "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap",
-                (params.status ?? "ALL") === s
-                  ? "bg-[#0f2137] text-white"
-                  : "bg-white border text-gray-600 hover:bg-gray-50"
-              )}
-            >
-              {s === "ALL" ? "All" : STATUS_STYLES[s].label}
-            </button>
-          </Link>
-        ))}
+        {["ALL", ...Object.keys(STATUS_STYLES)].map((s) => {
+          const href = q
+            ? `/invoices?status=${s}&q=${encodeURIComponent(q)}`
+            : `/invoices?status=${s}`;
+          return (
+            <Link key={s} href={href}>
+              <button
+                className={cn(
+                  "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap",
+                  (params.status ?? "ALL") === s
+                    ? "bg-[#0f2137] text-white"
+                    : "bg-white border text-gray-600 hover:bg-gray-50"
+                )}
+              >
+                {s === "ALL" ? "All" : STATUS_STYLES[s].label}
+              </button>
+            </Link>
+          );
+        })}
       </div>
 
       {invoices.length === 0 ? (
         <div className="text-center py-20">
           <Receipt className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-          <p className="text-gray-500 font-medium">No invoices</p>
-          <Button className="mt-6 bg-orange-500 hover:bg-orange-600" asChild>
-            <Link href="/invoices/new">
-              <Plus className="w-4 h-4 mr-2" /> Create Invoice
-            </Link>
-          </Button>
+          <p className="text-gray-500 font-medium">
+            {q ? "No invoices match your search" : "No invoices"}
+          </p>
+          {!q && (
+            <Button className="mt-6 bg-orange-500 hover:bg-orange-600" asChild>
+              <Link href="/invoices/new">
+                <Plus className="w-4 h-4 mr-2" /> Create Invoice
+              </Link>
+            </Button>
+          )}
         </div>
       ) : (
         <div className="space-y-3">

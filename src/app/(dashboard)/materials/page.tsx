@@ -3,15 +3,38 @@ import { requireAuth } from "@/lib/auth-utils";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Package } from "lucide-react";
+import { AdminSearch } from "@/components/admin/admin-search";
+import { CsvExportButton } from "@/components/admin/csv-export-button";
 import type { Metadata } from "next";
+import type { Prisma } from "@/generated/prisma";
 
 export const metadata: Metadata = { title: "Materials" };
 
-export default async function MaterialsPage() {
+export default async function MaterialsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   await requireAuth();
+  const params = await searchParams;
+  const q = (params.q ?? "").trim();
+
+  const where: Prisma.MaterialWhereInput = q
+    ? {
+        OR: [
+          { name: { contains: q, mode: "insensitive" } },
+          { category: { contains: q, mode: "insensitive" } },
+          { supplier: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+          { project: { name: { contains: q, mode: "insensitive" } } },
+          { project: { code: { contains: q, mode: "insensitive" } } },
+        ],
+      }
+    : {};
 
   const materials = await prisma.material
     .findMany({
+      where,
       orderBy: { name: "asc" },
       include: { project: { select: { name: true, code: true } } },
     })
@@ -32,11 +55,24 @@ export default async function MaterialsPage() {
         </div>
       </div>
 
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <AdminSearch
+          basePath="/materials"
+          initialQuery={q}
+          placeholder="Search materials, category, supplier…"
+        />
+        <CsvExportButton resource="materials" query={q} />
+      </div>
+
       {materials.length === 0 ? (
         <div className="text-center py-20">
           <Package className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-          <p className="text-gray-500 font-medium">No materials tracked yet</p>
-          <p className="text-sm text-gray-400 mt-1">Materials will appear when added to projects</p>
+          <p className="text-gray-500 font-medium">
+            {q ? "No materials match your search" : "No materials tracked yet"}
+          </p>
+          <p className="text-sm text-gray-400 mt-1">
+            {q ? "Try a different keyword" : "Materials will appear when added to projects"}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">

@@ -14,9 +14,11 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         name: true,
         email: true,
         role: true,
+        staffRoleId: true,
         phone: true,
         isActive: true,
         emailVerified: true,
+        staffRole: { select: { id: true, name: true } },
       },
     });
     if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });

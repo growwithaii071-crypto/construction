@@ -6,7 +6,10 @@ import { Card } from "@/components/ui/card";
 import { Plus, AlertTriangle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { AdminSearch } from "@/components/admin/admin-search";
+import { CsvExportButton } from "@/components/admin/csv-export-button";
 import type { Metadata } from "next";
+import type { Prisma } from "@/generated/prisma";
 
 export const metadata: Metadata = { title: "Issues" };
 
@@ -24,11 +27,32 @@ const STATUS_COLORS: Record<string, string> = {
   CLOSED: "bg-gray-100 text-gray-500",
 };
 
-export default async function IssuesPage() {
+export default async function IssuesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
   await requireAuth();
+  const params = await searchParams;
+  const q = (params.q ?? "").trim();
+
+  const where: Prisma.IssueWhereInput = q
+    ? {
+        OR: [
+          { title: { contains: q, mode: "insensitive" } },
+          { description: { contains: q, mode: "insensitive" } },
+          { location: { contains: q, mode: "insensitive" } },
+          { project: { name: { contains: q, mode: "insensitive" } } },
+          { project: { code: { contains: q, mode: "insensitive" } } },
+          { reporter: { name: { contains: q, mode: "insensitive" } } },
+          { assignee: { name: { contains: q, mode: "insensitive" } } },
+        ],
+      }
+    : {};
 
   const issues = await prisma.issue
     .findMany({
+      where,
       orderBy: [{ severity: "desc" }, { createdAt: "desc" }],
       include: {
         project: { select: { id: true, name: true, code: true } },
@@ -56,10 +80,21 @@ export default async function IssuesPage() {
         </Button>
       </div>
 
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <AdminSearch
+          basePath="/issues"
+          initialQuery={q}
+          placeholder="Search title, project, reporter…"
+        />
+        <CsvExportButton resource="issues" query={q} />
+      </div>
+
       {issues.length === 0 ? (
         <div className="text-center py-20">
           <AlertTriangle className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-          <p className="text-gray-500 font-medium">No issues reported</p>
+          <p className="text-gray-500 font-medium">
+            {q ? "No issues match your search" : "No issues reported"}
+          </p>
         </div>
       ) : (
         <div className="space-y-3">

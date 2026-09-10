@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { ServiceRequestForm } from "@/components/customer/service-request-form";
-import { Wrench, Search, X } from "lucide-react";
+import { Wrench, Search, X, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -48,7 +48,7 @@ export default async function CustomerServicesPage({
     prisma.serviceRequest
       .findMany({
         where: { clientId: session?.user?.id ?? "" },
-        select: { serviceId: true, status: true },
+        select: { id: true, serviceId: true, status: true },
       })
       .catch(() => []),
   ]);
@@ -67,7 +67,9 @@ export default async function CustomerServicesPage({
     return matchesSearch && matchesCategory;
   });
 
-  const myRequestMap = new Map(myRequests.map((r) => [r.serviceId, r.status]));
+  const myRequestMap = new Map(
+    myRequests.map((r) => [r.serviceId, { id: r.id, status: r.status }])
+  );
 
   // Get unique categories for filter pills
   const categories = [...new Set(allServices.map((s) => s.category))].sort();
@@ -188,7 +190,7 @@ export default async function CustomerServicesPage({
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {services.map((service) => {
-            const myStatus = myRequestMap.get(service.id);
+            const myRequest = myRequestMap.get(service.id);
             return (
               <div key={service.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3 hover:shadow-md transition-shadow">
                 <div>
@@ -212,19 +214,37 @@ export default async function CustomerServicesPage({
                 )}
 
                 <div className="pt-3 border-t border-gray-100">
-                  {myStatus ? (
-                    <div className="text-center py-1">
-                      <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
-                        myStatus === "PENDING" ? "bg-amber-100 text-amber-700" :
-                        myStatus === "ACCEPTED" || myStatus === "IN_PROGRESS" ? "bg-blue-100 text-blue-700" :
-                        myStatus === "COMPLETED" ? "bg-green-100 text-green-700" :
-                        "bg-red-100 text-red-600"
-                      }`}>
-                        {myStatus === "PENDING" ? "✓ Request Sent" :
-                         myStatus === "ACCEPTED" ? "✓ Accepted" :
-                         myStatus === "IN_PROGRESS" ? "🔨 In Progress" :
-                         myStatus === "COMPLETED" ? "✓ Completed" : "✗ Rejected"}
-                      </span>
+                  {myRequest ? (
+                    <div className="space-y-2">
+                      <div className="text-center py-1">
+                        <span className={`text-xs font-semibold px-3 py-1.5 rounded-full ${
+                          myRequest.status === "PENDING" ? "bg-amber-100 text-amber-700" :
+                          myRequest.status === "ACCEPTED" || myRequest.status === "IN_PROGRESS" ? "bg-blue-100 text-blue-700" :
+                          myRequest.status === "COMPLETED" ? "bg-green-100 text-green-700" :
+                          "bg-red-100 text-red-600"
+                        }`}>
+                          {myRequest.status === "PENDING" ? "✓ Request Sent" :
+                           myRequest.status === "ACCEPTED" ? "✓ Accepted" :
+                           myRequest.status === "IN_PROGRESS" ? "🔨 In Progress" :
+                           myRequest.status === "COMPLETED" ? "✓ Completed" : "✗ Rejected"}
+                        </span>
+                      </div>
+                      {(myRequest.status === "ACCEPTED" ||
+                        myRequest.status === "IN_PROGRESS" ||
+                        myRequest.status === "COMPLETED") && (
+                        <Link
+                          href={`/customer/messages/${myRequest.id}`}
+                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-violet-600 px-3 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-violet-700"
+                        >
+                          <MessageCircle className="h-3.5 w-3.5" />
+                          Message Contractor
+                        </Link>
+                      )}
+                      {myRequest.status === "PENDING" && (
+                        <p className="text-center text-[11px] text-gray-400">
+                          Messaging unlocks after contractor accepts
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <ServiceRequestForm serviceId={service.id} serviceTitle={service.title} />

@@ -2,228 +2,219 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowLeft, Edit, Phone, Mail, MapPin, Trash2 } from "lucide-react";
+import { UserRole } from "@/generated/prisma";
 import { format } from "date-fns";
-import { deleteClientAction } from "@/actions/clients";
+import {
+  ArrowLeft,
+  Pencil,
+  Mail,
+  Phone,
+  ClipboardList,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Client Detail" };
+export const metadata: Metadata = { title: "Client Details" };
 
-const STATUS_STYLES: Record<string, string> = {
-  PLANNING: "bg-orange-100 text-orange-700",
-  IN_PROGRESS: "bg-blue-100 text-blue-700",
-  ON_HOLD: "bg-yellow-100 text-yellow-700",
-  COMPLETED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
+const STATUS_STYLE: Record<string, string> = {
+  PENDING: "bg-amber-100 text-amber-700",
+  ACCEPTED: "bg-blue-100 text-blue-700",
+  IN_PROGRESS: "bg-violet-100 text-violet-700",
+  COMPLETED: "bg-emerald-100 text-emerald-700",
+  REJECTED: "bg-red-100 text-red-600",
 };
 
-export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ClientViewPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   await requireAuth();
   const { id } = await params;
 
-  const client = await prisma.client
-    .findUnique({
-      where: { id },
-      include: {
-        projects: {
-          orderBy: { createdAt: "desc" },
-          select: { id: true, name: true, code: true, status: true, progress: true, endDate: true },
-        },
-        invoices: {
-          orderBy: { createdAt: "desc" },
-          take: 5,
-          select: {
-            id: true,
-            invoiceNo: true,
-            invoiceNumber: true,
-            totalAmount: true,
-            status: true,
+  const client = await prisma.user.findFirst({
+    where: { id, role: UserRole.CLIENT },
+    include: {
+      serviceRequests: {
+        orderBy: { createdAt: "desc" },
+        include: {
+          service: {
+            select: {
+              title: true,
+              category: true,
+              contractor: { select: { name: true, email: true } },
+            },
           },
         },
-        _count: { select: { projects: true, invoices: true } },
       },
-    })
-    .catch(() => null);
+      _count: { select: { serviceRequests: true } },
+    },
+  });
 
   if (!client) notFound();
 
-  const totalRevenue = (client.invoices ?? []).reduce(
-    (acc: number, inv: { totalAmount?: number | null }) => acc + Number(inv.totalAmount ?? 0),
-    0
-  );
+  const completed = client.serviceRequests.filter((r) => r.status === "COMPLETED").length;
+  const pending = client.serviceRequests.filter((r) => r.status === "PENDING").length;
+  const inProgress = client.serviceRequests.filter(
+    (r) => r.status === "ACCEPTED" || r.status === "IN_PROGRESS"
+  ).length;
 
   return (
-    <div className="p-4 lg:p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
-            <Link href="/clients">
-              <ArrowLeft className="w-4 h-4" />
-            </Link>
-          </Button>
-          <div className="flex items-center gap-4">
-            <Avatar className="w-14 h-14">
-              <AvatarFallback className="bg-[#1e3a5f] text-white text-2xl font-bold">
-                {client.name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
+    <div className="space-y-6 p-4 lg:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-start gap-3">
+          <Link
+            href="/clients"
+            className="mt-1 flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 text-xl font-bold text-white">
+              {client.name.charAt(0).toUpperCase()}
+            </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">{client.name}</h1>
-              {client.company && <p className="text-sm text-gray-400">{client.company}</p>}
-            </div>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" asChild>
-            <Link href={`/clients/${id}/edit`}>
-              <Edit className="w-4 h-4 mr-2" /> Edit
-            </Link>
-          </Button>
-          <form action={deleteClientAction.bind(null, id)}>
-            <Button
-              variant="outline"
-              type="submit"
-              className="text-red-600 border-red-200 hover:bg-red-50"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </form>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left */}
-        <div className="space-y-4">
-          <Card className="p-5">
-            <h3 className="font-semibold text-gray-900 mb-3">Contact</h3>
-            <div className="space-y-2">
-              {client.email && (
-                <a
-                  href={`mailto:${client.email}`}
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
-                >
-                  <Mail className="w-4 h-4 text-gray-400" />
-                  {client.email}
-                </a>
-              )}
-              {client.phone && (
-                <a
-                  href={`tel:${client.phone}`}
-                  className="flex items-center gap-2 text-sm text-gray-600 hover:text-blue-600"
-                >
-                  <Phone className="w-4 h-4 text-gray-400" />
-                  {client.phone}
-                </a>
-              )}
-              {client.city && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <MapPin className="w-4 h-4 text-gray-400" />
-                  {[client.address, client.city, client.state, client.pincode]
-                    .filter(Boolean)
-                    .join(", ")}
-                </div>
-              )}
-            </div>
-          </Card>
-
-          {(client.gst || client.pan) && (
-            <Card className="p-5">
-              <h3 className="font-semibold text-gray-900 mb-3">Tax Info</h3>
-              {client.gst && (
-                <div className="text-sm">
-                  <span className="text-gray-400 text-xs">GST: </span>
-                  {client.gst}
-                </div>
-              )}
-              {client.pan && (
-                <div className="text-sm mt-1">
-                  <span className="text-gray-400 text-xs">PAN: </span>
-                  {client.pan}
-                </div>
-              )}
-            </Card>
-          )}
-
-          <div className="grid grid-cols-2 gap-3">
-            <Card className="p-4 text-center">
-              <p className="text-2xl font-bold text-blue-600">{client._count.projects}</p>
-              <p className="text-xs text-gray-400 mt-1">Projects</p>
-            </Card>
-            <Card className="p-4 text-center">
-              <p className="text-lg font-bold text-green-600">
-                ₹{(totalRevenue / 100000).toFixed(1)}L
+              <h1 className="text-2xl font-bold text-slate-900">{client.name}</h1>
+              <p className="mt-0.5 text-sm text-slate-500">
+                Client · Joined {format(new Date(client.createdAt), "dd MMM yyyy")}
               </p>
-              <p className="text-xs text-gray-400 mt-1">Revenue</p>
-            </Card>
+            </div>
           </div>
         </div>
-
-        {/* Right */}
-        <div className="lg:col-span-2 space-y-4">
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-base">Projects</CardTitle>
-                <Button size="sm" asChild className="bg-orange-500 hover:bg-orange-600">
-                  <Link href={`/projects/new`}>+ Project</Link>
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {(client.projects ?? []).length === 0 ? (
-                <p className="text-sm text-gray-400 text-center py-4">No projects</p>
-              ) : (
-                <div className="space-y-2">
-                  {(client.projects ?? []).map((p) => (
-                    <Link href={`/projects/${p.id}`} key={p.id}>
-                      <div className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 bg-[#0f2137] rounded-lg flex items-center justify-center">
-                            <span className="text-white text-[11px] font-bold">
-                              {p.code.slice(0, 2)}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium">{p.name}</p>
-                            {p.endDate && (
-                              <p className="text-xs text-gray-400">
-                                Due {format(new Date(p.endDate), "dd MMM yyyy")}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-gray-600">{p.progress}%</span>
-                          <span
-                            className={cn(
-                              "px-2 py-0.5 rounded-full text-[10px] font-semibold",
-                              STATUS_STYLES[p.status]
-                            )}
-                          >
-                            {p.status.replace("_", " ")}
-                          </span>
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {client.notes && (
-            <Card className="p-5">
-              <h3 className="font-semibold text-gray-900 mb-2">Notes</h3>
-              <p className="text-sm text-gray-600 whitespace-pre-wrap">{client.notes}</p>
-            </Card>
-          )}
-        </div>
+        <Link
+          href={`/clients/${id}/edit`}
+          className="inline-flex h-10 items-center gap-2 rounded-xl bg-orange-500 px-4 text-sm font-semibold text-white hover:bg-orange-600"
+        >
+          <Pencil className="h-4 w-4" />
+          Edit profile
+        </Link>
       </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat label="Total services" value={String(client._count.serviceRequests)} />
+        <Stat label="Completed" value={String(completed)} tone="emerald" />
+        <Stat label="In progress" value={String(inProgress)} tone="blue" />
+        <Stat label="Pending" value={String(pending)} tone="amber" />
+      </div>
+
+      <div className="grid gap-5 lg:grid-cols-[320px_minmax(0,1fr)]">
+        <aside className="h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <h2 className="text-sm font-bold text-slate-900">Contact</h2>
+          <div className="mt-4 space-y-3 text-sm text-slate-600">
+            <p className="flex items-center gap-2 break-all">
+              <Mail className="h-4 w-4 shrink-0 text-slate-400" />
+              {client.email}
+            </p>
+            {client.phone ? (
+              <p className="flex items-center gap-2">
+                <Phone className="h-4 w-4 shrink-0 text-slate-400" />
+                {client.phone}
+              </p>
+            ) : null}
+            <span
+              className={cn(
+                "inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                client.isActive
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "bg-slate-100 text-slate-500"
+              )}
+            >
+              {client.isActive ? "Active" : "Inactive"}
+            </span>
+          </div>
+        </aside>
+
+        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div>
+              <h2 className="text-sm font-bold text-slate-900">Services taken</h2>
+              <p className="text-xs text-slate-500">
+                All service requests by this client
+              </p>
+            </div>
+            <ClipboardList className="h-4 w-4 text-slate-400" />
+          </div>
+
+          {client.serviceRequests.length === 0 ? (
+            <div className="px-5 py-14 text-center">
+              <Clock className="mx-auto h-8 w-8 text-slate-200" />
+              <p className="mt-3 text-sm font-medium text-slate-600">No services yet</p>
+            </div>
+          ) : (
+            <ul className="divide-y divide-slate-100">
+              {client.serviceRequests.map((req) => (
+                <li key={req.id} className="px-5 py-4">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-slate-900">{req.service.title}</p>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {req.service.category}
+                        {" · "}
+                        Contractor: {req.service.contractor.name.split(" — ")[0]}
+                      </p>
+                      {req.location && (
+                        <p className="mt-1 text-xs text-slate-400">Location: {req.location}</p>
+                      )}
+                      {req.budget != null && (
+                        <p className="text-xs text-slate-400">
+                          Budget: ₹{req.budget.toLocaleString("en-IN")}
+                        </p>
+                      )}
+                      {req.message && (
+                        <p className="mt-2 line-clamp-2 text-sm text-slate-600">{req.message}</p>
+                      )}
+                    </div>
+                    <div className="shrink-0 text-left sm:text-right">
+                      <span
+                        className={cn(
+                          "inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold",
+                          STATUS_STYLE[req.status] ?? "bg-slate-100 text-slate-600"
+                        )}
+                      >
+                        {req.status.replaceAll("_", " ")}
+                      </span>
+                      <p className="mt-1.5 text-[11px] text-slate-400">
+                        {format(new Date(req.createdAt), "dd MMM yyyy")}
+                      </p>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  tone = "slate",
+}: {
+  label: string;
+  value: string;
+  tone?: "slate" | "emerald" | "blue" | "amber";
+}) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-1 text-2xl font-bold",
+          tone === "emerald" && "text-emerald-600",
+          tone === "blue" && "text-blue-600",
+          tone === "amber" && "text-amber-600",
+          tone === "slate" && "text-slate-900"
+        )}
+      >
+        {value}
+      </p>
     </div>
   );
 }
