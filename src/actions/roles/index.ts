@@ -126,14 +126,11 @@ export async function updateStaffRoleAction(id: string, _prev: unknown, formData
 export async function toggleStaffRoleAction(id: string, isActive: boolean) {
   await requireRoleAdmin();
   const role = await prisma.staffRole.findUnique({ where: { id } });
-  if (!role) return { error: "Role not found." };
-  if (role.isSystem && !isActive) {
-    return { error: "System roles cannot be disabled." };
-  }
+  if (!role) return;
+  if (role.isSystem && !isActive) return;
   await prisma.staffRole.update({ where: { id }, data: { isActive } });
   revalidatePath("/roles");
   revalidatePath("/users/new");
-  return { success: true };
 }
 
 export async function deleteStaffRoleAction(id: string) {

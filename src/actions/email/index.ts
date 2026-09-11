@@ -142,5 +142,4 @@ export async function seedEmailTemplatesAction() {
   await requireAdmin();
   await ensureDefaultEmailTemplates();
   revalidatePath("/settings/email-templates");
-  return { success: true as const, message: "Default templates ensured." };
 }
