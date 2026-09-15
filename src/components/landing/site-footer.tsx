@@ -43,7 +43,7 @@ export function SiteFooter() {
             <h4 className="mb-5 text-sm font-semibold text-white">Customers</h4>
             <ul className="space-y-3">
               {[
-                { label: "Post a Job", href: "/customer/register" },
+                { label: "Find Traders", href: "/services" },
                 { label: "Browse Services", href: "/services" },
                 { label: "Sign In", href: "/login" },
                 { label: "Create Account", href: "/customer/register" },

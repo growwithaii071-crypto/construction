@@ -8,7 +8,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Chat — BuildPro" };
 
-const CHAT_OK = new Set(["ACCEPTED", "IN_PROGRESS", "COMPLETED"]);
+const CHAT_OK = new Set(["PENDING", "ACCEPTED", "IN_PROGRESS", "COMPLETED"]);
 
 export default async function CustomerChatPage({
   params,

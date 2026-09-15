@@ -9,6 +9,7 @@ import { sendTemplateEmail, appUrl } from "@/lib/email";
 import { createNotification } from "@/lib/notifications";
 
 const CHAT_ALLOWED: ServiceRequestStatus[] = [
+  ServiceRequestStatus.PENDING,
   ServiceRequestStatus.ACCEPTED,
   ServiceRequestStatus.IN_PROGRESS,
   ServiceRequestStatus.COMPLETED,
@@ -73,7 +74,7 @@ export async function sendMessageAction(formData: FormData) {
   if (!CHAT_ALLOWED.includes(result.req.status)) {
     return {
       success: false as const,
-      message: "Messaging unlocks after the contractor accepts this request.",
+      message: "Messaging is not available for this request status.",
     };
   }
 

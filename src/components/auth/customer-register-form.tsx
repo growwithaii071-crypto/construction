@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -31,6 +31,8 @@ const PASSWORD_REQUIREMENTS = [
 
 export function CustomerRegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -49,6 +51,11 @@ export function CustomerRegisterForm() {
 
   const passwordValue = useWatch({ control, name: "password", defaultValue: "" });
 
+  const loginHref =
+    callbackUrl && callbackUrl.startsWith("/") && !callbackUrl.startsWith("//")
+      ? `/login?callbackUrl=${encodeURIComponent(callbackUrl)}`
+      : "/login";
+
   function onSubmit(data: RegisterInput) {
     setError(null);
     setSuccess(null);
@@ -56,7 +63,7 @@ export function CustomerRegisterForm() {
       const result = await registerAction(data);
       if (result.success) {
         setSuccess("Account created! Redirecting to sign in…");
-        setTimeout(() => router.push("/login"), 2500);
+        setTimeout(() => router.push(loginHref), 2500);
       } else {
         setError(result.message);
       }
@@ -251,7 +258,7 @@ export function CustomerRegisterForm() {
 
       <p className="text-center text-sm text-gray-500">
         Already have an account?{" "}
-        <Link href="/login" className="text-blue-600 hover:text-blue-700 font-semibold">
+        <Link href={loginHref} className="text-blue-600 hover:text-blue-700 font-semibold">
           Sign in
         </Link>
       </p>

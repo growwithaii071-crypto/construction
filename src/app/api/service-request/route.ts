@@ -48,13 +48,16 @@ export async function POST(req: NextRequest) {
       },
     });
     if (existing) {
-      return NextResponse.json(
-        { success: false, message: "You have already requested this service." },
-        { status: 409 }
-      );
+      // Resume conversation instead of blocking
+      return NextResponse.json({
+        success: true,
+        requestId: existing.id,
+        resumed: true,
+        message: "Opening your conversation with this trader.",
+      });
     }
 
-    await prisma.serviceRequest.create({
+    const created = await prisma.serviceRequest.create({
       data: {
         serviceId,
         clientId: session.user.id,
@@ -65,6 +68,18 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Seed first chat message so customer can continue the thread immediately
+    const firstBody = typeof message === "string" ? message.trim() : "";
+    if (firstBody) {
+      await prisma.message.create({
+        data: {
+          body: firstBody.slice(0, 2000),
+          serviceRequestId: created.id,
+          senderId: session.user.id,
+        },
+      });
+    }
+
     void sendTemplateEmail("service_request_created", service.contractor.email, {
       contractorName: service.contractor.name,
       clientName: session.user.name ?? "Client",
@@ -74,25 +89,30 @@ export async function POST(req: NextRequest) {
       budget: budget ? `₹${budget}` : "—",
       message: message || "—",
       requestsUrl: `${appUrl}/construction/requests`,
+      messagesUrl: `${appUrl}/construction/messages/${created.id}`,
     }).catch(() => {});
 
     const clientName = session.user.name ?? "Client";
     void createNotification({
       userId: service.contractor.id,
-      title: "New service request",
-      message: `${clientName} requested “${service.title}”.`,
+      title: "New message from a customer",
+      message: `${clientName} contacted you about “${service.title}”.`,
       type: "INFO",
-      link: "/construction/requests",
+      link: `/construction/messages/${created.id}`,
     });
 
     void notifyAdmins({
       title: "New marketplace request",
-      message: `${clientName} requested “${service.title}” from ${service.contractor.name}.`,
+      message: `${clientName} contacted ${service.contractor.name} about “${service.title}”.`,
       type: "INFO",
       link: "/projects",
     });
 
-    return NextResponse.json({ success: true, message: "Request sent to contractor!" });
+    return NextResponse.json({
+      success: true,
+      requestId: created.id,
+      message: "Message sent! Opening chat…",
+    });
   } catch (err) {
     console.error("[SERVICE_REQUEST]", err);
     return NextResponse.json({ success: false, message: "Something went wrong." }, { status: 500 });

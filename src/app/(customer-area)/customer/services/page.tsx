@@ -229,7 +229,8 @@ export default async function CustomerServicesPage({
                            myRequest.status === "COMPLETED" ? "✓ Completed" : "✗ Rejected"}
                         </span>
                       </div>
-                      {(myRequest.status === "ACCEPTED" ||
+                      {(myRequest.status === "PENDING" ||
+                        myRequest.status === "ACCEPTED" ||
                         myRequest.status === "IN_PROGRESS" ||
                         myRequest.status === "COMPLETED") && (
                         <Link
@@ -239,11 +240,6 @@ export default async function CustomerServicesPage({
                           <MessageCircle className="h-3.5 w-3.5" />
                           Message Contractor
                         </Link>
-                      )}
-                      {myRequest.status === "PENDING" && (
-                        <p className="text-center text-[11px] text-gray-400">
-                          Messaging unlocks after contractor accepts
-                        </p>
                       )}
                     </div>
                   ) : (

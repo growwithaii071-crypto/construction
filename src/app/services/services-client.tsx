@@ -54,10 +54,12 @@ export function ServicesClient({
   totalCount,
 }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const resume = searchParams.get("resume") === "1";
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [searchInput, setSearchInput] = useState(searchQuery);
 
-  // After login — check if there's a pending request and auto-open modal
+  // After login/register — reopen modal for pending trader and auto-submit
   useEffect(() => {
     const pending = localStorage.getItem("pendingServiceRequest");
     if (pending && isLoggedIn) {
@@ -101,7 +103,7 @@ export function ServicesClient({
                 <input
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="Search services, categories, contractors..."
+                  placeholder="Search trade persons, services, categories…"
                   className="w-full h-10 pl-10 pr-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition"
                 />
               </div>
@@ -233,7 +235,7 @@ export function ServicesClient({
                       onClick={(e) => { e.stopPropagation(); setSelectedService(service); }}
                       className="text-xs font-bold px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors"
                     >
-                      Get Quote
+                      Message
                     </button>
                   </div>
                 </div>
@@ -245,10 +247,10 @@ export function ServicesClient({
         {!isLoggedIn && services.length > 0 && (
           <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5 text-center">
             <p className="text-sm font-semibold text-violet-800">
-              👋 Select any service to get quotes from contractors
+              👋 Search trade persons, pick one, then create login and send a message
             </p>
             <p className="text-xs text-violet-500 mt-1">
-              Answer a few quick questions — you'll only need to login when submitting
+              Answer a few quick questions — login only when you&apos;re ready to message
             </p>
           </div>
         )}
@@ -259,6 +261,7 @@ export function ServicesClient({
         <ServiceMCQModal
           service={selectedService}
           isLoggedIn={isLoggedIn}
+          autoSubmitPending={resume}
           onClose={handleCloseModal}
         />
       )}

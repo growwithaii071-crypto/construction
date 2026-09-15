@@ -38,11 +38,11 @@ export function HeroSearch() {
           type="submit"
           className="h-12 px-5 bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap shadow-lg shadow-violet-700/30"
         >
-          Get quotes
+          Find traders
         </button>
       </div>
       <p className="mt-2.5 text-xs text-white/30">
-        Free to post · No obligation · Replies in hours
+        Search traders · Create login · Send message
       </p>
     </form>
   );

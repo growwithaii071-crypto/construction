@@ -126,7 +126,10 @@ export default async function ContractorRequestsPage() {
                       </button>
                     </form>
                   )}
-                  {(req.status === "ACCEPTED" || req.status === "IN_PROGRESS" || req.status === "COMPLETED") && (
+                  {(req.status === "PENDING" ||
+                    req.status === "ACCEPTED" ||
+                    req.status === "IN_PROGRESS" ||
+                    req.status === "COMPLETED") && (
                     <Link
                       href={`/construction/messages/${req.id}`}
                       className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors w-full justify-center"

@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Messages — BuildPro" };
 
-const CHAT_OK = ["ACCEPTED", "IN_PROGRESS", "COMPLETED"] as const;
+const CHAT_OK = ["PENDING", "ACCEPTED", "IN_PROGRESS", "COMPLETED"] as const;
 
 export default async function ContractorMessagesPage() {
   const session = await auth();

@@ -142,7 +142,7 @@ export default async function LandingPage() {
       <section id="how-it-works" className="py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-14">
-            How to hire the right contractor
+            How to message a trade person
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative">
@@ -151,25 +151,25 @@ export default async function LandingPage() {
 
             {[
               {
-                icon: MessageSquare,
+                icon: Users,
                 bg: "bg-violet-100",
                 iconColor: "text-violet-600",
-                title: "Post a job for free",
-                desc: "Tell us what you need — from house construction to a quick repair. Takes 2 minutes.",
+                title: "Search trade persons",
+                desc: "Browse services by trade — plumbers, builders, electricians, and more.",
               },
               {
-                icon: Users,
+                icon: MessageSquare,
                 bg: "bg-emerald-100",
                 iconColor: "text-emerald-600",
-                title: "Receive & compare quotes",
-                desc: "Interested contractors respond. Browse profiles, past work, and customer reviews.",
+                title: "Select a trader",
+                desc: "Open their listing, answer a few quick questions about your job.",
               },
               {
                 icon: Shield,
                 bg: "bg-amber-100",
                 iconColor: "text-amber-600",
-                title: "Hire with confidence",
-                desc: "Choose the best fit, track progress in real-time, and pay safely when done.",
+                title: "Create login & message",
+                desc: "Sign up or sign in once — then chat with the trader right away.",
               },
             ].map((step, i) => {
               const Icon = step.icon;
@@ -192,10 +192,10 @@ export default async function LandingPage() {
 
           <div className="text-center mt-12">
             <Link
-              href="/customer/register"
+              href="/services"
               className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-8 py-3.5 rounded-full text-sm transition-colors shadow-md shadow-violet-600/25"
             >
-              Get a quote
+              Find traders
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -696,18 +696,18 @@ export default async function LandingPage() {
             <div className="relative">
               <p className="text-violet-200 text-xs font-semibold uppercase tracking-widest mb-3">Get started today</p>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-3">
-                Post your job today
+                Find a trade person today
               </h2>
               <p className="text-white/60 text-base mb-8 max-w-lg mx-auto">
-                Free to post. Get quotes from verified local contractors within 24 hours. No commitment required.
+                Search traders, pick one, create your login, and send a message — chat opens immediately.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link
-                  href="/customer/register"
+                  href="/services"
                   className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-violet-700 font-bold px-8 py-3.5 rounded-full text-sm hover:bg-violet-50 transition-colors shadow-lg"
                 >
                   <Building2 className="w-4 h-4" />
-                  I need a contractor
+                  Find traders
                 </Link>
                 <Link
                   href="/construction/register"

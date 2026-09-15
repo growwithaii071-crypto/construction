@@ -79,10 +79,10 @@ export function Navbar({ isLoggedIn }: NavbarProps) {
                   Sign in
                 </Link>
                 <Link
-                  href="/customer/register"
+                  href="/services"
                   className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors shadow-sm"
                 >
-                  Post a job
+                  Find traders
                 </Link>
                 <Link
                   href="/construction/register"
@@ -128,8 +128,8 @@ export function Navbar({ isLoggedIn }: NavbarProps) {
               </Link>
             ) : (
               <>
-                <Link href="/customer/register" className="block text-center bg-violet-600 text-white font-semibold py-2.5 rounded-full text-sm">
-                  Post a job
+                <Link href="/services" className="block text-center bg-violet-600 text-white font-semibold py-2.5 rounded-full text-sm">
+                  Find traders
                 </Link>
                 <Link href="/construction/register" className="block text-center border border-gray-300 text-gray-700 font-medium py-2.5 rounded-full text-sm">
                   Find work
