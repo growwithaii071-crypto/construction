@@ -1,141 +1,123 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { HardHat, Menu, X, ChevronDown } from "lucide-react";
+import { Home, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavbarProps {
   isLoggedIn: boolean;
 }
 
+const NAV = [
+  { href: "/", label: "Home" },
+  { href: "/services", label: "Find a Trader" },
+  { href: "/customer/register", label: "Post a Job" },
+  { href: "/#how-it-works", label: "How It Works" },
+  { href: "/#about", label: "About Us" },
+];
+
 export function Navbar({ isLoggedIn }: NavbarProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   return (
-    <header
-      className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        scrolled ? "bg-white shadow-md" : "bg-transparent"
-      )}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center shadow-sm">
-              <HardHat className="w-4 h-4 text-white" />
-            </div>
-            <span className={cn("font-bold text-lg tracking-tight transition-colors", scrolled ? "text-gray-900" : "text-white")}>
-              Build<span className="text-violet-400">Pro</span>
-            </span>
-          </Link>
+    <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/95 backdrop-blur-md">
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
+          <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-[#0B2A4A] shadow-sm">
+            <Home className="h-4 w-4 text-white" />
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white" />
+          </div>
+          <span className="text-xl font-extrabold tracking-tight text-[#0B2A4A]">
+            Build<span className="text-orange-500">Pro</span>
+          </span>
+        </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
-            {[
-              { href: "#how-it-works", label: "How it works" },
-              { href: "/services", label: "Services" },
-              { href: "#about", label: "About" },
-            ].map((link) => (
-              <a
+        <nav className="hidden items-center gap-1 lg:flex">
+          {NAV.map((link, i) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "relative px-3 py-2 text-sm font-semibold transition-colors",
+                i === 0
+                  ? "text-[#0B2A4A] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:rounded-full after:bg-orange-500"
+                  : "text-slate-600 hover:text-[#0B2A4A]"
+              )}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
+
+        <div className="hidden items-center gap-3 sm:flex">
+          {isLoggedIn ? (
+            <Link
+              href="/dashboard"
+              className="rounded-full bg-orange-500 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-orange-600"
+            >
+              Dashboard
+            </Link>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="px-3 py-2 text-sm font-semibold text-[#0B2A4A] transition-colors hover:text-orange-600"
+              >
+                Log In
+              </Link>
+              <Link
+                href="/customer/register"
+                className="rounded-full bg-orange-500 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-colors hover:bg-orange-600"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setMobileOpen((v) => !v)}
+          className="rounded-lg p-2 text-slate-700 hover:bg-slate-100 lg:hidden"
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+      </div>
+
+      {mobileOpen && (
+        <div className="border-t border-slate-100 bg-white px-4 py-4 lg:hidden">
+          <div className="flex flex-col gap-1">
+            {NAV.map((link) => (
+              <Link
                 key={link.href}
                 href={link.href}
-                className={cn(
-                  "text-sm font-medium px-3 py-2 rounded-lg transition-colors",
-                  scrolled ? "text-gray-600 hover:text-gray-900 hover:bg-gray-100" : "text-white/80 hover:text-white hover:bg-white/10"
-                )}
+                onClick={() => setMobileOpen(false)}
+                className="rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
               >
                 {link.label}
-              </a>
+              </Link>
             ))}
-          </nav>
-
-          {/* CTAs */}
-          <div className="hidden md:flex items-center gap-2">
+          </div>
+          <div className="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3">
             {isLoggedIn ? (
               <Link
                 href="/dashboard"
-                className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors shadow-sm"
+                className="rounded-full bg-orange-500 py-2.5 text-center text-sm font-bold text-white"
               >
-                Go to Dashboard
+                Dashboard
               </Link>
             ) : (
               <>
-                <Link
-                  href="/login"
-                  className={cn(
-                    "text-sm font-medium px-4 py-2 rounded-full transition-colors",
-                    scrolled ? "text-gray-700 hover:text-gray-900 hover:bg-gray-100" : "text-white/80 hover:text-white hover:bg-white/10"
-                  )}
-                >
-                  Sign in
+                <Link href="/login" className="py-2 text-center text-sm font-semibold text-[#0B2A4A]">
+                  Log In
                 </Link>
                 <Link
-                  href="/services"
-                  className="bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-5 py-2 rounded-full transition-colors shadow-sm"
+                  href="/customer/register"
+                  className="rounded-full bg-orange-500 py-2.5 text-center text-sm font-bold text-white"
                 >
-                  Find traders
-                </Link>
-                <Link
-                  href="/construction/register"
-                  className={cn(
-                    "text-sm font-medium px-4 py-2 rounded-full border transition-colors",
-                    scrolled
-                      ? "border-gray-300 text-gray-700 hover:bg-gray-50"
-                      : "border-white/30 text-white hover:bg-white/10"
-                  )}
-                >
-                  Find work
-                </Link>
-              </>
-            )}
-          </div>
-
-          {/* Mobile toggle */}
-          <button
-            onClick={() => setMobileOpen((v) => !v)}
-            className={cn("md:hidden p-2 rounded-lg transition-colors", scrolled ? "text-gray-700 hover:bg-gray-100" : "text-white hover:bg-white/10")}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 px-4 py-5 space-y-2 shadow-xl">
-          {[
-            { href: "#how-it-works", label: "How it works" },
-            { href: "/services", label: "Services" },
-            { href: "#about", label: "About" },
-          ].map((link) => (
-            <a key={link.href} href={link.href} onClick={() => setMobileOpen(false)} className="block text-gray-700 font-medium py-2 text-sm">
-              {link.label}
-            </a>
-          ))}
-          <div className="pt-3 border-t border-gray-100 space-y-2">
-            {isLoggedIn ? (
-              <Link href="/dashboard" className="block text-center bg-violet-600 text-white font-semibold py-2.5 rounded-full text-sm">
-                Go to Dashboard
-              </Link>
-            ) : (
-              <>
-                <Link href="/services" className="block text-center bg-violet-600 text-white font-semibold py-2.5 rounded-full text-sm">
-                  Find traders
-                </Link>
-                <Link href="/construction/register" className="block text-center border border-gray-300 text-gray-700 font-medium py-2.5 rounded-full text-sm">
-                  Find work
-                </Link>
-                <Link href="/login" className="block text-center text-violet-600 font-medium py-2 text-sm">
-                  Sign in
+                  Sign Up
                 </Link>
               </>
             )}

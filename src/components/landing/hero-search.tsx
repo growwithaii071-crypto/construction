@@ -2,47 +2,109 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { Search, MapPin, Wrench, ChevronDown } from "lucide-react";
+
+const TRADES = [
+  "Plumbing & Sanitation",
+  "Electrical Works",
+  "Painting & Finishing",
+  "Roofing & Waterproofing",
+  "Interior Finishing",
+  "Residential Construction",
+  "Commercial Construction",
+  "Renovation & Remodeling",
+  "Landscaping",
+  "HVAC & Ventilation",
+];
+
+const CITIES = [
+  "Mumbai",
+  "Delhi",
+  "Bengaluru",
+  "Hyderabad",
+  "Pune",
+  "Chennai",
+  "Ahmedabad",
+  "Jaipur",
+];
 
 export function HeroSearch() {
-  const [query, setQuery] = useState("");
   const router = useRouter();
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("");
+  const [location, setLocation] = useState("");
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
+    const params = new URLSearchParams();
     const q = query.trim();
-    if (q) {
-      router.push(`/services?search=${encodeURIComponent(q)}`);
-    } else {
-      router.push("/services");
-    }
+    if (q) params.set("search", q);
+    if (category) params.set("category", category);
+    if (location) params.set("location", location);
+    const qs = params.toString();
+    router.push(`/services${qs ? `?${qs}` : ""}`);
   }
 
   return (
-    <form onSubmit={handleSearch} className="mt-8 max-w-105">
-      <label className="block text-white/70 text-sm font-medium mb-2">
-        What&apos;s your job?
-      </label>
-      <div className="flex gap-2">
-        <div className="flex-1 relative">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+    <form onSubmit={handleSearch} className="mt-7 w-full max-w-xl">
+      <div className="rounded-2xl border border-slate-200/80 bg-white p-2 shadow-xl shadow-slate-200/60">
+        <div className="relative">
+          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g. House construction, plumber..."
-            className="w-full h-12 pl-10 pr-4 bg-white rounded-xl text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500"
+            placeholder="Search tradesmen (plumber, electrician…)"
+            className="h-12 w-full rounded-xl bg-slate-50 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/30"
           />
         </div>
+
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          <div className="relative">
+            <Wrench className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-blue-600" />
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="h-11 w-full appearance-none rounded-xl border border-slate-100 bg-slate-50 pl-9 pr-8 text-sm font-medium text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            >
+              <option value="">All trades</option>
+              {TRADES.map((t) => (
+                <option key={t} value={t}>
+                  {t}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </div>
+
+          <div className="relative">
+            <MapPin className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-orange-500" />
+            <select
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              className="h-11 w-full appearance-none rounded-xl border border-slate-100 bg-slate-50 pl-9 pr-8 text-sm font-medium text-slate-700 focus:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+            >
+              <option value="">All locations</option>
+              {CITIES.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          </div>
+        </div>
+
         <button
           type="submit"
-          className="h-12 px-5 bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm rounded-xl flex items-center justify-center gap-1.5 transition-colors whitespace-nowrap shadow-lg shadow-violet-700/30"
+          className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 text-sm font-bold text-white shadow-sm transition-colors hover:bg-orange-600"
         >
-          Find traders
+          <Search className="h-4 w-4" />
+          Search traders
         </button>
       </div>
-      <p className="mt-2.5 text-xs text-white/30">
-        Search traders · Create login · Send message
+      <p className="mt-2.5 text-xs text-slate-400">
+        Filter by trade &amp; city · Message after login
       </p>
     </form>
   );

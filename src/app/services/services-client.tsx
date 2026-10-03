@@ -1,9 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Search, X, Wrench, Users, Star } from "lucide-react";
+import {
+  Search,
+  MapPin,
+  Star,
+  BadgeCheck,
+  Briefcase,
+  Calendar,
+  Phone,
+  Bell,
+  HardHat,
+  SlidersHorizontal,
+  ChevronDown,
+  Wrench,
+  User,
+  UserRound,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ServiceMCQModal } from "@/components/services/service-mcq-modal";
 
@@ -16,50 +31,107 @@ type Service = {
   priceTo?: number | null;
   priceUnit?: string | null;
   requestCount: number;
-  contractor: { name: string; avatar?: string | null };
-};
-
-const CATEGORY_COLORS: Record<string, string> = {
-  "Residential Construction": "bg-blue-100 text-blue-700",
-  "Commercial Construction": "bg-purple-100 text-purple-700",
-  "Industrial Construction": "bg-gray-100 text-gray-700",
-  "Infrastructure & Civil": "bg-teal-100 text-teal-700",
-  "Interior Finishing": "bg-pink-100 text-pink-700",
-  "Electrical Works": "bg-yellow-100 text-yellow-700",
-  "Plumbing & Sanitation": "bg-cyan-100 text-cyan-700",
-  "Structural Engineering": "bg-indigo-100 text-indigo-700",
-  "Renovation & Remodeling": "bg-orange-100 text-orange-700",
-  "Roofing & Waterproofing": "bg-sky-100 text-sky-700",
-  "Painting & Finishing": "bg-rose-100 text-rose-700",
-  "Landscaping": "bg-green-100 text-green-700",
-  "HVAC & Ventilation": "bg-blue-100 text-blue-700",
-  "Road & Pavement": "bg-stone-100 text-stone-700",
+  rating: number;
+  reviews: number;
+  years: number;
+  distanceKm: string;
+  city: string;
+  online: boolean;
+  availability: string;
+  tags: string[];
+  contractor: { name: string; avatar?: string | null; phone?: string | null };
 };
 
 type Props = {
   services: Service[];
   categories: string[];
+  cities: string[];
   searchQuery: string;
   categoryFilter: string;
+  locationFilter: string;
+  jobTypeFilter: string;
+  ratingFilter: string;
+  sortBy: string;
   isLoggedIn: boolean;
   totalCount: number;
 };
 
+function DummyTraderIcon() {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-1 rounded-xl bg-linear-to-br from-blue-100 via-slate-100 to-blue-50 text-blue-600">
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm">
+        <UserRound className="h-8 w-8" strokeWidth={1.5} />
+      </div>
+      <HardHat className="h-4 w-4 text-blue-500/80" />
+    </div>
+  );
+}
+
+function TraderAvatar({
+  serviceId,
+  name,
+  avatar,
+  online,
+  broken,
+  onBroken,
+}: {
+  serviceId: string;
+  name: string;
+  avatar?: string | null;
+  online: boolean;
+  broken: boolean;
+  onBroken: (id: string) => void;
+}) {
+  const showImage = !!avatar && !broken;
+
+  return (
+    <div className="relative mx-auto h-28 w-28 shrink-0 sm:mx-0 sm:h-32 sm:w-32">
+      {showImage ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={avatar!}
+          alt={name}
+          onError={() => onBroken(serviceId)}
+          className="h-full w-full rounded-xl object-cover"
+        />
+      ) : (
+        <DummyTraderIcon />
+      )}
+      {online && (
+        <span className="absolute bottom-2 left-1/2 -translate-x-1/2 rounded-full bg-emerald-500 px-2.5 py-0.5 text-[10px] font-bold text-white shadow">
+          Online
+        </span>
+      )}
+    </div>
+  );
+}
+
 export function ServicesClient({
   services,
   categories,
+  cities,
   searchQuery,
   categoryFilter,
+  locationFilter,
+  jobTypeFilter,
+  ratingFilter,
+  sortBy,
   isLoggedIn,
   totalCount,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const resume = searchParams.get("resume") === "1";
+
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [searchInput, setSearchInput] = useState(searchQuery);
+  const [locationInput, setLocationInput] = useState(locationFilter);
+  const [sideCategory, setSideCategory] = useState(categoryFilter);
+  const [sideJobType, setSideJobType] = useState(jobTypeFilter || "all");
+  const [sideRating, setSideRating] = useState(ratingFilter);
+  const [mobileFilters, setMobileFilters] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // After login/register — reopen modal for pending trader and auto-submit
   useEffect(() => {
     const pending = localStorage.getItem("pendingServiceRequest");
     if (pending && isLoggedIn) {
@@ -73,13 +145,28 @@ export function ServicesClient({
     }
   }, [isLoggedIn, services]);
 
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    const q = searchInput.trim();
+  function buildUrl(overrides: Record<string, string | undefined> = {}) {
     const params = new URLSearchParams();
-    if (q) params.set("search", q);
-    if (categoryFilter) params.set("category", categoryFilter);
-    router.push(`/services${params.toString() ? "?" + params.toString() : ""}`);
+    const next = {
+      search: searchInput.trim() || searchQuery,
+      category: sideCategory,
+      location: locationInput.trim() || locationFilter,
+      jobType: sideJobType,
+      rating: sideRating,
+      sort: sortBy,
+      ...overrides,
+    };
+    Object.entries(next).forEach(([k, v]) => {
+      if (v && v !== "all") params.set(k, v);
+    });
+    const qs = params.toString();
+    return `/services${qs ? `?${qs}` : ""}`;
+  }
+
+  function applyFilters(e?: React.FormEvent) {
+    e?.preventDefault();
+    router.push(buildUrl());
+    setMobileFilters(false);
   }
 
   function handleCloseModal() {
@@ -87,176 +174,427 @@ export function ServicesClient({
     localStorage.removeItem("pendingServiceRequest");
   }
 
-  const getContractorInitials = (name: string) =>
-    name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
+  const [brokenAvatars, setBrokenAvatars] = useState<Record<string, boolean>>({});
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top bar */}
-      <div className="bg-white border-b border-gray-100 sticky top-0 z-10 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-violet-600 font-extrabold text-lg shrink-0">BuildPro</Link>
-            <form onSubmit={handleSearch} className="flex-1 flex gap-2">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="Search trade persons, services, categories…"
-                  className="w-full h-10 pl-10 pr-4 border border-gray-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition"
-                />
-              </div>
-              <button type="submit" className="h-10 px-5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors">
-                Search
-              </button>
-              {(searchQuery || categoryFilter) && (
-                <Link href="/services" className="h-10 px-3 border border-gray-200 hover:bg-gray-50 text-gray-500 text-sm rounded-xl flex items-center gap-1 transition-colors">
-                  <X className="w-4 h-4" /> Clear
-                </Link>
-              )}
-            </form>
-          </div>
+  const locationLabel = locationFilter || "your area";
+
+  const FilterPanel = (
+    <div className="space-y-5">
+      <div>
+        <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+          <MapPin className="h-3.5 w-3.5 text-blue-600" />
+          Location
+        </label>
+        <select
+          value={locationInput}
+          onChange={(e) => setLocationInput(e.target.value)}
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+        >
+          <option value="">All locations</option>
+          {cities.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+          <Wrench className="h-3.5 w-3.5 text-blue-600" />
+          Trade / Category
+        </label>
+        <select
+          value={sideCategory}
+          onChange={(e) => setSideCategory(e.target.value)}
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+        >
+          <option value="">All Trades</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <p className="mb-2 text-sm font-semibold text-slate-800">Job Type</p>
+        <div className="space-y-2">
+          {[
+            { value: "all", label: "All" },
+            { value: "hourly", label: "Hourly Rate" },
+            { value: "fixed", label: "Fixed Price" },
+            { value: "emergency", label: "Emergency" },
+          ].map((opt) => (
+            <label key={opt.value} className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-600">
+              <input
+                type="radio"
+                name="jobType"
+                checked={sideJobType === opt.value}
+                onChange={() => setSideJobType(opt.value)}
+                className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              {opt.label}
+            </label>
+          ))}
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-6 space-y-5">
-        {/* Active search indicator */}
-        {searchQuery && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-gray-500">
-              <span className="font-semibold text-gray-900">{services.length}</span> result{services.length !== 1 ? "s" : ""} for
-            </span>
-            <span className="inline-flex items-center gap-1.5 bg-violet-100 text-violet-700 text-sm font-semibold px-3 py-1 rounded-full">
-              <Search className="w-3.5 h-3.5" />
-              {searchQuery}
-            </span>
-            <span className="text-sm text-gray-400">out of {totalCount} services</span>
-          </div>
-        )}
+      <div>
+        <label className="mb-1.5 block text-sm font-semibold text-slate-800">Availability</label>
+        <select
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          defaultValue="any"
+        >
+          <option value="any">Any Time</option>
+          <option value="today">Available today</option>
+          <option value="week">This week</option>
+        </select>
+      </div>
 
-        {/* Category filter pills */}
-        {categories.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            <Link
-              href={searchQuery ? `/services?search=${encodeURIComponent(searchQuery)}` : "/services"}
-              className={cn(
-                "text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors",
-                !categoryFilter ? "bg-violet-600 text-white border-violet-600" : "bg-white text-gray-600 border-gray-200 hover:border-violet-300 hover:text-violet-600"
-              )}
+      <div>
+        <label className="mb-1.5 block text-sm font-semibold text-slate-800">Experience Level</label>
+        <select
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          defaultValue="any"
+        >
+          <option value="any">Any Level</option>
+          <option value="junior">1–5 years</option>
+          <option value="mid">5–10 years</option>
+          <option value="senior">10+ years</option>
+        </select>
+      </div>
+
+      <div>
+        <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
+          <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+          Rating
+        </p>
+        <div className="space-y-2">
+          {[
+            { value: "4", label: "4+ Stars" },
+            { value: "3", label: "3+ Stars" },
+            { value: "2", label: "2+ Stars" },
+          ].map((opt) => (
+            <label key={opt.value} className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-600">
+              <input
+                type="checkbox"
+                checked={sideRating === opt.value}
+                onChange={() => setSideRating(sideRating === opt.value ? "" : opt.value)}
+                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+              />
+              {opt.label}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={() => applyFilters()}
+        className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+      >
+        <Search className="h-4 w-4" />
+        Search
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#f4f6f8]">
+      {/* Top marketplace bar */}
+      <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
+          <Link href="/" className="hidden shrink-0 items-center gap-2 sm:flex">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm">
+              <HardHat className="h-4 w-4 text-white" />
+            </div>
+            <div className="leading-tight">
+              <p className="text-base font-extrabold tracking-tight text-slate-900">
+                Build<span className="text-blue-600">Pro</span>
+              </p>
+              <p className="text-[10px] font-medium text-slate-400">Find · Hire · Get It Done</p>
+            </div>
+          </Link>
+
+          <form onSubmit={applyFilters} className="flex min-w-0 flex-1 items-center gap-2">
+            <div className="relative min-w-0 flex-1">
+              <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <input
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search for tradesmen (e.g. plumber, electrician, painter…)"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              />
+            </div>
+            <div className="relative hidden w-48 shrink-0 md:block">
+              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-600" />
+              <select
+                value={locationInput}
+                onChange={(e) => setLocationInput(e.target.value)}
+                className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-9 pr-8 text-sm font-medium text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              >
+                <option value="">All locations</option>
+                {cities.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            </div>
+          </form>
+
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setMobileFilters(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-600 lg:hidden"
+              aria-label="Filters"
             >
-              All ({totalCount})
+              <SlidersHorizontal className="h-4 w-4" />
+            </button>
+            <Link
+              href="/customer/register"
+              className="hidden h-10 items-center rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 sm:inline-flex"
+            >
+              Post a Job
             </Link>
-            {categories.map((cat) => {
-              const isActive = cat === categoryFilter;
-              const href = isActive
-                ? searchQuery ? `/services?search=${encodeURIComponent(searchQuery)}` : "/services"
-                : searchQuery
-                ? `/services?search=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(cat)}`
-                : `/services?category=${encodeURIComponent(cat)}`;
-              return (
-                <Link key={cat} href={href}
-                  className={cn(
-                    "text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors",
-                    isActive ? "bg-violet-600 text-white border-violet-600" : "bg-white text-gray-600 border-gray-200 hover:border-violet-300 hover:text-violet-600"
-                  )}
-                >
-                  {cat}
-                </Link>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Services grid */}
-        {services.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-16 text-center">
-            <Wrench className="w-12 h-12 text-gray-200 mx-auto mb-4" />
-            <h2 className="text-lg font-semibold text-gray-700 mb-1">
-              {searchQuery ? `No results for "${searchQuery}"` : "No services available yet"}
-            </h2>
-            <p className="text-gray-400 text-sm">
-              {searchQuery ? "Try different keywords or browse all services" : "Check back soon!"}
-            </p>
-            {searchQuery && (
-              <Link href="/services" className="mt-4 inline-flex text-sm font-semibold text-violet-600 hover:text-violet-700">
-                ← Browse all services
+            {isLoggedIn ? (
+              <Link
+                href="/customer/dashboard"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-700"
+              >
+                <User className="h-4 w-4" />
               </Link>
+            ) : (
+              <>
+                <span className="hidden h-10 w-10 items-center justify-center rounded-full text-slate-400 md:inline-flex">
+                  <Bell className="h-5 w-5" />
+                </span>
+                <Link
+                  href="/login"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600"
+                >
+                  <User className="h-4 w-4" />
+                </Link>
+              </>
             )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {services.map((service) => {
-              const contractorName = service.contractor.name.split(" — ")[0];
-              const initials = getContractorInitials(contractorName);
-              return (
-                <div key={service.id}
-                  className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 cursor-pointer flex flex-col"
-                  onClick={() => setSelectedService(service)}
-                >
-                  <div className="p-5 flex-1">
-                    {/* Category badge */}
-                    <span className={cn("text-xs font-semibold px-2.5 py-1 rounded-full", CATEGORY_COLORS[service.category] ?? "bg-gray-100 text-gray-600")}>
-                      {service.category}
-                    </span>
+        </div>
+      </header>
 
-                    {/* Title */}
-                    <h3 className="font-bold text-gray-900 text-base mt-3 leading-snug">{service.title}</h3>
+      <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[260px_1fr]">
+        {/* Sidebar filters */}
+        <aside className="hidden h-fit rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-24 lg:block">
+          <h2 className="mb-4 text-base font-bold text-slate-900">Filters</h2>
+          {FilterPanel}
+        </aside>
 
-                    {/* Description */}
-                    <p className="text-sm text-gray-500 mt-2 line-clamp-2 leading-relaxed">{service.description}</p>
+        {/* Results */}
+        <main className="min-w-0 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-slate-600">
+              Found{" "}
+              <span className="font-bold text-slate-900">{services.length}</span>{" "}
+              tradesmen{locationFilter ? ` near ${locationLabel}` : ""}
+              {searchQuery ? (
+                <>
+                  {" "}
+                  for <span className="font-semibold text-blue-700">&ldquo;{searchQuery}&rdquo;</span>
+                </>
+              ) : null}
+              <span className="text-slate-400"> · {totalCount} listed</span>
+            </p>
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <span>Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => router.push(buildUrl({ sort: e.target.value }))}
+                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              >
+                <option value="best">Best Match</option>
+                <option value="rating">Highest Rated</option>
+                <option value="price_low">Price: Low to High</option>
+                <option value="price_high">Price: High to Low</option>
+              </select>
+            </div>
+          </div>
 
-                    {/* Price */}
-                    {(service.priceFrom || service.priceTo) && (
-                      <p className="text-sm font-bold text-gray-800 mt-3">
-                        ₹{service.priceFrom?.toLocaleString("en-IN")}
-                        {service.priceTo && service.priceTo !== service.priceFrom
-                          ? ` – ₹${service.priceTo.toLocaleString("en-IN")}` : ""}
-                        {service.priceUnit && <span className="text-gray-400 font-normal text-xs"> {service.priceUnit}</span>}
-                      </p>
-                    )}
-                  </div>
+          {services.length === 0 ? (
+            <div className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+              <Wrench className="mx-auto mb-4 h-12 w-12 text-slate-200" />
+              <h2 className="text-lg font-semibold text-slate-800">No tradesmen found</h2>
+              <p className="mt-1 text-sm text-slate-500">Try different filters or clear your search.</p>
+              <Link href="/services" className="mt-4 inline-block text-sm font-semibold text-blue-600 hover:text-blue-700">
+                ← Clear all filters
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {services.map((service) => {
+                const name = service.contractor.name.split(" — ")[0];
+                const expanded = expandedId === service.id;
+                const price =
+                  service.priceFrom != null
+                    ? `₹${service.priceFrom.toLocaleString("en-IN")}`
+                    : "Quote";
+                const unit =
+                  service.priceUnit?.toLowerCase().includes("hr") ||
+                  service.priceUnit?.toLowerCase().includes("hour")
+                    ? "/hr"
+                    : service.priceUnit
+                      ? ` ${service.priceUnit}`
+                      : "";
 
-                  {/* Contractor info + CTA */}
-                  <div className="px-5 py-4 border-t border-gray-50 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 bg-orange-100 rounded-full flex items-center justify-center text-orange-700 text-xs font-bold">
-                        {initials}
+                return (
+                  <article
+                    key={service.id}
+                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row">
+                      <TraderAvatar
+                        serviceId={service.id}
+                        name={name}
+                        avatar={service.contractor.avatar}
+                        online={service.online}
+                        broken={!!brokenAvatars[service.id]}
+                        onBroken={(id) =>
+                          setBrokenAvatars((prev) => ({ ...prev, [id]: true }))
+                        }
+                      />
+
+                      {/* Details */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h3 className="text-lg font-bold text-blue-700">{name}</h3>
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600">
+                            <BadgeCheck className="h-4 w-4" />
+                            Verified Tradesman
+                          </span>
+                        </div>
+
+                        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
+                          <span className="inline-flex items-center gap-1 font-medium">
+                            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
+                            {service.rating.toFixed(1)}
+                            <span className="font-normal text-slate-400">({service.reviews} reviews)</span>
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-slate-500">
+                            <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                            {service.distanceKm} km away · {service.city}
+                          </span>
+                        </div>
+
+                        <div className="mt-2.5 flex flex-wrap gap-1.5">
+                          {service.tags.map((tag) => (
+                            <span
+                              key={tag}
+                              className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+
+                        <p className={cn("mt-2.5 text-sm leading-relaxed text-slate-600", !expanded && "line-clamp-2")}>
+                          <span className="font-medium text-slate-800">{service.title}. </span>
+                          {service.description}
+                        </p>
+                        {service.description.length > 120 && (
+                          <button
+                            type="button"
+                            onClick={() => setExpandedId(expanded ? null : service.id)}
+                            className="mt-0.5 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                          >
+                            {expanded ? "Show less" : "Read more"}
+                          </button>
+                        )}
+
+                        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-slate-500">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Briefcase className="h-3.5 w-3.5 text-slate-400" />
+                            {service.years}+ years experience
+                          </span>
+                          <span className="inline-flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                            {service.availability}
+                          </span>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-xs font-semibold text-gray-700">{contractorName}</p>
-                        <div className="flex items-center gap-1">
-                          <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                          <span className="text-[10px] text-gray-400">{service.requestCount} requests</span>
+
+                      {/* Price + actions */}
+                      <div className="flex shrink-0 flex-row items-center justify-between gap-3 border-t border-slate-100 pt-3 sm:w-36 sm:flex-col sm:items-stretch sm:justify-start sm:border-t-0 sm:border-l sm:pl-5 sm:pt-0">
+                        <div className="sm:text-right">
+                          <p className="text-xl font-extrabold text-slate-900">
+                            {price}
+                            <span className="text-sm font-semibold text-slate-500">{unit}</span>
+                          </p>
+                          <p className="text-[11px] text-slate-400">(or fixed price)</p>
+                        </div>
+                        <div className="flex gap-2 sm:mt-3 sm:flex-col">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedService(service)}
+                            className="h-10 flex-1 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 sm:flex-none"
+                          >
+                            Contact
+                          </button>
+                          {service.contractor.phone ? (
+                            <a
+                              href={`tel:${service.contractor.phone}`}
+                              className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-blue-600 px-3 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 sm:flex-none"
+                            >
+                              <Phone className="h-3.5 w-3.5" />
+                              Call
+                            </a>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setSelectedService(service)}
+                              className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-blue-600 px-3 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 sm:flex-none"
+                            >
+                              <Phone className="h-3.5 w-3.5" />
+                              Call
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); setSelectedService(service); }}
-                      className="text-xs font-bold px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg transition-colors"
-                    >
-                      Message
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {!isLoggedIn && services.length > 0 && (
-          <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5 text-center">
-            <p className="text-sm font-semibold text-violet-800">
-              👋 Search trade persons, pick one, then create login and send a message
-            </p>
-            <p className="text-xs text-violet-500 mt-1">
-              Answer a few quick questions — login only when you&apos;re ready to message
-            </p>
-          </div>
-        )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </main>
       </div>
 
-      {/* MCQ Modal */}
+      {/* Mobile filters drawer */}
+      {mobileFilters && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMobileFilters(false)}
+            aria-label="Close filters"
+          />
+          <div className="absolute inset-y-0 left-0 w-[min(100%,320px)] overflow-y-auto bg-white p-5 shadow-xl">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-base font-bold text-slate-900">Filters</h2>
+              <button
+                type="button"
+                onClick={() => setMobileFilters(false)}
+                className="rounded-lg px-2 py-1 text-sm text-slate-500 hover:bg-slate-100"
+              >
+                Close
+              </button>
+            </div>
+            {FilterPanel}
+          </div>
+        </div>
+      )}
+
       {selectedService && (
         <ServiceMCQModal
           service={selectedService}
