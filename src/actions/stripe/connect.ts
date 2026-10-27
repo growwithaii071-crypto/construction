@@ -274,7 +274,7 @@ export async function createFeeSetupIntentAction() {
 
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
-      payment_method_types: ["card"],
+      allowed_payment_method_types: ["card"],
       usage: "off_session",
       metadata: {
         buildproUserId: userId,
