@@ -148,18 +148,16 @@ export async function confirmJobAction(jobId: string) {
     return { success: false as const, message: "Job is under dispute." };
   }
 
-  if (
-    job.status !== MarketplaceJobStatus.COMPLETED &&
-    job.status !== MarketplaceJobStatus.IN_PROGRESS
-  ) {
-    // Allow confirm from IN_PROGRESS for early acceptance, or COMPLETED
-    if (job.status !== MarketplaceJobStatus.FUNDED) {
-      return { success: false as const, message: "Nothing to confirm yet." };
-    }
-  }
-
   if (job.status === MarketplaceJobStatus.PAID_OUT) {
     return { success: true as const, message: "Already paid out." };
+  }
+
+  if (
+    job.status !== MarketplaceJobStatus.COMPLETED &&
+    job.status !== MarketplaceJobStatus.IN_PROGRESS &&
+    job.status !== MarketplaceJobStatus.FUNDED
+  ) {
+    return { success: false as const, message: "Nothing to confirm yet." };
   }
 
   await prisma.marketplaceJob.update({
