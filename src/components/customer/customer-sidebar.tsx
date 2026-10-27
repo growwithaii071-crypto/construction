@@ -17,6 +17,7 @@ import {
   ChevronRight,
   MessageCircle,
   Bell,
+  Briefcase,
 } from "lucide-react";
 
 const NAV_SECTIONS = [
@@ -25,6 +26,13 @@ const NAV_SECTIONS = [
     items: [
       { href: "/customer/dashboard", label: "Dashboard", icon: LayoutDashboard },
       { href: "/customer/notifications", label: "Notifications", icon: Bell },
+    ],
+  },
+  {
+    label: "Jobs",
+    items: [
+      { href: "/customer/jobs", label: "My Jobs", icon: Briefcase },
+      { href: "/customer/jobs/new", label: "Post a Job", icon: ClipboardList },
     ],
   },
   {

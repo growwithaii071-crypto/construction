@@ -4,8 +4,10 @@ import Link from "next/link";
 import {
   Wrench, ClipboardList, CheckCircle2, Clock, Plus, ArrowRight,
   AlertCircle, DollarSign, BarChart3, Star, FileText, Users, TrendingUp,
+  Landmark,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getTraderVerification } from "@/lib/trader-verification";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Contractor Dashboard — BuildPro" };
@@ -69,7 +71,9 @@ const STATUS_LABELS: Record<string, string> = {
 export default async function ContractorDashboardPage() {
   const session = await auth();
   const firstName = session?.user?.name?.split(" ")[0] ?? "there";
-  const data = await getContractorData(session?.user?.id ?? "");
+  const userId = session?.user?.id ?? "";
+  const data = await getContractorData(userId);
+  const verification = userId ? await getTraderVerification(userId) : null;
 
   const kpis = [
     { icon: Wrench, label: "Services", value: data?.totalServices ?? 0, color: "orange", href: "/construction/services" },
@@ -89,6 +93,7 @@ export default async function ContractorDashboardPage() {
   const quickActions = [
     { href: "/construction/services/new", label: "Add Service", icon: Plus, color: "orange", desc: "List a new service" },
     { href: "/construction/requests", label: "View Requests", icon: ClipboardList, color: "blue", desc: "Manage incoming jobs" },
+    { href: "/construction/payouts", label: "Payouts", icon: Landmark, color: "green", desc: "Verify & get paid" },
     { href: "/construction/earnings", label: "Earnings", icon: DollarSign, color: "green", desc: "Track your revenue" },
     { href: "/construction/analytics", label: "Analytics", icon: BarChart3, color: "violet", desc: "Service performance" },
     { href: "/construction/reviews", label: "Reviews", icon: Star, color: "amber", desc: "Customer feedback" },
@@ -110,6 +115,28 @@ export default async function ContractorDashboardPage() {
           <Plus className="w-4 h-4" /> Add Service
         </Link>
       </div>
+
+      {verification && !verification.verified && (
+        <Link
+          href="/construction/payouts"
+          className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 transition hover:border-amber-300"
+        >
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500 text-white">
+              <Landmark className="h-5 w-5" />
+            </span>
+            <div>
+              <p className="font-bold text-amber-950">Get verified to receive job invites</p>
+              <p className="text-sm text-amber-800/80">
+                Complete Stripe Connect and authorize success fees — free to quote until accepted
+              </p>
+            </div>
+          </div>
+          <span className="inline-flex items-center gap-1 text-sm font-bold text-amber-900">
+            Verify now <ArrowRight className="h-4 w-4" />
+          </span>
+        </Link>
+      )}
 
       {/* KPI Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

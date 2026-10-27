@@ -23,6 +23,9 @@ import {
   Users,
   MessageCircle,
   Bell,
+  Landmark,
+  Inbox,
+  Briefcase,
 } from "lucide-react";
 
 const NAV_SECTIONS = [
@@ -43,6 +46,8 @@ const NAV_SECTIONS = [
   {
     label: "Requests",
     items: [
+      { href: "/construction/invitations", label: "Job Invitations", icon: Inbox },
+      { href: "/construction/jobs", label: "Accepted Jobs", icon: Briefcase },
       { href: "/construction/requests", label: "Customer Requests", icon: ClipboardList },
       { href: "/construction/messages", label: "Messages", icon: MessageCircle },
       { href: "/construction/reviews", label: "Reviews", icon: Star },
@@ -51,6 +56,7 @@ const NAV_SECTIONS = [
   {
     label: "Finance",
     items: [
+      { href: "/construction/payouts", label: "Payouts & Verify", icon: Landmark },
       { href: "/construction/earnings", label: "Earnings", icon: DollarSign },
       { href: "/construction/invoices", label: "Invoices", icon: FileText },
     ],

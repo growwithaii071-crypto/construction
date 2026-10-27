@@ -31,6 +31,8 @@ import {
   Boxes,
   Cog,
   Wallet,
+  BadgeIndianRupee,
+  Scale,
   type LucideIcon,
 } from "lucide-react";
 
@@ -76,6 +78,7 @@ const NAV: NavItem[] = [
     children: [
       { href: "/projects", label: "Projects / Jobs", icon: FolderKanban },
       { href: "/admin/services", label: "Services", icon: Wrench },
+      { href: "/disputes", label: "Disputes", icon: Scale },
       { href: "/clients", label: "Clients", icon: Building2 },
       { href: "/contractors", label: "Contractors", icon: HardHat },
     ],
@@ -129,6 +132,7 @@ const NAV: NavItem[] = [
     icon: Cog,
     children: [
       { href: "/settings", label: "General", icon: Settings },
+      { href: "/settings/pricing", label: "Marketplace Pricing", icon: BadgeIndianRupee },
       { href: "/settings/email", label: "Email / SMTP", icon: Mail },
       { href: "/settings/email-templates", label: "Email Templates", icon: Mails },
     ],

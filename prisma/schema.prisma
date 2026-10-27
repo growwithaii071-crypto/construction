@@ -173,6 +173,21 @@ model User {
   serviceRequests    ServiceRequest[] @relation("ClientRequests")
   sentMessages       Message[]        @relation("MessageSender")
 
+  /// Marketplace (quotes / jobs)
+  postedJobs         MarketplaceJob[] @relation("JobClient")
+  jobInvitations     JobInvitation[]  @relation("InvitationTrader")
+  quotes             Quote[]          @relation("QuoteTrader")
+  feeLedgerEntries   FeeLedger[]      @relation("FeeTrader")
+  payouts            Payout[]         @relation("PayoutTrader")
+  disputesRaised     Dispute[]        @relation("DisputeRaiser")
+
+  /// Stripe Connect (traders)
+  stripeAccountId       String?
+  stripeCustomerId      String?
+  stripeOnboardingDone  Boolean @default(false)
+  stripePayoutsEnabled  Boolean @default(false)
+  feePaymentMethodId    String?
+
   @@map("users")
 }
 
@@ -825,4 +840,269 @@ model EmailTemplate {
   updatedAt   DateTime @updatedAt
 
   @@map("email_templates")
+}
+
+// ============================================================
+// MARKETPLACE: Pricing, Quotes, Payment Protection
+// ============================================================
+
+enum TraderFeeType {
+  PERCENTAGE
+  FIXED
+}
+
+enum ProtectionDefaultMode {
+  OPT_IN
+  OPT_OUT
+}
+
+enum UnprotectedReleaseTiming {
+  JOB_START
+  COMPLETION
+}
+
+enum MarketplaceJobStatus {
+  OPEN
+  QUOTES_RECEIVED
+  AWAITING_PAYMENT
+  FUNDED
+  IN_PROGRESS
+  COMPLETED
+  PAID_OUT
+  EXPIRED
+  CANCELLED
+  DISPUTED
+  RESOLVED
+}
+
+enum ProtectionStatus {
+  PROTECTED
+  UNPROTECTED
+  UNDECIDED
+}
+
+enum InvitationStatus {
+  SENT
+  VIEWED
+  QUOTED
+  DECLINED
+  EXPIRED
+}
+
+enum QuoteStatus {
+  SUBMITTED
+  ACCEPTED
+  NOT_SELECTED
+  WITHDRAWN
+  EXPIRED
+}
+
+enum MarketplacePaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum FeeLedgerStatus {
+  PENDING
+  COLLECTED
+  VOIDED
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  FULL_RELEASE
+  PARTIAL_RELEASE
+  REFUNDED
+  CLOSED
+}
+
+/// Singleton-style admin-editable rates (key = "default")
+model PricingConfig {
+  id                     String                   @id @default(auto()) @map("_id") @db.ObjectId
+  key                    String                   @unique @default("default")
+  traderFeeType          TraderFeeType            @default(PERCENTAGE)
+  traderFeeRate          Float                    @default(0.10)
+  traderFeeCap           Float?
+  protectionFeeEnabled   Boolean                  @default(true)
+  protectionFeeRate      Float                    @default(0.03)
+  protectionFeeDefault   ProtectionDefaultMode    @default(OPT_IN)
+  unprotectedReleaseAt   UnprotectedReleaseTiming @default(JOB_START)
+  quoteValidDays         Int                      @default(14)
+  invitationExpiryHours  Int                      @default(48)
+  autoConfirmDays        Int                      @default(5)
+  matchingInviteCount    Int                      @default(3)
+  maxReassignments       Int                      @default(6)
+  /// Per-category overrides: { "Plumbing": { traderFeeRate: 0.08, traderFeeCap: 5000 } }
+  categoryOverrides      Json?
+  termsVersion           String                   @default("v1.0")
+  updatedById            String?                  @db.ObjectId
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+
+  @@map("pricing_config")
+}
+
+model MarketplaceJob {
+  id               String               @id @default(auto()) @map("_id") @db.ObjectId
+  title            String
+  description      String
+  category         String
+  location         String?
+  photos           String[]
+  budgetMin        Float?
+  budgetMax        Float?
+  status           MarketplaceJobStatus @default(OPEN)
+  protectionStatus ProtectionStatus     @default(UNDECIDED)
+  startDate        DateTime?
+  completedAt      DateTime?
+  confirmedAt      DateTime?
+  clientId         String               @db.ObjectId
+  acceptedQuoteId  String?              @db.ObjectId
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  client      User            @relation("JobClient", fields: [clientId], references: [id])
+  invitations JobInvitation[]
+  quotes      Quote[]
+  payments    MarketplacePayment[]
+  payouts     Payout[]
+  disputes    Dispute[]
+
+  @@index([clientId, status])
+  @@index([category, status])
+  @@map("marketplace_jobs")
+}
+
+model JobInvitation {
+  id        String           @id @default(auto()) @map("_id") @db.ObjectId
+  jobId     String           @db.ObjectId
+  traderId  String           @db.ObjectId
+  status    InvitationStatus @default(SENT)
+  rank      Int              @default(1)
+  sentAt    DateTime         @default(now())
+  expiresAt DateTime
+  viewedAt  DateTime?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  job    MarketplaceJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  trader User           @relation("InvitationTrader", fields: [traderId], references: [id])
+
+  @@index([jobId, status])
+  @@index([traderId, status])
+  @@map("job_invitations")
+}
+
+model Quote {
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  jobId       String      @db.ObjectId
+  traderId    String      @db.ObjectId
+  amount      Float
+  scope       String?
+  startDate   DateTime?
+  validUntil  DateTime
+  status      QuoteStatus @default(SUBMITTED)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  job      MarketplaceJob         @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  trader   User                   @relation("QuoteTrader", fields: [traderId], references: [id])
+  payments MarketplacePayment[]
+  feeLedger FeeLedger?
+
+  @@index([jobId, status])
+  @@index([traderId, status])
+  @@map("quotes")
+}
+
+model MarketplacePayment {
+  id                    String                   @id @default(auto()) @map("_id") @db.ObjectId
+  jobId                 String                   @db.ObjectId
+  quoteId               String                   @db.ObjectId
+  customerTotal         Float
+  protectionOptedIn     Boolean                  @default(false)
+  protectionFee         Float                    @default(0)
+  quoteAmount           Float
+  termsVersion          String
+  stripePaymentIntentId String?
+  status                MarketplacePaymentStatus @default(PENDING)
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+
+  job   MarketplaceJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  quote Quote          @relation(fields: [quoteId], references: [id])
+
+  @@index([jobId])
+  @@index([stripePaymentIntentId])
+  @@map("marketplace_payments")
+}
+
+model FeeLedger {
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  quoteId   String          @unique @db.ObjectId
+  traderId  String          @db.ObjectId
+  amount    Float
+  status    FeeLedgerStatus @default(PENDING)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+
+  quote  Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  trader User  @relation("FeeTrader", fields: [traderId], references: [id])
+
+  @@index([traderId, status])
+  @@map("fee_ledger")
+}
+
+model Payout {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  traderId        String   @db.ObjectId
+  jobId           String   @db.ObjectId
+  netAmount       Float
+  stripeTransferId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  trader User           @relation("PayoutTrader", fields: [traderId], references: [id])
+  job    MarketplaceJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([traderId])
+  @@index([jobId])
+  @@map("payouts")
+}
+
+model Dispute {
+  id         String        @id @default(auto()) @map("_id") @db.ObjectId
+  jobId      String        @db.ObjectId
+  raisedById String        @db.ObjectId
+  reason     String
+  status     DisputeStatus @default(OPEN)
+  resolution String?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  job      MarketplaceJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  raisedBy User           @relation("DisputeRaiser", fields: [raisedById], references: [id])
+
+  @@index([jobId, status])
+  @@map("disputes")
+}
+
+model AuditLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  entity    String
+  entityId  String
+  action    String
+  actorId   String?
+  before    Json?
+  after     Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([createdAt])
+  @@map("audit_log")
 }

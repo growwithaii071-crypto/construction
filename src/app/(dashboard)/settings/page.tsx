@@ -8,6 +8,7 @@ import {
   ChevronRight,
   Shield,
   Settings2,
+  BadgeIndianRupee,
 } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -45,6 +46,16 @@ const EMAIL_ITEMS: SettingItem[] = [
     desc: "Subjects & HTML for requests, messages, welcome mail",
     href: "/settings/email-templates",
     tone: "violet",
+  },
+];
+
+const MARKETPLACE_ITEMS: SettingItem[] = [
+  {
+    icon: BadgeIndianRupee,
+    label: "Pricing & protection",
+    desc: "Trader success fees, payment protection rates and matching rules",
+    href: "/settings/pricing",
+    tone: "orange",
   },
 ];
 
@@ -127,6 +138,22 @@ export default async function SettingsPage() {
           ))}
         </div>
       </section>
+
+      {isAdmin && (
+        <section className="space-y-3">
+          <div className="flex items-center gap-2">
+            <BadgeIndianRupee className="h-4 w-4 text-slate-400" />
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              Marketplace
+            </h2>
+          </div>
+          <div className="grid gap-3 lg:grid-cols-2">
+            {MARKETPLACE_ITEMS.map((item) => (
+              <SettingLink key={item.href} item={item} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {isAdmin && (
         <section className="space-y-3">
