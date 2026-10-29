@@ -2,6 +2,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Docs
 
+- **[Full site flow](docs/FULL_SITE_FLOW.md)** — public site, customer, contractor, and staff: screens, server actions, APIs, Stripe, and data. ([Word](docs/FULL_SITE_FLOW.docx))
 - **[Tester guide (marketplace QA)](docs/TESTER_GUIDE.md)** — roles, Stripe test setup, happy path, protected vs unprotected, disputes, checklists, bug template.
 
 ## Getting Started
