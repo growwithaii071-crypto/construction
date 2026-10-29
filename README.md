@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Docs
+
+- **[Tester guide (marketplace QA)](docs/TESTER_GUIDE.md)** — roles, Stripe test setup, happy path, protected vs unprotected, disputes, checklists, bug template.
+
 ## Getting Started
 
 First, run the development server:

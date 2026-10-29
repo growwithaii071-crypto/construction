@@ -25,12 +25,22 @@ async function main() {
   ];
 
   for (const u of users) {
+    const hashed = await bcrypt.hash(u.password, 12);
     const existing = await prisma.user.findUnique({ where: { email: u.email } });
     if (existing) {
-      console.log(`⚠️  Already exists: ${u.email}`);
+      await prisma.user.update({
+        where: { email: u.email },
+        data: {
+          password: hashed,
+          role: u.role,
+          isActive: true,
+          emailVerified: new Date(),
+          ...(u.avatar !== undefined ? { avatar: u.avatar } : {}),
+        },
+      });
+      console.log(`🔁 Reset password [${u.role}]: ${u.email}`);
       continue;
     }
-    const hashed = await bcrypt.hash(u.password, 12);
     await prisma.user.create({
       data: {
         name: u.name,
