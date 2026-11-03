@@ -56,3 +56,67 @@ export function computeVerified(opts: {
     opts.onboardingDone && opts.payoutsEnabled && opts.feePaymentMethodId
   );
 }
+
+/** Mask secrets for admin UI — never return full keys. */
+export function maskEnvSecret(value: string | undefined | null): string | null {
+  const v = value?.trim() ?? "";
+  if (!v) return null;
+  if (v.length <= 10) return `${v.slice(0, 3)}…`;
+  return `${v.slice(0, 7)}…${v.slice(-4)}`;
+}
+
+export type StripeEnvStatus = {
+  secretConfigured: boolean;
+  secretMasked: string | null;
+  publishableConfigured: boolean;
+  publishableMasked: string | null;
+  webhookConfigured: boolean;
+  webhookMasked: string | null;
+  appUrl: string;
+  webhookEndpointUrl: string;
+  connectReturnUrl: string;
+  connectRefreshUrl: string;
+  /** Stripe account reachability when secret key is set */
+  apiOk: boolean | null;
+  apiError: string | null;
+  livemode: boolean | null;
+};
+
+/** Server-only diagnostic for admin Stripe settings page. */
+export async function getStripeEnvStatus(): Promise<StripeEnvStatus> {
+  const secret = process.env.STRIPE_SECRET_KEY?.trim() ?? "";
+  const publishable = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
+  const webhook = process.env.STRIPE_WEBHOOK_SECRET?.trim() ?? "";
+  const base = appUrl.replace(/\/$/, "");
+
+  const status: StripeEnvStatus = {
+    secretConfigured: Boolean(secret),
+    secretMasked: maskEnvSecret(secret),
+    publishableConfigured: Boolean(publishable),
+    publishableMasked: maskEnvSecret(publishable),
+    webhookConfigured: Boolean(webhook),
+    webhookMasked: maskEnvSecret(webhook),
+    appUrl: base,
+    webhookEndpointUrl: `${base}/api/stripe/webhook`,
+    connectReturnUrl: connectReturnUrl(),
+    connectRefreshUrl: connectRefreshUrl(),
+    apiOk: null,
+    apiError: null,
+    livemode: null,
+  };
+
+  if (!secret) return status;
+
+  try {
+    const stripe = getStripe();
+    await stripe.balance.retrieve();
+    status.apiOk = true;
+    status.livemode = secret.startsWith("sk_live");
+  } catch (err) {
+    status.apiOk = false;
+    status.apiError =
+      err instanceof Error ? err.message : "Could not reach Stripe API";
+  }
+
+  return status;
+}

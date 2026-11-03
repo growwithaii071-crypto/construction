@@ -33,6 +33,7 @@ import {
   Wallet,
   BadgeIndianRupee,
   Scale,
+  CreditCard,
   type LucideIcon,
 } from "lucide-react";
 
@@ -133,6 +134,7 @@ const NAV: NavItem[] = [
     children: [
       { href: "/settings", label: "General", icon: Settings },
       { href: "/settings/pricing", label: "Marketplace Pricing", icon: BadgeIndianRupee },
+      { href: "/settings/stripe", label: "Stripe / Payments", icon: CreditCard },
       { href: "/settings/email", label: "Email / SMTP", icon: Mail },
       { href: "/settings/email-templates", label: "Email Templates", icon: Mails },
     ],

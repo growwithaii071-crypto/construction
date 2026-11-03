@@ -445,6 +445,7 @@ Admin
 Settings
    /settings              general
    /settings/pricing      marketplace rates (the money rules)
+   /settings/stripe       Stripe env status, webhook URL, Connect overview (keys stay in env)
    /settings/profile      staff profile
    /settings/email        SMTP
    /settings/email-templates

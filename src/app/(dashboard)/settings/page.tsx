@@ -9,6 +9,7 @@ import {
   Shield,
   Settings2,
   BadgeIndianRupee,
+  CreditCard,
 } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -56,6 +57,13 @@ const MARKETPLACE_ITEMS: SettingItem[] = [
     desc: "Trader success fees, payment protection rates and matching rules",
     href: "/settings/pricing",
     tone: "orange",
+  },
+  {
+    icon: CreditCard,
+    label: "Stripe / Payments",
+    desc: "Key status, webhook URL, Connect traders and payout overview",
+    href: "/settings/stripe",
+    tone: "violet",
   },
 ];
 
