@@ -39,7 +39,7 @@ Use this document for staging / production smoke tests and full regression of pr
 - Database seeded or migrated (`prisma db push` / migrate + optional seed)
 - Env vars present (see `.env.example`):
   - `STRIPE_SECRET_KEY` (`sk_test_…`)
-  - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` (`pk_test_…`)
+  - `STRIPE_PUBLISHABLE_KEY` (`pk_test_…`) — prefer this on Vercel (Sensitive OK); `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` still works as fallback
   - `STRIPE_WEBHOOK_SECRET` (`whsec_…`)
   - `NEXTAUTH_URL` / `NEXTAUTH_SECRET`
 

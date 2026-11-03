@@ -75,7 +75,7 @@ export function ConnectOnboarding({
       {!status.configured && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           Stripe keys are not set. Add <code className="rounded bg-amber-100 px-1">STRIPE_SECRET_KEY</code>{" "}
-          and <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code> to{" "}
+          and <code className="rounded bg-amber-100 px-1">STRIPE_PUBLISHABLE_KEY</code> to{" "}
           <code className="rounded bg-amber-100 px-1">.env</code>, then restart the server.
         </div>
       )}

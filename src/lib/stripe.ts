@@ -5,8 +5,17 @@ export function isStripeConfigured() {
   return Boolean(process.env.STRIPE_SECRET_KEY?.trim());
 }
 
+/**
+ * Publishable key for Stripe.js (safe to send to the browser via props).
+ * Prefer STRIPE_PUBLISHABLE_KEY (no NEXT_PUBLIC_) so Vercel can store it as Sensitive.
+ * Falls back to NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY for older envs.
+ */
 export function getStripePublishableKey() {
-  return process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
+  return (
+    process.env.STRIPE_PUBLISHABLE_KEY?.trim() ||
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ||
+    ""
+  );
 }
 
 let stripeSingleton: Stripe | null = null;
@@ -85,7 +94,7 @@ export type StripeEnvStatus = {
 /** Server-only diagnostic for admin Stripe settings page. */
 export async function getStripeEnvStatus(): Promise<StripeEnvStatus> {
   const secret = process.env.STRIPE_SECRET_KEY?.trim() ?? "";
-  const publishable = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.trim() ?? "";
+  const publishable = getStripePublishableKey();
   const webhook = process.env.STRIPE_WEBHOOK_SECRET?.trim() ?? "";
   const base = appUrl.replace(/\/$/, "");
 

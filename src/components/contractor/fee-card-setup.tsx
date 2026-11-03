@@ -148,7 +148,7 @@ export function FeeCardSetup({
   if (!publishableKey) {
     return (
       <p className="text-sm text-amber-700">
-        Add <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code> to
+        Add <code className="rounded bg-amber-100 px-1">STRIPE_PUBLISHABLE_KEY</code> to
         enable card setup.
       </p>
     );

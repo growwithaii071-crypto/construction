@@ -113,7 +113,7 @@ export function JobCheckout({
   if (!publishableKey) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        Add <code className="rounded bg-amber-100 px-1">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code> to
+        Add <code className="rounded bg-amber-100 px-1">STRIPE_PUBLISHABLE_KEY</code> to
         enable checkout.
       </div>
     );

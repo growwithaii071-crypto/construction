@@ -133,10 +133,10 @@ export default async function StripeSettingsPage() {
             hint="Platform account — receives customer payments & keeps fees"
           />
           <EnvRow
-            label="NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY"
+            label="STRIPE_PUBLISHABLE_KEY"
             ok={env.publishableConfigured}
             masked={env.publishableMasked}
-            hint="Browser checkout (mark as Config on Vercel, not Sensitive)"
+            hint="pk_test_… / pk_live_… — Sensitive OK on Vercel (no NEXT_PUBLIC_ prefix)"
           />
           <EnvRow
             label="STRIPE_WEBHOOK_SECRET"
