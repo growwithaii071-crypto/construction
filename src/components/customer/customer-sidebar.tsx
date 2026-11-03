@@ -83,12 +83,16 @@ export function CustomerSidebar({ user, onClose }: CustomerSidebarProps) {
       {/* Logo */}
       <div className="flex items-center justify-between h-16 px-5 border-b border-gray-100 shrink-0">
         <Link href="/customer/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center shadow-sm">
-            <Building2 className="w-4 h-4 text-white" />
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B2A4A] shadow-sm">
+            <Building2 className="h-4 w-4 text-white" />
           </div>
           <div>
-            <p className="font-bold text-gray-900 text-sm leading-none">BuildPro</p>
-            <p className="text-violet-600 text-[10px] font-medium leading-none mt-0.5">Customer Portal</p>
+            <p className="text-sm font-bold leading-none text-gray-900">
+              Build<span className="text-orange-500">Pro</span>
+            </p>
+            <p className="mt-0.5 text-[10px] font-medium leading-none text-orange-500">
+              Customer Portal
+            </p>
           </div>
         </Link>
         {onClose && (
@@ -117,19 +121,19 @@ export function CustomerSidebar({ user, onClose }: CustomerSidebarProps) {
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
                       active
-                        ? "bg-violet-50 text-violet-700"
+                        ? "bg-orange-50 text-[#0B2A4A]"
                         : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     )}
                   >
                     <Icon
                       className={cn(
-                        "w-4 h-4 shrink-0",
-                        active ? "text-violet-600" : "text-gray-400"
+                        "h-4 w-4 shrink-0",
+                        active ? "text-orange-500" : "text-gray-400"
                       )}
                     />
                     {item.label}
                     {active && (
-                      <div className="ml-auto w-1.5 h-1.5 bg-violet-500 rounded-full" />
+                      <div className="ml-auto h-1.5 w-1.5 rounded-full bg-orange-500" />
                     )}
                   </Link>
                 );
@@ -153,7 +157,7 @@ export function CustomerSidebar({ user, onClose }: CustomerSidebarProps) {
       {/* User card */}
       <div className="p-3 border-t border-gray-100 shrink-0">
         <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-gray-50 transition-colors">
-          <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#0B2A4A] text-xs font-bold text-white">
             {initials}
           </div>
           <div className="flex-1 min-w-0">

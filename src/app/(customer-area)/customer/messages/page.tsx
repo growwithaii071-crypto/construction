@@ -55,7 +55,7 @@ export default async function CustomerMessagesPage() {
           </p>
           <Link
             href="/customer/requests"
-            className="mt-5 inline-flex rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-violet-700"
+            className="mt-5 inline-flex rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-orange-600"
           >
             View My Requests
           </Link>
@@ -69,7 +69,7 @@ export default async function CustomerMessagesPage() {
               <Link
                 key={t.id}
                 href={`/customer/messages/${t.id}`}
-                className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-violet-200 hover:shadow-md"
+                className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:border-orange-200 hover:shadow-md"
               >
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-700">
                   {name.charAt(0).toUpperCase()}
@@ -86,7 +86,7 @@ export default async function CustomerMessagesPage() {
                     {last?.body ?? "Start the conversation…"}
                   </p>
                 </div>
-                <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-bold text-violet-600">
+                <span className="rounded-full bg-orange-50 px-2.5 py-1 text-[10px] font-bold text-orange-600">
                   {t._count.messages}
                 </span>
               </Link>

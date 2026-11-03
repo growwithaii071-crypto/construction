@@ -4,8 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useRouter } from "next/navigation";
-import { Loader2, Shield, AlertCircle, CheckCircle2, Lock } from "lucide-react";
+import { Loader2, Shield, CheckCircle2, Lock } from "lucide-react";
 import { getCheckoutBootstrapAction } from "@/actions/marketplace/payments";
+import { CheckoutSkeleton } from "@/components/ui/checkout-skeleton";
+import { BilingualAlert } from "@/components/ui/bilingual-alert";
 
 function CheckoutForm({
   amount,
@@ -19,6 +21,7 @@ function CheckoutForm({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,19 +43,30 @@ function CheckoutForm({
       return;
     }
 
-    // Webhook is source of truth; refresh after short delay
+    setSubmitted(true);
     router.push(`/customer/jobs/${jobId}?paid=1`);
     router.refresh();
+  }
+
+  if (submitted) {
+    return (
+      <BilingualAlert
+        tone="info"
+        en="Payment submitted. Waiting for Stripe webhook to mark the job FUNDED…"
+        hi="भुगतान भेज दिया गया। Stripe webhook से जॉब FUNDED होने तक प्रतीक्षा करें…"
+      />
+    );
   }
 
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <PaymentElement options={{ layout: "tabs" }} />
       {error && (
-        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-          {error}
-        </div>
+        <BilingualAlert
+          tone="error"
+          en={error}
+          hi="भुगतान असफल। कार्ड जाँचें या दोबारा कोशिश करें।"
+        />
       )}
       <button
         type="submit"
@@ -62,7 +76,7 @@ function CheckoutForm({
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Processing…
+            Processing… · प्रोसेस हो रहा है…
           </>
         ) : (
           <>
@@ -72,7 +86,9 @@ function CheckoutForm({
         )}
       </button>
       <p className="text-center text-[11px] text-slate-400">
-        Payment status is confirmed by Stripe webhooks — not the browser redirect alone.
+        Final status comes from Stripe webhook, not this screen alone.
+        <br />
+        अंतिम स्थिति webhook से अपडेट होती है।
       </p>
     </form>
   );
@@ -112,27 +128,25 @@ export function JobCheckout({
 
   if (!publishableKey) {
     return (
-      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        Add <code className="rounded bg-amber-100 px-1">STRIPE_PUBLISHABLE_KEY</code> to
-        enable checkout.
-      </div>
+      <BilingualAlert
+        tone="warning"
+        en="Checkout unavailable — STRIPE_PUBLISHABLE_KEY is not configured."
+        hi="भुगतान उपलब्ध नहीं — Stripe publishable key सेट नहीं है।"
+      />
     );
   }
 
   if (loading || !boot) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-slate-500">
-        <Loader2 className="h-4 w-4 animate-spin" /> Preparing secure checkout…
-      </div>
-    );
+    return <CheckoutSkeleton />;
   }
 
   if (!boot.success) {
     return (
-      <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-        {boot.message}
-      </div>
+      <BilingualAlert
+        tone="error"
+        en={boot.message}
+        hi="चेकआउट शुरू नहीं हो सका। जॉब स्टेटस या Stripe सेटिंग जाँचें।"
+      />
     );
   }
 
@@ -146,7 +160,13 @@ export function JobCheckout({
   }
 
   if (!("clientSecret" in boot) || !boot.clientSecret || !stripePromise) {
-    return null;
+    return (
+      <BilingualAlert
+        tone="warning"
+        en="Webhook pending or payment intent missing. Refresh in a moment."
+        hi="Webhook लंबित है या पेमेंट इंटेंट नहीं मिला। थोड़ी देर बाद रिफ्रेश करें।"
+      />
+    );
   }
 
   return (
@@ -161,16 +181,16 @@ export function JobCheckout({
           {boot.protectionOptedIn ? (
             <div className="flex justify-between text-slate-600">
               <span className="inline-flex items-center gap-1">
-                <Shield className="h-3.5 w-3.5 text-blue-600" /> Protection fee
+                <Shield className="h-3.5 w-3.5 text-orange-500" /> Protection fee
               </span>
               <span>₹{boot.protectionFee.toLocaleString("en-IN")}</span>
             </div>
           ) : (
             <p className="text-xs text-slate-400">
-              Unprotected — report-a-problem only, no refund guarantee. Still paid via BuildPro.
+              Unprotected — report-a-problem only, no refund guarantee.
             </p>
           )}
-          <div className="flex justify-between border-t border-slate-100 pt-2 font-bold text-slate-900">
+          <div className="flex justify-between border-t border-slate-100 pt-2 font-bold text-[#0B2A4A]">
             <span>Total</span>
             <span>₹{boot.amount.toLocaleString("en-IN")}</span>
           </div>

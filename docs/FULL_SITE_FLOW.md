@@ -446,6 +446,8 @@ Settings
    /settings              general
    /settings/pricing      marketplace rates (the money rules)
    /settings/stripe       Stripe env status, webhook URL, Connect overview (keys stay in env)
+   Cron                   GET /api/cron/marketplace (hourly) — invite/quote expiry + auto-confirm
+   Receipts               /customer/jobs/[id]/receipt · /construction/jobs/[id]/receipt
    /settings/profile      staff profile
    /settings/email        SMTP
    /settings/email-templates

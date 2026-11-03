@@ -71,7 +71,7 @@ export default async function CustomerProfilePage() {
   return (
     <div className="space-y-6 p-4 lg:p-6">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-700 via-violet-600 to-indigo-700 p-6 text-white shadow-lg sm:p-8">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B2A4A] via-[#123A5C] to-orange-700 p-6 text-white shadow-lg sm:p-8">
         <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
         <div className="pointer-events-none absolute -bottom-16 left-20 h-40 w-40 rounded-full bg-fuchsia-400/20 blur-2xl" />
 
@@ -88,14 +88,14 @@ export default async function CustomerProfilePage() {
                   Customer
                 </span>
               </div>
-              <p className="text-sm text-violet-100">{email}</p>
-              <p className="mt-1 text-xs text-violet-200/80">Member since {memberSince}</p>
+              <p className="text-sm text-orange-100">{email}</p>
+              <p className="mt-1 text-xs text-orange-100/80">Member since {memberSince}</p>
             </div>
           </div>
 
           <Link
             href="/customer/services"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-violet-700 shadow-sm transition hover:bg-violet-50"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-[#0B2A4A] shadow-sm transition hover:bg-orange-50"
           >
             Browse Services
             <ArrowRight className="h-4 w-4" />
@@ -106,7 +106,7 @@ export default async function CustomerProfilePage() {
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          { label: "Total Requests", value: stats.total, icon: ClipboardList, color: "text-violet-600 bg-violet-50" },
+          { label: "Total Requests", value: stats.total, icon: ClipboardList, color: "text-orange-600 bg-orange-50" },
           { label: "Pending", value: stats.pending, icon: Clock, color: "text-amber-600 bg-amber-50" },
           { label: "Active Jobs", value: stats.active, icon: Wrench, color: "text-blue-600 bg-blue-50" },
           { label: "Completed", value: stats.completed, icon: CheckCircle2, color: "text-green-600 bg-green-50" },
@@ -147,7 +147,7 @@ export default async function CustomerProfilePage() {
                   key={item.label}
                   className="flex items-start gap-3 rounded-xl border border-gray-50 bg-gray-50/70 p-3.5"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-600">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="min-w-0">
@@ -177,10 +177,10 @@ export default async function CustomerProfilePage() {
                   <Link
                     key={l.href}
                     href={l.href}
-                    className="flex items-center justify-between rounded-xl border border-gray-100 px-3.5 py-3 text-sm font-semibold text-gray-700 transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700"
+                    className="flex items-center justify-between rounded-xl border border-gray-100 px-3.5 py-3 text-sm font-semibold text-gray-700 transition hover:border-orange-200 hover:bg-orange-50 hover:text-[#0B2A4A]"
                   >
                     <span className="flex items-center gap-2.5">
-                      <Icon className="h-4 w-4 text-violet-500" />
+                      <Icon className="h-4 w-4 text-orange-500" />
                       {l.label}
                     </span>
                     <ArrowRight className="h-4 w-4 text-gray-300" />
@@ -190,20 +190,20 @@ export default async function CustomerProfilePage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-violet-100 bg-violet-50 p-5">
-            <h3 className="font-bold text-violet-900">Activity</h3>
-            <p className="mt-1 text-sm text-violet-700/80">
+          <div className="rounded-2xl border border-orange-100 bg-orange-50 p-5">
+            <h3 className="font-bold text-[#0B2A4A]">Activity</h3>
+            <p className="mt-1 text-sm text-[#0B2A4A]/80">
               You&apos;ve sent <strong>{messageCount}</strong> message{messageCount === 1 ? "" : "s"} and have{" "}
               <strong>{stats.active}</strong> active job{stats.active === 1 ? "" : "s"}.
             </p>
-            <div className="mt-4 space-y-2 text-sm text-violet-800">
+            <div className="mt-4 space-y-2 text-sm text-[#0B2A4A]">
               <a href="mailto:support@buildpro.in" className="flex items-center gap-2 font-medium hover:underline">
                 <Mail className="h-4 w-4" /> support@buildpro.in
               </a>
               <a href="tel:+919876543210" className="flex items-center gap-2 font-medium hover:underline">
                 <Phone className="h-4 w-4" /> +91 98765 43210
               </a>
-              <p className="flex items-center gap-2 text-violet-600/80">
+              <p className="flex items-center gap-2 text-orange-600/80">
                 <MapPin className="h-4 w-4" /> Mumbai, India
               </p>
             </div>

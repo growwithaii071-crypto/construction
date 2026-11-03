@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "My Jobs — BuildPro" };
 const STATUS_STYLES: Record<string, string> = {
   OPEN: "bg-amber-50 text-amber-700",
   QUOTES_RECEIVED: "bg-blue-50 text-blue-700",
-  AWAITING_PAYMENT: "bg-violet-50 text-violet-700",
+  AWAITING_PAYMENT: "bg-orange-50 text-[#0B2A4A]",
   FUNDED: "bg-emerald-50 text-emerald-700",
   IN_PROGRESS: "bg-indigo-50 text-indigo-700",
   COMPLETED: "bg-green-50 text-green-700",

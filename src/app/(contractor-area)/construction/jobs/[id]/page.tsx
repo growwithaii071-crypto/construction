@@ -3,8 +3,9 @@ import { UserRole, QuoteStatus } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MapPin, BadgeCheck } from "lucide-react";
+import { ArrowLeft, MapPin, BadgeCheck, FileText } from "lucide-react";
 import { TraderJobActions } from "@/components/marketplace/job-lifecycle-actions";
+import { JobStatusTimeline } from "@/components/marketplace/job-status-timeline";
 import { processAutoConfirms } from "@/lib/marketplace-payouts";
 import type { Metadata } from "next";
 
@@ -48,6 +49,8 @@ export default async function ContractorJobDetailPage({
         <ArrowLeft className="h-4 w-4" />
         Accepted jobs
       </Link>
+
+      <JobStatusTimeline status={job.status} />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -111,8 +114,15 @@ export default async function ContractorJobDetailPage({
           </div>
         )}
 
-        <div className="mt-6">
+        <div className="mt-6 flex flex-wrap items-center gap-3">
           <TraderJobActions jobId={job.id} status={job.status} />
+          <Link
+            href={`/construction/jobs/${job.id}/receipt`}
+            className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+          >
+            <FileText className="h-4 w-4" />
+            Receipt / payout PDF
+          </Link>
         </div>
 
         {job.protectionStatus === "UNPROTECTED" && job.status === "FUNDED" && (

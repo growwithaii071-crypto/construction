@@ -1,11 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
   Loader2,
   BadgeCheck,
-  AlertCircle,
   ExternalLink,
   RefreshCw,
   Landmark,
@@ -17,6 +16,8 @@ import {
 } from "@/actions/stripe/connect";
 import type { TraderConnectStatus } from "@/lib/stripe";
 import { FeeCardSetup } from "@/components/contractor/fee-card-setup";
+import { BilingualAlert } from "@/components/ui/bilingual-alert";
+import { ConnectSkeleton } from "@/components/ui/checkout-skeleton";
 import { cn } from "@/lib/utils";
 
 export function ConnectOnboarding({
@@ -30,6 +31,13 @@ export function ConnectOnboarding({
   const [status, setStatus] = useState(initial);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [booting, setBooting] = useState(true);
+
+  // Brief skeleton so Connect UI never flashes empty
+  useEffect(() => {
+    const t = setTimeout(() => setBooting(false), 280);
+    return () => clearTimeout(t);
+  }, []);
 
   function startOnboarding() {
     setError(null);
@@ -70,21 +78,26 @@ export function ConnectOnboarding({
     },
   ];
 
+  if (booting) {
+    return <ConnectSkeleton />;
+  }
+
   return (
     <div className="space-y-6">
       {!status.configured && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          Stripe keys are not set. Add <code className="rounded bg-amber-100 px-1">STRIPE_SECRET_KEY</code>{" "}
-          and <code className="rounded bg-amber-100 px-1">STRIPE_PUBLISHABLE_KEY</code> to{" "}
-          <code className="rounded bg-amber-100 px-1">.env</code>, then restart the server.
-        </div>
+        <BilingualAlert
+          tone="warning"
+          en="Stripe keys are not set. Add STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY, then redeploy."
+          hi="Stripe keys सेट नहीं हैं। Keys जोड़कर redeploy करें।"
+        />
       )}
 
       {error && (
-        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-          {error}
-        </div>
+        <BilingualAlert
+          tone="error"
+          en={error}
+          hi="Connect सेटअप असफल। दोबारा कोशिश करें या Stripe Dashboard जाँचें।"
+        />
       )}
 
       {/* Status banner */}

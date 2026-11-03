@@ -3,11 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import { Loader2, CreditCard, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, CreditCard, CheckCircle2 } from "lucide-react";
 import {
   createFeeSetupIntentAction,
   saveFeePaymentMethodAction,
 } from "@/actions/stripe/connect";
+import { BilingualAlert } from "@/components/ui/bilingual-alert";
+import { ConnectSkeleton } from "@/components/ui/checkout-skeleton";
 
 function SetupForm({ onSaved }: { onSaved: () => void }) {
   const stripe = useStripe();
@@ -72,10 +74,11 @@ function SetupForm({ onSaved }: { onSaved: () => void }) {
     <form onSubmit={handleSubmit} className="space-y-4">
       <PaymentElement options={{ layout: "tabs" }} />
       {error && (
-        <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-          {error}
-        </div>
+        <BilingualAlert
+          tone="error"
+          en={error}
+          hi="कार्ड सेव नहीं हो सका। दोबारा कोशिश करें।"
+        />
       )}
       <button
         type="submit"
@@ -147,27 +150,25 @@ export function FeeCardSetup({
 
   if (!publishableKey) {
     return (
-      <p className="text-sm text-amber-700">
-        Add <code className="rounded bg-amber-100 px-1">STRIPE_PUBLISHABLE_KEY</code> to
-        enable card setup.
-      </p>
+      <BilingualAlert
+        tone="warning"
+        en="Add STRIPE_PUBLISHABLE_KEY to enable fee card setup."
+        hi="फी कार्ड सेटअप के लिए STRIPE_PUBLISHABLE_KEY जोड़ें।"
+      />
     );
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center gap-2 text-sm text-slate-500">
-        <Loader2 className="h-4 w-4 animate-spin" /> Preparing secure card form…
-      </div>
-    );
+    return <ConnectSkeleton />;
   }
 
   if (error) {
     return (
-      <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-        <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
-        {error}
-      </div>
+      <BilingualAlert
+        tone="error"
+        en={error}
+        hi="कार्ड फॉर्म लोड नहीं हुआ। Stripe / webhook सेटिंग जाँचें।"
+      />
     );
   }
 

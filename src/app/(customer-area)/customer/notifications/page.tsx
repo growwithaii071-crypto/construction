@@ -23,7 +23,7 @@ export default async function CustomerNotificationsPage() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900">
-            <Bell className="h-6 w-6 text-violet-600" />
+            <Bell className="h-6 w-6 text-orange-600" />
             Notifications
           </h1>
           <p className="mt-1 text-sm text-slate-500">
@@ -34,7 +34,7 @@ export default async function CustomerNotificationsPage() {
           <span className="rounded-xl border border-slate-200 bg-white px-3 py-2 font-semibold text-slate-700 shadow-sm">
             {items.length} total
           </span>
-          <span className="rounded-xl border border-violet-100 bg-violet-50 px-3 py-2 font-semibold text-violet-700">
+          <span className="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2 font-semibold text-[#0B2A4A]">
             {unread} unread
           </span>
         </div>

@@ -3,7 +3,9 @@ import { UserRole, InvitationStatus, QuoteStatus } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, MapPin, Users } from "lucide-react";
+import { ArrowLeft, MapPin, Users, FileText } from "lucide-react";
+import { JobStatusTimeline } from "@/components/marketplace/job-status-timeline";
+import { BilingualAlert } from "@/components/ui/bilingual-alert";
 import { maintainLiveInvitations } from "@/lib/matching";
 import { CancelJobButton } from "@/components/marketplace/cancel-job-button";
 import { AcceptQuotePanel } from "@/components/marketplace/accept-quote-panel";
@@ -112,16 +114,34 @@ export default async function CustomerJobDetailPage({
                 {job.protectionStatus}
               </span>
             )}
+            {[
+              "FUNDED",
+              "IN_PROGRESS",
+              "COMPLETED",
+              "PAID_OUT",
+              "RESOLVED",
+            ].includes(job.status) && (
+              <Link
+                href={`/customer/jobs/${job.id}/receipt`}
+                className="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-bold text-emerald-800 ring-1 ring-emerald-100 hover:bg-emerald-100"
+              >
+                <FileText className="h-3 w-3" />
+                Receipt PDF
+              </Link>
+            )}
           </div>
         </div>
       </div>
 
-      {sp.paid === "1" && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-          Thanks — if Stripe confirms the payment, this job will show as <strong>FUNDED</strong>{" "}
-          shortly (webhook).
-        </div>
+      {sp.paid === "1" && job.status === "AWAITING_PAYMENT" && (
+        <BilingualAlert
+          tone="info"
+          en="Webhook pending… Payment sent. Job becomes FUNDED when Stripe confirms."
+          hi="Webhook लंबित… भुगतान भेज दिया। Stripe कन्फर्म होते ही जॉब FUNDED होगा।"
+        />
       )}
+
+      <JobStatusTimeline status={job.status} />
 
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="font-bold text-slate-900">Description</h2>
@@ -157,9 +177,31 @@ export default async function CustomerJobDetailPage({
         </div>
 
         {invitations.length === 0 ? (
-          <p className="text-sm text-slate-500">
-            No traders invited yet. Verified traders in this category will be matched as they join.
-          </p>
+          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center">
+            <Users className="mx-auto mb-2 h-8 w-8 text-slate-300" />
+            <p className="font-semibold text-slate-800">No invitations yet</p>
+            <p className="mt-1 text-sm text-slate-500">
+              No matched traders yet for <span className="font-medium">{job.category}</span>.
+              Verified traders in this category get invited automatically.
+            </p>
+            <p className="mt-1 text-xs text-slate-400">
+              अभी कोई निमंत्रण नहीं · इस कैटेगरी में verified traders जुड़ने पर आमंत्रित होंगे।
+            </p>
+            <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <Link
+                href="/customer/jobs/new"
+                className="inline-flex h-9 items-center rounded-lg bg-orange-500 px-3 text-xs font-bold text-white hover:bg-orange-600"
+              >
+                Post another job
+              </Link>
+              <Link
+                href="/services"
+                className="inline-flex h-9 items-center rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-[#0B2A4A] hover:bg-slate-50"
+              >
+                Browse traders
+              </Link>
+            </div>
+          </div>
         ) : (
           <ul className="space-y-2">
             {invitations.map((inv) => (
@@ -237,7 +279,7 @@ export default async function CustomerJobDetailPage({
         )}
 
         {job.status === "AWAITING_PAYMENT" && (
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-violet-100 bg-violet-50 px-4 py-3 text-sm text-violet-900">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-100 bg-orange-50 px-4 py-3 text-sm text-[#0B2A4A]">
             <p>Quote accepted — pay securely to fund the job.</p>
             <Link
               href={`/customer/jobs/${job.id}/pay`}

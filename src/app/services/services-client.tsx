@@ -39,6 +39,7 @@ type Service = {
   online: boolean;
   availability: string;
   tags: string[];
+  verified?: boolean;
   contractor: { name: string; avatar?: string | null; phone?: string | null };
 };
 
@@ -52,6 +53,11 @@ type Props = {
   jobTypeFilter: string;
   ratingFilter: string;
   sortBy: string;
+  priceMin: string;
+  priceMax: string;
+  verifiedOnly: boolean;
+  availabilityFilter: string;
+  experienceFilter: string;
   isLoggedIn: boolean;
   totalCount: number;
 };
@@ -116,6 +122,11 @@ export function ServicesClient({
   jobTypeFilter,
   ratingFilter,
   sortBy,
+  priceMin,
+  priceMax,
+  verifiedOnly,
+  availabilityFilter,
+  experienceFilter,
   isLoggedIn,
   totalCount,
 }: Props) {
@@ -129,6 +140,11 @@ export function ServicesClient({
   const [sideCategory, setSideCategory] = useState(categoryFilter);
   const [sideJobType, setSideJobType] = useState(jobTypeFilter || "all");
   const [sideRating, setSideRating] = useState(ratingFilter);
+  const [sidePriceMin, setSidePriceMin] = useState(priceMin);
+  const [sidePriceMax, setSidePriceMax] = useState(priceMax);
+  const [sideVerified, setSideVerified] = useState(verifiedOnly);
+  const [sideAvailability, setSideAvailability] = useState(availabilityFilter || "any");
+  const [sideExperience, setSideExperience] = useState(experienceFilter || "any");
   const [mobileFilters, setMobileFilters] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -154,10 +170,15 @@ export function ServicesClient({
       jobType: sideJobType,
       rating: sideRating,
       sort: sortBy,
+      priceMin: sidePriceMin.trim(),
+      priceMax: sidePriceMax.trim(),
+      verified: sideVerified ? "1" : "",
+      availability: sideAvailability,
+      experience: sideExperience,
       ...overrides,
     };
     Object.entries(next).forEach(([k, v]) => {
-      if (v && v !== "all") params.set(k, v);
+      if (v && v !== "all" && v !== "any") params.set(k, v);
     });
     const qs = params.toString();
     return `/services${qs ? `?${qs}` : ""}`;
@@ -166,6 +187,21 @@ export function ServicesClient({
   function applyFilters(e?: React.FormEvent) {
     e?.preventDefault();
     router.push(buildUrl());
+    setMobileFilters(false);
+  }
+
+  function clearFilters() {
+    setSearchInput("");
+    setLocationInput("");
+    setSideCategory("");
+    setSideJobType("all");
+    setSideRating("");
+    setSidePriceMin("");
+    setSidePriceMax("");
+    setSideVerified(false);
+    setSideAvailability("any");
+    setSideExperience("any");
+    router.push("/services");
     setMobileFilters(false);
   }
 
@@ -242,10 +278,35 @@ export function ServicesClient({
       </div>
 
       <div>
+        <label className="mb-1.5 block text-sm font-semibold text-slate-800">
+          Price range (₹ from)
+        </label>
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            type="number"
+            min={0}
+            placeholder="Min"
+            value={sidePriceMin}
+            onChange={(e) => setSidePriceMin(e.target.value)}
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          />
+          <input
+            type="number"
+            min={0}
+            placeholder="Max"
+            value={sidePriceMax}
+            onChange={(e) => setSidePriceMax(e.target.value)}
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          />
+        </div>
+      </div>
+
+      <div>
         <label className="mb-1.5 block text-sm font-semibold text-slate-800">Availability</label>
         <select
+          value={sideAvailability}
+          onChange={(e) => setSideAvailability(e.target.value)}
           className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-          defaultValue="any"
         >
           <option value="any">Any Time</option>
           <option value="today">Available today</option>
@@ -256,8 +317,9 @@ export function ServicesClient({
       <div>
         <label className="mb-1.5 block text-sm font-semibold text-slate-800">Experience Level</label>
         <select
+          value={sideExperience}
+          onChange={(e) => setSideExperience(e.target.value)}
           className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-          defaultValue="any"
         >
           <option value="any">Any Level</option>
           <option value="junior">1–5 years</option>
@@ -290,14 +352,34 @@ export function ServicesClient({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={() => applyFilters()}
-        className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
-      >
-        <Search className="h-4 w-4" />
-        Search
-      </button>
+      <label className="flex cursor-pointer items-center gap-2.5 text-sm font-semibold text-slate-800">
+        <input
+          type="checkbox"
+          checked={sideVerified}
+          onChange={(e) => setSideVerified(e.target.checked)}
+          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+        />
+        <BadgeCheck className="h-4 w-4 text-blue-600" />
+        Verified traders only
+      </label>
+
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          onClick={() => applyFilters()}
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+        >
+          <Search className="h-4 w-4" />
+          Apply filters
+        </button>
+        <button
+          type="button"
+          onClick={clearFilters}
+          className="flex h-10 w-full items-center justify-center rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+        >
+          Clear all
+        </button>
+      </div>
     </div>
   );
 
@@ -469,10 +551,16 @@ export function ServicesClient({
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="text-lg font-bold text-blue-700">{name}</h3>
-                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600">
-                            <BadgeCheck className="h-4 w-4" />
-                            Verified Tradesman
-                          </span>
+                          {service.verified ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600">
+                              <BadgeCheck className="h-4 w-4" />
+                              Verified Tradesman
+                            </span>
+                          ) : (
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-500">
+                              Pending verification
+                            </span>
+                          )}
                         </div>
 
                         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">

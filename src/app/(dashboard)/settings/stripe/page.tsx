@@ -272,6 +272,17 @@ export default async function StripeSettingsPage() {
         </a>
       </section>
 
+      <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
+        <p className="font-semibold text-slate-800">Marketplace cron</p>
+        <p className="mt-1">
+          Hourly job: invite expiry, quote expiry, auto-confirm payouts →{" "}
+          <code className="rounded bg-white px-1">GET /api/cron/marketplace</code> with{" "}
+          <code className="rounded bg-white px-1">Authorization: Bearer CRON_SECRET</code>. Set{" "}
+          <code className="rounded bg-white px-1">CRON_SECRET</code> on Vercel (same value Vercel
+          Cron uses).
+        </p>
+      </div>
+
       <p className="text-xs text-slate-400">
         Contractors complete Connect + fee card themselves at{" "}
         <code className="rounded bg-slate-100 px-1">/construction/payouts</code>. Customers pay

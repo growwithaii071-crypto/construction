@@ -6,6 +6,7 @@ import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getStripePublishableKey } from "@/lib/stripe";
 import { JobCheckout } from "@/components/marketplace/job-checkout";
+import { BilingualAlert } from "@/components/ui/bilingual-alert";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Pay for job — BuildPro" };
@@ -61,9 +62,11 @@ export default async function JobPayPage({
       </div>
 
       {sp.paid === "1" && (
-        <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
-          Payment submitted. Final status updates when Stripe confirms via webhook.
-        </div>
+        <BilingualAlert
+          tone="info"
+          en="Webhook pending… Payment submitted. Final status updates when Stripe confirms."
+          hi="Webhook लंबित… भुगतान भेज दिया गया। Stripe कन्फर्म होने पर स्टेटस अपडेट होगा।"
+        />
       )}
 
       <JobCheckout jobId={job.id} publishableKey={getStripePublishableKey()} />

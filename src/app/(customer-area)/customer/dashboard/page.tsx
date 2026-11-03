@@ -25,7 +25,7 @@ export const metadata: Metadata = { title: "Dashboard — BuildPro Customer" };
 const STATUS_STYLES: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-700 border-amber-200",
   ACCEPTED: "bg-blue-50 text-blue-700 border-blue-200",
-  IN_PROGRESS: "bg-violet-50 text-violet-700 border-violet-200",
+  IN_PROGRESS: "bg-orange-50 text-[#0B2A4A] border-orange-200",
   COMPLETED: "bg-green-50 text-green-700 border-green-200",
   REJECTED: "bg-red-50 text-red-600 border-red-200",
 };
@@ -105,7 +105,7 @@ export default async function CustomerDashboardPage() {
       value: data?.total ?? 0,
       sub: "All time",
       icon: ClipboardList,
-      color: "violet",
+      color: "orange",
       href: "/customer/requests",
     },
     {
@@ -135,7 +135,7 @@ export default async function CustomerDashboardPage() {
   ];
 
   const colorMap: Record<string, string> = {
-    violet: "bg-violet-50 text-violet-600",
+    orange: "bg-orange-50 text-orange-600",
     amber: "bg-amber-50 text-amber-600",
     blue: "bg-blue-50 text-blue-600",
     green: "bg-green-50 text-green-600",
@@ -148,7 +148,7 @@ export default async function CustomerDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5 mb-1">
-            <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
               <Building2 className="w-4 h-4 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900">
@@ -161,7 +161,7 @@ export default async function CustomerDashboardPage() {
         </div>
         <Link
           href="/customer/services"
-          className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
           Browse Services
@@ -201,7 +201,7 @@ export default async function CustomerDashboardPage() {
               <ClipboardList className="w-4 h-4 text-gray-400" />
               My Service Requests
             </h2>
-            <Link href="/customer/requests" className="text-xs text-violet-600 hover:text-violet-700 font-semibold">
+            <Link href="/customer/requests" className="text-xs text-orange-600 hover:text-[#0B2A4A] font-semibold">
               View all →
             </Link>
           </div>
@@ -215,7 +215,7 @@ export default async function CustomerDashboardPage() {
               </p>
               <Link
                 href="/customer/services"
-                className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
+                className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2.5 rounded-xl text-sm transition-colors"
               >
                 <Wrench className="w-4 h-4" />
                 Browse Services
@@ -258,7 +258,7 @@ export default async function CustomerDashboardPage() {
                         <td className="py-3.5 px-6 text-right">
                           <Link
                             href="/customer/requests"
-                            className="text-xs text-violet-600 hover:text-violet-700 font-semibold"
+                            className="text-xs text-orange-600 hover:text-[#0B2A4A] font-semibold"
                           >
                             View
                           </Link>
@@ -282,7 +282,7 @@ export default async function CustomerDashboardPage() {
               icon: Wrench,
               label: "Browse Services",
               desc: `${data?.availableServices ?? 0} services available`,
-              color: "violet",
+              color: "orange",
             },
             {
               href: "/customer/requests",
@@ -308,7 +308,7 @@ export default async function CustomerDashboardPage() {
           ].map((action) => {
             const Icon = action.icon;
             const acColor: Record<string, string> = {
-              violet: "bg-violet-50 text-violet-600",
+              orange: "bg-orange-50 text-orange-600",
               blue: "bg-blue-50 text-blue-600",
               green: "bg-green-50 text-green-600",
               gray: "bg-gray-50 text-gray-500",
@@ -321,12 +321,12 @@ export default async function CustomerDashboardPage() {
                       <Icon className="w-5 h-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-gray-800 group-hover:text-violet-600 transition-colors">
+                      <p className="text-sm font-semibold text-gray-800 group-hover:text-orange-600 transition-colors">
                         {action.label}
                       </p>
                       <p className="text-xs text-gray-400 truncate">{action.desc}</p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-violet-500 group-hover:translate-x-0.5 transition-all shrink-0" />
+                    <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-orange-500 group-hover:translate-x-0.5 transition-all shrink-0" />
                   </div>
                 </div>
               </Link>
@@ -346,7 +346,7 @@ export default async function CustomerDashboardPage() {
             {[
               { label: "Pending", count: data?.pending ?? 0, color: "bg-amber-400", textColor: "text-amber-700" },
               { label: "Accepted", count: data?.accepted ?? 0, color: "bg-blue-400", textColor: "text-blue-700" },
-              { label: "In Progress", count: data?.inProgress ?? 0, color: "bg-violet-500", textColor: "text-violet-700" },
+              { label: "In Progress", count: data?.inProgress ?? 0, color: "bg-orange-500", textColor: "text-[#0B2A4A]" },
               { label: "Completed", count: data?.completed ?? 0, color: "bg-green-500", textColor: "text-green-700" },
               { label: "Rejected", count: data?.rejected ?? 0, color: "bg-red-400", textColor: "text-red-600" },
             ].map((row) => {
@@ -372,16 +372,16 @@ export default async function CustomerDashboardPage() {
 
       {/* ── Portal cards ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5">
+        <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center">
-              <Wrench className="w-4 h-4 text-violet-600" />
+            <div className="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center">
+              <Wrench className="w-4 h-4 text-orange-600" />
             </div>
             <h3 className="font-semibold text-gray-800 text-sm">Available Services</h3>
           </div>
-          <p className="text-2xl font-extrabold text-violet-600">{data?.availableServices ?? 0}</p>
+          <p className="text-2xl font-extrabold text-orange-600">{data?.availableServices ?? 0}</p>
           <p className="text-xs text-gray-500 mt-1 mb-3">Active services from contractors</p>
-          <Link href="/customer/services" className="text-xs text-violet-600 hover:text-violet-700 font-semibold">
+          <Link href="/customer/services" className="text-xs text-orange-600 hover:text-[#0B2A4A] font-semibold">
             Browse now →
           </Link>
         </div>

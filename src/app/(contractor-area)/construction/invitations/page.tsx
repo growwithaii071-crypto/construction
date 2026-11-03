@@ -55,18 +55,29 @@ export default async function ContractorInvitationsPage() {
       </div>
 
       {invitations.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-16 text-center">
-          <Inbox className="mx-auto mb-3 h-10 w-10 text-slate-200" />
-          <p className="font-semibold text-slate-800">No invitations yet</p>
-          <p className="mt-1 text-sm text-slate-500">
-            Complete verification under Payouts to become eligible for matching.
+        <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50/40 px-6 py-14 text-center">
+          <Inbox className="mx-auto mb-3 h-10 w-10 text-orange-300" />
+          <p className="font-bold text-[#0B2A4A]">No invitations yet</p>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-slate-600">
+            Get matched faster: verify payouts, then add an active service in the right category.
           </p>
-          <Link
-            href="/construction/payouts"
-            className="mt-4 inline-flex text-sm font-bold text-orange-600 hover:text-orange-700"
-          >
-            Go to payouts →
-          </Link>
+          <p className="mt-1 text-xs text-slate-400">
+            अभी निमंत्रण नहीं · वेरिफाई करें और सर्विस कैटेगरी जोड़ें।
+          </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <Link
+              href="/construction/payouts"
+              className="inline-flex h-10 items-center rounded-xl bg-orange-500 px-4 text-sm font-bold text-white hover:bg-orange-600"
+            >
+              Verify payouts
+            </Link>
+            <Link
+              href="/construction/services/new"
+              className="inline-flex h-10 items-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-[#0B2A4A] hover:bg-slate-50"
+            >
+              Add service / category
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">

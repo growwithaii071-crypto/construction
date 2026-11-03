@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "My Requests — BuildPro" };
 const STATUS_STYLES: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-700 border-amber-200",
   ACCEPTED: "bg-blue-50 text-blue-700 border-blue-200",
-  IN_PROGRESS: "bg-violet-50 text-violet-700 border-violet-200",
+  IN_PROGRESS: "bg-orange-50 text-[#0B2A4A] border-orange-200",
   COMPLETED: "bg-green-50 text-green-700 border-green-200",
   REJECTED: "bg-red-50 text-red-600 border-red-200",
 };
@@ -63,7 +63,7 @@ export default async function CustomerRequestsPage() {
         </div>
         <Link
           href="/customer/services"
-          className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm"
+          className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors shadow-sm"
         >
           <Wrench className="w-4 h-4" />
           Browse Services
@@ -79,7 +79,7 @@ export default async function CustomerRequestsPage() {
           </p>
           <Link
             href="/customer/services"
-            className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors"
+            className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-colors"
           >
             <Wrench className="w-4 h-4" />
             Browse Services
@@ -112,7 +112,7 @@ export default async function CustomerRequestsPage() {
 
                   {/* Contractor info */}
                   <div className="mt-2.5 flex items-start gap-3">
-                    <div className="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center text-violet-600 font-bold text-xs shrink-0">
+                    <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 font-bold text-xs shrink-0">
                       {req.service.contractor.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -186,7 +186,7 @@ export default async function CustomerRequestsPage() {
                     req.status === "COMPLETED") && (
                     <Link
                       href={`/customer/messages/${req.id}`}
-                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-violet-600 px-3 py-2 text-xs font-semibold text-white hover:bg-violet-700"
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-xs font-semibold text-white hover:bg-orange-600"
                     >
                       <MessageCircle className="h-3.5 w-3.5" />
                       Message

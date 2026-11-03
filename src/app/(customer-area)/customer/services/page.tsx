@@ -93,7 +93,7 @@ export default async function CustomerServicesPage({
             defaultValue={searchQuery}
             type="text"
             placeholder="Search by service, category or contractor..."
-            className="w-full h-11 pl-10 pr-4 border border-gray-200 rounded-xl text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent transition"
+            className="w-full h-11 pl-10 pr-4 border border-gray-200 rounded-xl text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition"
           />
           {categoryFilter && (
             <input type="hidden" name="category" value={categoryFilter} />
@@ -101,7 +101,7 @@ export default async function CustomerServicesPage({
         </div>
         <button
           type="submit"
-          className="h-11 px-5 bg-violet-600 hover:bg-violet-700 text-white font-semibold text-sm rounded-xl transition-colors"
+          className="h-11 px-5 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm rounded-xl transition-colors"
         >
           Search
         </button>
@@ -121,11 +121,11 @@ export default async function CustomerServicesPage({
           <span className="text-sm text-gray-500">
             Showing <span className="font-semibold text-gray-900">{services.length}</span> results for
           </span>
-          <span className="inline-flex items-center gap-1.5 bg-violet-100 text-violet-700 text-sm font-semibold px-3 py-1 rounded-full">
+          <span className="inline-flex items-center gap-1.5 bg-orange-100 text-[#0B2A4A] text-sm font-semibold px-3 py-1 rounded-full">
             <Search className="w-3.5 h-3.5" />
             {searchQuery}
             <Link href={categoryFilter ? `/customer/services?category=${encodeURIComponent(categoryFilter)}` : "/customer/services"}>
-              <X className="w-3.5 h-3.5 hover:text-violet-900" />
+              <X className="w-3.5 h-3.5 hover:text-[#0B2A4A]" />
             </Link>
           </span>
         </div>
@@ -138,8 +138,8 @@ export default async function CustomerServicesPage({
             href={searchQuery ? `/customer/services?search=${encodeURIComponent(searchQuery)}` : "/customer/services"}
             className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
               !categoryFilter
-                ? "bg-violet-600 text-white border-violet-600"
-                : "bg-white text-gray-600 border-gray-200 hover:border-violet-300 hover:text-violet-600"
+                ? "bg-orange-500 text-white border-orange-500"
+                : "bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:text-orange-600"
             }`}
           >
             All
@@ -157,8 +157,8 @@ export default async function CustomerServicesPage({
                 href={href}
                 className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-colors ${
                   isActive
-                    ? "bg-violet-600 text-white border-violet-600"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-violet-300 hover:text-violet-600"
+                    ? "bg-orange-500 text-white border-orange-500"
+                    : "bg-white text-gray-600 border-gray-200 hover:border-orange-300 hover:text-orange-600"
                 }`}
               >
                 {cat}
@@ -182,7 +182,7 @@ export default async function CustomerServicesPage({
           </p>
           {searchQuery && (
             <Link href="/customer/services"
-              className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-violet-600 hover:text-violet-700 transition-colors">
+              className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-orange-600 hover:text-[#0B2A4A] transition-colors">
               ← Browse all services
             </Link>
           )}
@@ -235,7 +235,7 @@ export default async function CustomerServicesPage({
                         myRequest.status === "COMPLETED") && (
                         <Link
                           href={`/customer/messages/${myRequest.id}`}
-                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-violet-600 px-3 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-violet-700"
+                          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-3 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-orange-600"
                         >
                           <MessageCircle className="h-3.5 w-3.5" />
                           Message Contractor
