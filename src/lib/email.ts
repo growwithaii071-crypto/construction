@@ -1,9 +1,9 @@
 import nodemailer from "nodemailer";
 import prisma from "@/lib/prisma";
 import { ensureDefaultEmailTemplates } from "@/lib/email-templates";
+import { getAppUrl } from "@/lib/app-url";
 
 const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "BuildPro";
-const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 type SendOptions = {
   to: string;
@@ -110,11 +110,12 @@ export async function sendTemplateEmail(
       return { success: false, message: "Template inactive" };
     }
 
+    const base = getAppUrl();
     const merged = {
       appName,
-      appUrl,
-      loginUrl: `${appUrl}/login`,
-      servicesUrl: `${appUrl}/services`,
+      appUrl: base,
+      loginUrl: `${base}/login`,
+      servicesUrl: `${base}/services`,
       ...vars,
     };
 
@@ -133,7 +134,7 @@ export async function sendTemplateEmail(
 }
 
 export async function sendVerificationEmail(email: string, token: string) {
-  const verifyUrl = `${appUrl}/verify-email?token=${token}`;
+  const verifyUrl = `${getAppUrl()}/verify-email?token=${token}`;
   await sendEmail({
     to: email,
     subject: `Verify your email — ${appName}`,
@@ -148,7 +149,7 @@ export async function sendVerificationEmail(email: string, token: string) {
 }
 
 export async function sendPasswordResetEmail(email: string, token: string, userName = "there") {
-  const resetUrl = `${appUrl}/reset-password?token=${token}`;
+  const resetUrl = `${getAppUrl()}/reset-password?token=${token}`;
   await sendTemplateEmail("password_reset", email, {
     userName,
     resetUrl,
@@ -159,7 +160,7 @@ export async function sendWelcomeEmail(name: string, email: string) {
   await sendTemplateEmail("welcome", email, {
     userName: name,
     userEmail: email,
-    loginUrl: `${appUrl}/login`,
+    loginUrl: `${getAppUrl()}/login`,
   });
 }
 
@@ -185,4 +186,6 @@ export async function testSmtpConnection() {
   }
 }
 
-export { appName, appUrl };
+export { appName, getAppUrl };
+/** @deprecated Use getAppUrl() — snapshot at import time may be wrong on Vercel. */
+export const appUrl = getAppUrl();

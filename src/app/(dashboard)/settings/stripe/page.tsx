@@ -146,9 +146,9 @@ export default async function StripeSettingsPage() {
           />
           <EnvRow
             label="NEXT_PUBLIC_APP_URL"
-            ok={Boolean(env.appUrl)}
+            ok={Boolean(env.appUrl) && !/localhost|127\.0\.0\.1/i.test(env.appUrl)}
             masked={env.appUrl}
-            hint="Must match your live domain for Connect return URLs"
+            hint="Set to https://construction-nine-red.vercel.app on Vercel (no trailing slash). Localhost here breaks live webhooks/Connect."
           />
         </ul>
 

@@ -5,7 +5,8 @@ import { requireAuth } from "@/lib/auth-utils";
 import { UserRole, ServiceRequestStatus } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
 import { uploadMessageAttachment } from "@/lib/upload";
-import { sendTemplateEmail, appUrl } from "@/lib/email";
+import { sendTemplateEmail } from "@/lib/email";
+import { getAppUrl } from "@/lib/app-url";
 import { createNotification } from "@/lib/notifications";
 
 const CHAT_ALLOWED: ServiceRequestStatus[] = [
@@ -115,8 +116,8 @@ export async function sendMessageAction(formData: FormData) {
     ? result.req.client.name
     : result.req.service.contractor.name;
   const messagesUrl = isClientSender
-    ? `${appUrl}/construction/messages/${requestId}`
-    : `${appUrl}/customer/messages/${requestId}`;
+    ? `${getAppUrl()}/construction/messages/${requestId}`
+    : `${getAppUrl()}/customer/messages/${requestId}`;
   const preview =
     text ||
     (attachment ? `📎 ${attachment.attachmentName}` : "New message");

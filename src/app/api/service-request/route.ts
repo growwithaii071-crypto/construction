@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
-import { sendTemplateEmail, appUrl } from "@/lib/email";
+import { sendTemplateEmail } from "@/lib/email";
+import { getAppUrl } from "@/lib/app-url";
 import { createNotification, notifyAdmins } from "@/lib/notifications";
 
 export async function POST(req: NextRequest) {
@@ -88,8 +89,8 @@ export async function POST(req: NextRequest) {
       location: location || "—",
       budget: budget ? `₹${budget}` : "—",
       message: message || "—",
-      requestsUrl: `${appUrl}/construction/requests`,
-      messagesUrl: `${appUrl}/construction/messages/${created.id}`,
+      requestsUrl: `${getAppUrl()}/construction/requests`,
+      messagesUrl: `${getAppUrl()}/construction/messages/${created.id}`,
     }).catch(() => {});
 
     const clientName = session.user.name ?? "Client";

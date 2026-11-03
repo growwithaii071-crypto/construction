@@ -4,7 +4,8 @@ import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
 import { UserRole, ServiceRequestStatus } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
-import { sendTemplateEmail, appUrl } from "@/lib/email";
+import { sendTemplateEmail } from "@/lib/email";
+import { getAppUrl } from "@/lib/app-url";
 import { createNotification, notifyAdmins } from "@/lib/notifications";
 
 const STATUS_TEMPLATE: Partial<Record<ServiceRequestStatus, string>> = {
@@ -77,9 +78,9 @@ export async function updateRequestStatusAction(
       clientName: existing.client.name,
       contractorName: existing.service.contractor.name,
       serviceTitle: existing.service.title,
-      messagesUrl: `${appUrl}/customer/messages/${requestId}`,
-      requestsUrl: `${appUrl}/customer/requests`,
-      servicesUrl: `${appUrl}/services`,
+      messagesUrl: `${getAppUrl()}/customer/messages/${requestId}`,
+      requestsUrl: `${getAppUrl()}/customer/requests`,
+      servicesUrl: `${getAppUrl()}/services`,
     }).catch(() => {});
   }
 

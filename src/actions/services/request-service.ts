@@ -5,7 +5,8 @@ import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
 import { UserRole } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
-import { sendTemplateEmail, appUrl } from "@/lib/email";
+import { sendTemplateEmail } from "@/lib/email";
+import { getAppUrl } from "@/lib/app-url";
 import { createNotification, notifyAdmins } from "@/lib/notifications";
 
 const RequestServiceSchema = z.object({
@@ -65,7 +66,7 @@ export async function requestServiceAction(formData: unknown) {
       location: parsed.data.location || "—",
       budget: parsed.data.budget != null ? `₹${parsed.data.budget}` : "—",
       message: parsed.data.message || "—",
-      requestsUrl: `${appUrl}/construction/requests`,
+      requestsUrl: `${getAppUrl()}/construction/requests`,
     }).catch(() => {});
 
     void createNotification({

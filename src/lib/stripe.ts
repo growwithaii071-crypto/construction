@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { appUrl } from "@/lib/email";
+import { getAppUrl } from "@/lib/app-url";
 
 export function isStripeConfigured() {
   return Boolean(process.env.STRIPE_SECRET_KEY?.trim());
@@ -37,11 +37,11 @@ export function getStripe(): Stripe {
 }
 
 export function connectReturnUrl() {
-  return `${appUrl}/construction/payouts?connect=return`;
+  return `${getAppUrl()}/construction/payouts?connect=return`;
 }
 
 export function connectRefreshUrl() {
-  return `${appUrl}/api/stripe/connect/refresh`;
+  return `${getAppUrl()}/api/stripe/connect/refresh`;
 }
 
 export type TraderConnectStatus = {
@@ -96,7 +96,7 @@ export async function getStripeEnvStatus(): Promise<StripeEnvStatus> {
   const secret = process.env.STRIPE_SECRET_KEY?.trim() ?? "";
   const publishable = getStripePublishableKey();
   const webhook = process.env.STRIPE_WEBHOOK_SECRET?.trim() ?? "";
-  const base = appUrl.replace(/\/$/, "");
+  const base = getAppUrl();
 
   const status: StripeEnvStatus = {
     secretConfigured: Boolean(secret),

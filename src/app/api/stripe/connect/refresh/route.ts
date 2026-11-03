@@ -7,17 +7,19 @@ import {
   connectReturnUrl,
   connectRefreshUrl,
 } from "@/lib/stripe";
+import { getAppUrl } from "@/lib/app-url";
 import { UserRole } from "@/generated/prisma";
 
 export async function GET() {
+  const appUrl = getAppUrl();
   const session = await auth();
   if (!session?.user?.id || session.user.role !== UserRole.CONTRACTOR) {
-    return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"));
+    return NextResponse.redirect(new URL("/login", appUrl));
   }
 
   if (!isStripeConfigured()) {
     return NextResponse.redirect(
-      new URL("/construction/payouts?error=stripe_not_configured", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000")
+      new URL("/construction/payouts?error=stripe_not_configured", appUrl)
     );
   }
 
@@ -25,8 +27,6 @@ export async function GET() {
     where: { id: session.user.id },
     select: { stripeAccountId: true },
   });
-
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   if (!user?.stripeAccountId) {
     return NextResponse.redirect(new URL("/construction/payouts", appUrl));
