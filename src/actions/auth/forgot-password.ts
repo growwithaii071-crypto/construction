@@ -4,6 +4,12 @@ import prisma from "@/lib/prisma";
 import { ForgotPasswordSchema } from "@/schemas/auth";
 import { generatePasswordResetToken } from "@/lib/tokens";
 import { sendPasswordResetEmail } from "@/lib/email";
+import {
+  checkRateLimit,
+  getClientIp,
+  rateLimitMessage,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 
 interface ActionResult {
   success: boolean;
@@ -18,6 +24,25 @@ export async function forgotPasswordAction(formData: unknown): Promise<ActionRes
   }
 
   const { email } = parsed.data;
+  const emailKey = email.trim().toLowerCase();
+  const ip = await getClientIp();
+
+  const ipLimit = checkRateLimit(
+    `forgot:ip:${ip}`,
+    RATE_LIMITS.forgotIp.limit,
+    RATE_LIMITS.forgotIp.windowMs
+  );
+  if (!ipLimit.ok) {
+    return { success: false, message: rateLimitMessage(ipLimit.retryAfterSec) };
+  }
+  const emailLimit = checkRateLimit(
+    `forgot:email:${emailKey}`,
+    RATE_LIMITS.forgotEmail.limit,
+    RATE_LIMITS.forgotEmail.windowMs
+  );
+  if (!emailLimit.ok) {
+    return { success: false, message: rateLimitMessage(emailLimit.retryAfterSec) };
+  }
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });

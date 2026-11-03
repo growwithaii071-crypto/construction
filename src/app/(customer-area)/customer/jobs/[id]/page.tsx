@@ -6,6 +6,9 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin, Users, FileText } from "lucide-react";
 import { JobStatusTimeline } from "@/components/marketplace/job-status-timeline";
 import { BilingualAlert } from "@/components/ui/bilingual-alert";
+import { JobReviewForm } from "@/components/marketplace/job-review-form";
+import { WhatsAppTraderLink } from "@/components/marketplace/whatsapp-trader-link";
+import { FlowBadge } from "@/components/marketplace/flow-badge";
 import { maintainLiveInvitations } from "@/lib/matching";
 import { CancelJobButton } from "@/components/marketplace/cancel-job-button";
 import { AcceptQuotePanel } from "@/components/marketplace/accept-quote-panel";
@@ -36,8 +39,9 @@ export default async function CustomerJobDetailPage({
     include: {
       quotes: {
         orderBy: { createdAt: "desc" },
-        include: { trader: { select: { name: true } } },
+        include: { trader: { select: { name: true, phone: true } } },
       },
+      review: true,
     },
   });
 
@@ -94,6 +98,7 @@ export default async function CustomerJobDetailPage({
         </Link>
         <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
           <div>
+            <FlowBadge flow="marketplace" className="mb-2" />
             <h1 className="text-2xl font-bold text-slate-900">{job.title}</h1>
             <p className="mt-1 text-sm text-slate-500">
               {job.category}
@@ -143,11 +148,37 @@ export default async function CustomerJobDetailPage({
 
       <JobStatusTimeline status={job.status} />
 
+      {["COMPLETED", "PAID_OUT", "RESOLVED"].includes(job.status) &&
+        (job.review ? (
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+            Your review: <strong>{job.review.rating}★</strong>
+            {job.review.comment ? ` — ${job.review.comment}` : ""}
+          </div>
+        ) : (
+          <JobReviewForm jobId={job.id} />
+        ))}
+
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
         <h2 className="font-bold text-slate-900">Description</h2>
         <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-600">
           {job.description}
         </p>
+        {job.photos?.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {job.photos.map((url) => (
+              <a
+                key={url}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative h-20 w-20 overflow-hidden rounded-xl border border-slate-200"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={url} alt="" className="h-full w-full object-cover" />
+              </a>
+            ))}
+          </div>
+        )}
         {(job.budgetMin != null || job.budgetMax != null) && (
           <p className="mt-3 text-sm font-semibold text-slate-800">
             Budget:{" "}
@@ -250,6 +281,14 @@ export default async function CustomerJobDetailPage({
                       {q.status.replaceAll("_", " ")}
                       {q.scope ? ` · ${q.scope.slice(0, 80)}` : ""}
                     </p>
+                    {q.status === "SUBMITTED" || q.status === "ACCEPTED" ? (
+                      <div className="mt-2">
+                        <WhatsAppTraderLink
+                          phone={q.trader.phone}
+                          jobTitle={job.title}
+                        />
+                      </div>
+                    ) : null}
                     <p className="text-[11px] text-slate-400">
                       Valid until{" "}
                       {q.validUntil.toLocaleDateString("en-IN", {

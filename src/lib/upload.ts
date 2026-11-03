@@ -88,6 +88,33 @@ async function uploadLocally(file: File, folder: string): Promise<UploadedFile> 
   };
 }
 
+const IMAGE_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+
+export async function uploadJobPhoto(
+  file: File
+): Promise<{ success: true; file: UploadedFile } | { success: false; message: string }> {
+  if (!file || file.size === 0) return { success: false, message: "Empty file." };
+  if (file.size > MAX_BYTES) return { success: false, message: "Image must be under 5 MB." };
+  if (!IMAGE_MIME.has(file.type)) {
+    return { success: false, message: "Only JPG, PNG, WebP or GIF allowed." };
+  }
+
+  try {
+    const folder = "jobs";
+    const uploaded = hasCloudinary()
+      ? await uploadToCloudinary(file, `buildpro/${folder}`)
+      : await uploadLocally(file, folder);
+    return { success: true, file: uploaded };
+  } catch (err) {
+    console.error("[UPLOAD_JOB_PHOTO]", err);
+    try {
+      return { success: true, file: await uploadLocally(file, "jobs") };
+    } catch {
+      return { success: false, message: "Upload failed. Try again." };
+    }
+  }
+}
+
 export async function uploadMessageAttachment(
   file: File,
   requestId: string

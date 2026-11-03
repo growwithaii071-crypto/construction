@@ -7,8 +7,26 @@ import {
   markMarketplacePaymentFailed,
   markMarketplacePaymentRefunded,
 } from "@/lib/marketplace-payments";
+import {
+  checkRateLimit,
+  clientIpFromRequest,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
+
+function rateLimitedResponse(retryAfterSec: number) {
+  return NextResponse.json(
+    { error: "Too many requests" },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": String(retryAfterSec),
+        "Cache-Control": "no-store",
+      },
+    }
+  );
+}
 
 async function handleAccountUpdated(account: Stripe.Account) {
   const userId = account.metadata?.buildproUserId;
@@ -81,9 +99,25 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Stripe not configured" }, { status: 503 });
   }
 
+  const ip = clientIpFromRequest(req);
+  const ipLimit = checkRateLimit(
+    `webhook:ip:${ip}`,
+    RATE_LIMITS.webhookIp.limit,
+    RATE_LIMITS.webhookIp.windowMs
+  );
+  if (!ipLimit.ok) {
+    return rateLimitedResponse(ipLimit.retryAfterSec);
+  }
+
   const signature = req.headers.get("stripe-signature");
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
   if (!signature || !webhookSecret) {
+    const bad = checkRateLimit(
+      `webhook:badsig:${ip}`,
+      RATE_LIMITS.webhookBadSig.limit,
+      RATE_LIMITS.webhookBadSig.windowMs
+    );
+    if (!bad.ok) return rateLimitedResponse(bad.retryAfterSec);
     return NextResponse.json({ error: "Missing webhook secret or signature" }, { status: 400 });
   }
 
@@ -95,6 +129,12 @@ export async function POST(req: NextRequest) {
     event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
   } catch (err) {
     console.error("[STRIPE_WEBHOOK_SIG]", err);
+    const bad = checkRateLimit(
+      `webhook:badsig:${ip}`,
+      RATE_LIMITS.webhookBadSig.limit,
+      RATE_LIMITS.webhookBadSig.windowMs
+    );
+    if (!bad.ok) return rateLimitedResponse(bad.retryAfterSec);
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
   }
 

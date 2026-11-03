@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import { ServiceRequestForm } from "@/components/customer/service-request-form";
+import { FlowBadge } from "@/components/marketplace/flow-badge";
 import { Wrench, Search, X, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -78,9 +79,10 @@ export default async function CustomerServicesPage({
     <div className="p-4 lg:p-6 space-y-6">
       {/* Header */}
       <div>
+        <FlowBadge flow="chat" className="mb-2" />
         <h1 className="text-2xl font-bold text-gray-900">Browse Services</h1>
         <p className="text-gray-500 text-sm mt-1">
-          {allServices.length} services available — find the right contractor for your project
+          {allServices.length} services available — request &amp; chat (not escrow jobs)
         </p>
       </div>
 

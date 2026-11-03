@@ -3,6 +3,7 @@ import { UserRole, InvitationStatus } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { Inbox, MapPin, Clock } from "lucide-react";
+import { FlowBadge } from "@/components/marketplace/flow-badge";
 import { maintainLiveInvitations } from "@/lib/matching";
 import type { Metadata } from "next";
 
@@ -48,6 +49,7 @@ export default async function ContractorInvitationsPage() {
   return (
     <div className="space-y-6 p-4 lg:p-6">
       <div>
+        <FlowBadge flow="marketplace" className="mb-2" />
         <h1 className="text-2xl font-bold text-slate-900">Job invitations</h1>
         <p className="mt-1 text-sm text-slate-500">
           Matched jobs awaiting your quote. Free to quote — success fee only if accepted.

@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getTraderVerification } from "@/lib/trader-verification";
+import { ContractorOnboardingChecklist } from "@/components/contractor/onboarding-checklist";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Contractor Dashboard — BuildPro" };
@@ -115,6 +116,14 @@ export default async function ContractorDashboardPage() {
           <Plus className="w-4 h-4" /> Add Service
         </Link>
       </div>
+
+      <ContractorOnboardingChecklist
+        hasService={(data?.totalServices ?? 0) > 0}
+        connectDone={Boolean(
+          verification?.onboardingDone && verification?.payoutsEnabled
+        )}
+        feeCardDone={Boolean(verification?.feeMethodSaved)}
+      />
 
       {verification && !verification.verified && (
         <Link

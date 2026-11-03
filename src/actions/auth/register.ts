@@ -6,6 +6,12 @@ import { RegisterSchema } from "@/schemas/auth";
 import { UserRole } from "@/generated/prisma";
 import { sendWelcomeEmail } from "@/lib/email";
 import { notifyAdmins } from "@/lib/notifications";
+import {
+  checkRateLimit,
+  getClientIp,
+  rateLimitMessage,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 
 interface ActionResult {
   success: boolean;
@@ -22,6 +28,16 @@ export async function registerAction(formData: unknown): Promise<ActionResult> {
   }
 
   const { name, email, password, phone } = parsed.data;
+
+  const ip = await getClientIp();
+  const limited = checkRateLimit(
+    `register:ip:${ip}`,
+    RATE_LIMITS.registerIp.limit,
+    RATE_LIMITS.registerIp.windowMs
+  );
+  if (!limited.ok) {
+    return { success: false, message: rateLimitMessage(limited.retryAfterSec) };
+  }
 
   try {
     const existing = await prisma.user.findUnique({ where: { email } });

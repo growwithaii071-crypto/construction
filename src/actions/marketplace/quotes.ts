@@ -21,6 +21,7 @@ import {
   calcProtectionFee,
 } from "@/lib/pricing";
 import { createNotification } from "@/lib/notifications";
+import { notifyUserWithEmail } from "@/lib/marketplace-notify";
 
 const SubmitQuoteSchema = z.object({
   invitationId: z.string().min(1),
@@ -156,12 +157,19 @@ export async function submitQuoteAction(formData: FormData) {
       },
     });
 
-    void createNotification({
+    const traderName = session.user.name?.split(" — ")[0] ?? "A trader";
+    void notifyUserWithEmail({
       userId: inv.job.clientId,
       title: "New quote received",
-      message: `${session.user.name?.split(" — ")[0] ?? "A trader"} quoted ₹${quote.amount.toLocaleString("en-IN")} on “${inv.job.title}”.`,
+      message: `${traderName} quoted ₹${quote.amount.toLocaleString("en-IN")} on “${inv.job.title}”.`,
       type: "SUCCESS",
       link: `/customer/jobs/${inv.jobId}`,
+      emailKey: "marketplace_new_quote",
+      emailVars: {
+        jobTitle: inv.job.title,
+        amount: quote.amount.toLocaleString("en-IN"),
+        traderName,
+      },
     });
 
     revalidatePath(`/construction/invitations/${inv.id}`);

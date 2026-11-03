@@ -4,7 +4,7 @@ import {
   MarketplacePaymentStatus,
 } from "@/generated/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
-import { createNotification } from "@/lib/notifications";
+import { notifyUserWithEmail } from "@/lib/marketplace-notify";
 
 /** Stripe expects integer amount in smallest currency unit (paise for INR). */
 export function toStripeAmount(rupees: number) {
@@ -73,20 +73,25 @@ export async function markMarketplacePaymentSucceeded(opts: {
     });
   });
 
-  void createNotification({
+  const amount = payment.customerTotal.toLocaleString("en-IN");
+  void notifyUserWithEmail({
     userId: payment.quote.traderId,
     title: "Job funded — you can start",
     message: `Payment received for “${payment.job.title}”. Funds are held on BuildPro until release rules apply.`,
     type: "SUCCESS",
     link: `/construction/jobs/${payment.jobId}`,
+    emailKey: "marketplace_payment_success",
+    emailVars: { jobTitle: payment.job.title, amount },
   });
 
-  void createNotification({
+  void notifyUserWithEmail({
     userId: payment.job.clientId,
     title: "Payment successful",
     message: `Your payment for “${payment.job.title}” is confirmed. The trader has been notified.`,
     type: "SUCCESS",
     link: `/customer/jobs/${payment.jobId}`,
+    emailKey: "marketplace_payment_success",
+    emailVars: { jobTitle: payment.job.title, amount },
   });
 
   return { ok: true as const, jobId: payment.jobId };

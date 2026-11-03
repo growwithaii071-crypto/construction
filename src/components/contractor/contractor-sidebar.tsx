@@ -44,13 +44,18 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    label: "Requests",
+    label: "Marketplace (Escrow)",
     items: [
       { href: "/construction/invitations", label: "Job Invitations", icon: Inbox },
       { href: "/construction/jobs", label: "Accepted Jobs", icon: Briefcase },
+      { href: "/construction/reviews", label: "Reviews", icon: Star },
+    ],
+  },
+  {
+    label: "Services (Chat)",
+    items: [
       { href: "/construction/requests", label: "Customer Requests", icon: ClipboardList },
       { href: "/construction/messages", label: "Messages", icon: MessageCircle },
-      { href: "/construction/reviews", label: "Reviews", icon: Star },
     ],
   },
   {

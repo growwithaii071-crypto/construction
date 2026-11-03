@@ -446,8 +446,13 @@ Settings
    /settings              general
    /settings/pricing      marketplace rates (the money rules)
    /settings/stripe       Stripe env status, webhook URL, Connect overview (keys stay in env)
-   Cron                   GET /api/cron/marketplace (hourly) — invite/quote expiry + auto-confirm
-   Receipts               /customer/jobs/[id]/receipt · /construction/jobs/[id]/receipt
+   Cron                   GET /api/cron/marketplace — invite expiry, expire quotes, auto-confirm
+                          Schedule: vercel.json `"0 * * * *"` (hourly). Auth: `Authorization: Bearer CRON_SECRET`
+                          (set `CRON_SECRET` in Vercel env; Vercel Cron sends the same header automatically).
+   Receipts               /customer/jobs/[id]/receipt · /construction/jobs/[id]/receipt (print → PDF)
+   Reviews                JobReview after COMPLETED/PAID_OUT/RESOLVED; landing avg from live reviews
+   WhatsApp               Optional `wa.me/91…` after quote (India phone on trader profile)
+   Flow labels            Sidebar “Marketplace (Escrow)” vs “Services (Chat)” + FlowBadge on pages
    /settings/profile      staff profile
    /settings/email        SMTP
    /settings/email-templates

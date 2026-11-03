@@ -8,6 +8,12 @@ import {
   deletePasswordResetToken,
   revokeAllUserRefreshTokens,
 } from "@/lib/tokens";
+import {
+  checkRateLimit,
+  getClientIp,
+  rateLimitMessage,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 
 interface ActionResult {
   success: boolean;
@@ -23,6 +29,16 @@ export async function resetPasswordAction(formData: unknown): Promise<ActionResu
   }
 
   const { token, password } = parsed.data;
+
+  const ip = await getClientIp();
+  const limited = checkRateLimit(
+    `reset:ip:${ip}`,
+    RATE_LIMITS.forgotIp.limit,
+    RATE_LIMITS.forgotIp.windowMs
+  );
+  if (!limited.ok) {
+    return { success: false, message: rateLimitMessage(limited.retryAfterSec) };
+  }
 
   try {
     const resetToken = await getPasswordResetToken(token);

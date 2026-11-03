@@ -1,5 +1,9 @@
 import { requireAuth } from "@/lib/auth-utils";
-import { UserRole, MarketplaceJobStatus } from "@/generated/prisma";
+import {
+  UserRole,
+  MarketplaceJobStatus,
+  MarketplacePaymentStatus,
+} from "@/generated/prisma";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -14,6 +18,7 @@ import {
   KeyRound,
   Users,
   Wallet,
+  Clock,
 } from "lucide-react";
 import { getStripeEnvStatus, computeVerified } from "@/lib/stripe";
 import prisma from "@/lib/prisma";
@@ -25,8 +30,16 @@ export const metadata: Metadata = { title: "Stripe / Payments" };
 export default async function StripeSettingsPage() {
   await requireAuth([UserRole.ADMIN, UserRole.SUPER_ADMIN]);
 
-  const [env, contractors, payoutAgg, feePending, jobsFunded, jobsDisputed] =
-    await Promise.all([
+  const [
+    env,
+    contractors,
+    payoutAgg,
+    feePending,
+    jobsFunded,
+    jobsDisputed,
+    failedPayments,
+    lastWebhook,
+  ] = await Promise.all([
       getStripeEnvStatus(),
       prisma.user.findMany({
         where: { role: UserRole.CONTRACTOR, isActive: true },
@@ -59,6 +72,19 @@ export default async function StripeSettingsPage() {
       }),
       prisma.marketplaceJob.count({
         where: { status: MarketplaceJobStatus.DISPUTED },
+      }),
+      prisma.marketplacePayment.findMany({
+        where: { status: MarketplacePaymentStatus.FAILED },
+        orderBy: { updatedAt: "desc" },
+        take: 15,
+        include: {
+          job: { select: { id: true, title: true, clientId: true } },
+        },
+      }),
+      prisma.auditLog.findFirst({
+        where: { entity: "stripe_event", action: "processed" },
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true, entityId: true, after: true },
       }),
     ]);
 
@@ -191,6 +217,86 @@ export default async function StripeSettingsPage() {
           <UrlHint label="Connect return" value={env.connectReturnUrl} />
           <UrlHint label="Connect refresh" value={env.connectRefreshUrl} />
         </div>
+        <div
+          className={cn(
+            "mt-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm",
+            lastWebhook
+              ? "border-emerald-100 bg-emerald-50/80 text-emerald-950"
+              : "border-amber-100 bg-amber-50/80 text-amber-950"
+          )}
+        >
+          <Clock className="mt-0.5 h-4 w-4 shrink-0 opacity-70" />
+          <div>
+            <p className="font-semibold">
+              {lastWebhook
+                ? "Last webhook success"
+                : "No webhook events processed yet"}
+            </p>
+            <p className="mt-0.5 text-xs opacity-90">
+              {lastWebhook
+                ? `${lastWebhook.createdAt.toLocaleString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
+                  })}${
+                    (lastWebhook.after as { type?: string } | null)?.type
+                      ? ` · ${(lastWebhook.after as { type?: string }).type}`
+                      : ""
+                  }`
+                : "Send a test event from Stripe Dashboard after deploying the endpoint."}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Failed payments */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+          <XCircle className="h-4 w-4 text-rose-500" />
+          Recent failed payments
+        </h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Marketplace checkout failures from Stripe{" "}
+          <code className="rounded bg-slate-100 px-1">payment_intent.payment_failed</code>
+        </p>
+        {failedPayments.length === 0 ? (
+          <p className="mt-4 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
+            No failed payments recorded
+          </p>
+        ) : (
+          <ul className="mt-4 divide-y divide-slate-100">
+            {failedPayments.map((p) => (
+              <li
+                key={p.id}
+                className="flex flex-wrap items-center justify-between gap-2 py-3 first:pt-0 last:pb-0"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-slate-900">
+                    {p.job.title}
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    ₹{p.customerTotal.toLocaleString("en-IN")} ·{" "}
+                    {p.updatedAt.toLocaleString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                    {p.stripePaymentIntentId
+                      ? ` · ${p.stripePaymentIntentId.slice(0, 18)}…`
+                      : ""}
+                  </p>
+                </div>
+                <code className="shrink-0 rounded bg-slate-100 px-2 py-1 text-[10px] text-slate-600">
+                  {p.job.id.slice(-8)}
+                </code>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {/* Marketplace money ops */}

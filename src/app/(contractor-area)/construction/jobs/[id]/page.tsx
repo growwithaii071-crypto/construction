@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, MapPin, BadgeCheck, FileText } from "lucide-react";
 import { TraderJobActions } from "@/components/marketplace/job-lifecycle-actions";
 import { JobStatusTimeline } from "@/components/marketplace/job-status-timeline";
+import { FlowBadge } from "@/components/marketplace/flow-badge";
 import { processAutoConfirms } from "@/lib/marketplace-payouts";
 import type { Metadata } from "next";
 
@@ -55,6 +56,7 @@ export default async function ContractorJobDetailPage({
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
+            <FlowBadge flow="marketplace" className="mb-2" />
             <h1 className="text-xl font-bold text-slate-900">{job.title}</h1>
             <p className="mt-1 text-sm text-slate-500">{job.category}</p>
           </div>
@@ -67,6 +69,21 @@ export default async function ContractorJobDetailPage({
                 <BadgeCheck className="h-3 w-3" />
                 Protected job
               </span>
+            )}
+            {[
+              "COMPLETED",
+              "PAID_OUT",
+              "RESOLVED",
+              "FUNDED",
+              "IN_PROGRESS",
+            ].includes(job.status) && (
+              <Link
+                href={`/construction/jobs/${job.id}/receipt`}
+                className="mt-1 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-bold text-emerald-800 ring-1 ring-emerald-100 hover:bg-emerald-100"
+              >
+                <FileText className="h-3 w-3" />
+                Receipt PDF
+              </Link>
             )}
           </div>
         </div>

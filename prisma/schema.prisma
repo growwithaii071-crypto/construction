@@ -180,6 +180,8 @@ model User {
   feeLedgerEntries   FeeLedger[]      @relation("FeeTrader")
   payouts            Payout[]         @relation("PayoutTrader")
   disputesRaised     Dispute[]        @relation("DisputeRaiser")
+  reviewsGiven       JobReview[]      @relation("ReviewClient")
+  reviewsReceived    JobReview[]      @relation("ReviewTrader")
 
   /// Stripe Connect (traders)
   stripeAccountId       String?
@@ -972,10 +974,28 @@ model MarketplaceJob {
   payments    MarketplacePayment[]
   payouts     Payout[]
   disputes    Dispute[]
+  review      JobReview?
 
   @@index([clientId, status])
   @@index([category, status])
   @@map("marketplace_jobs")
+}
+
+model JobReview {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  jobId     String   @unique @db.ObjectId
+  clientId  String   @db.ObjectId
+  traderId  String   @db.ObjectId
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  job    MarketplaceJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  client User           @relation("ReviewClient", fields: [clientId], references: [id])
+  trader User           @relation("ReviewTrader", fields: [traderId], references: [id])
+
+  @@index([traderId, rating])
+  @@map("job_reviews")
 }
 
 model JobInvitation {

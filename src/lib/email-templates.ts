@@ -115,9 +115,80 @@ export const DEFAULT_EMAIL_TEMPLATES = [
     bodyHtml: `
       <h2 style="color:#1e3a5f;margin:0 0 16px;">New Message</h2>
       <p style="color:#555;line-height:1.6;">Hi {{recipientName}}, <strong>{{senderName}}</strong> sent you a message about <strong>{{serviceTitle}}</strong>:</p>
-      <blockquote style="background:#f8f8f8;border-left:4px solid #7c3aed;margin:16px 0;padding:12px 16px;color:#444;">{{messagePreview}}</blockquote>
+      <blockquote style="background:#f8f8f8;border-left:4px solid #ea580c;margin:16px 0;padding:12px 16px;color:#444;">{{messagePreview}}</blockquote>
       <div style="text-align:center;margin:28px 0;">
-        <a href="{{messagesUrl}}" style="background:#7c3aed;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;display:inline-block;">Reply in Chat</a>
+        <a href="{{messagesUrl}}" style="background:#ea580c;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;display:inline-block;">Reply in Chat</a>
+      </div>
+    `,
+  },
+  {
+    key: "marketplace_new_quote",
+    name: "New Marketplace Quote",
+    description: "Customer: trader submitted a quote",
+    subject: "New quote on {{jobTitle}} — ₹{{amount}}",
+    variables: ["userName", "jobTitle", "amount", "traderName", "actionUrl", "appName"],
+    bodyHtml: `
+      <h2 style="color:#1e3a5f;margin:0 0 16px;">New quote received</h2>
+      <p style="color:#555;line-height:1.6;">Hi {{userName}}, <strong>{{traderName}}</strong> quoted <strong>₹{{amount}}</strong> on <strong>{{jobTitle}}</strong>.</p>
+      <div style="text-align:center;margin:28px 0;">
+        <a href="{{actionUrl}}" style="background:#ea580c;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;display:inline-block;">Review quote</a>
+      </div>
+    `,
+  },
+  {
+    key: "marketplace_payment_success",
+    name: "Marketplace Payment Success",
+    description: "Customer & trader: job funded",
+    subject: "Payment confirmed — {{jobTitle}}",
+    variables: ["userName", "jobTitle", "amount", "actionUrl", "appName"],
+    bodyHtml: `
+      <h2 style="color:#1e3a5f;margin:0 0 16px;">Payment successful</h2>
+      <p style="color:#555;line-height:1.6;">Hi {{userName}}, payment for <strong>{{jobTitle}}</strong> (₹{{amount}}) is confirmed.</p>
+      <div style="text-align:center;margin:28px 0;">
+        <a href="{{actionUrl}}" style="background:#16a34a;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;display:inline-block;">View job</a>
+      </div>
+    `,
+  },
+  {
+    key: "marketplace_job_started",
+    name: "Marketplace Job Started",
+    description: "Customer: trader started work",
+    subject: "Work started — {{jobTitle}}",
+    variables: ["userName", "jobTitle", "actionUrl", "appName"],
+    bodyHtml: `
+      <h2 style="color:#1e3a5f;margin:0 0 16px;">Work started</h2>
+      <p style="color:#555;line-height:1.6;">Hi {{userName}}, the trader started work on <strong>{{jobTitle}}</strong>.</p>
+      <div style="text-align:center;margin:28px 0;">
+        <a href="{{actionUrl}}" style="background:#0B2A4A;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;display:inline-block;">Track job</a>
+      </div>
+    `,
+  },
+  {
+    key: "marketplace_job_completed",
+    name: "Marketplace Job Completed",
+    description: "Customer: confirm to release payout",
+    subject: "Please confirm — {{jobTitle}}",
+    variables: ["userName", "jobTitle", "actionUrl", "appName"],
+    bodyHtml: `
+      <h2 style="color:#1e3a5f;margin:0 0 16px;">Work marked complete</h2>
+      <p style="color:#555;line-height:1.6;">Hi {{userName}}, please confirm <strong>{{jobTitle}}</strong> to release payment (or raise a dispute if protected).</p>
+      <div style="text-align:center;margin:28px 0;">
+        <a href="{{actionUrl}}" style="background:#ea580c;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;display:inline-block;">Confirm or review</a>
+      </div>
+    `,
+  },
+  {
+    key: "marketplace_dispute",
+    name: "Marketplace Dispute",
+    description: "Trader/admin: dispute raised",
+    subject: "Dispute opened — {{jobTitle}}",
+    variables: ["userName", "jobTitle", "reason", "actionUrl", "appName"],
+    bodyHtml: `
+      <h2 style="color:#1e3a5f;margin:0 0 16px;">Dispute opened</h2>
+      <p style="color:#555;line-height:1.6;">Hi {{userName}}, a dispute was raised on <strong>{{jobTitle}}</strong>.</p>
+      <blockquote style="background:#fff7ed;border-left:4px solid #ea580c;margin:16px 0;padding:12px 16px;color:#444;">{{reason}}</blockquote>
+      <div style="text-align:center;margin:28px 0;">
+        <a href="{{actionUrl}}" style="background:#0B2A4A;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;display:inline-block;">View details</a>
       </div>
     `,
   },

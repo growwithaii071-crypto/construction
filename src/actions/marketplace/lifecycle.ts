@@ -10,7 +10,7 @@ import {
   QuoteStatus,
 } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
-import { createNotification } from "@/lib/notifications";
+import { notifyUserWithEmail } from "@/lib/marketplace-notify";
 import {
   releaseJobPayout,
   voidFeeIfPending,
@@ -72,12 +72,14 @@ export async function startJobAction(jobId: string) {
       : `Payout pending: ${release.reason}`;
   }
 
-  void createNotification({
+  void notifyUserWithEmail({
     userId: job.clientId,
     title: "Work started",
     message: `The trader started work on “${job.title}”.`,
     type: "INFO",
     link: `/customer/jobs/${jobId}`,
+    emailKey: "marketplace_job_started",
+    emailVars: { jobTitle: job.title },
   });
 
   revalidatePath(`/customer/jobs/${jobId}`);
@@ -121,12 +123,14 @@ export async function completeJobAction(jobId: string) {
     },
   });
 
-  void createNotification({
+  void notifyUserWithEmail({
     userId: job.clientId,
     title: "Work marked complete",
     message: `Please confirm “${job.title}” to release payment${job.protectionStatus === ProtectionStatus.PROTECTED ? " (protected escrow)" : ""}.`,
     type: "SUCCESS",
     link: `/customer/jobs/${jobId}`,
+    emailKey: "marketplace_job_completed",
+    emailVars: { jobTitle: job.title },
   });
 
   revalidatePath(`/customer/jobs/${jobId}`);

@@ -19,6 +19,7 @@ import {
   Mail,
 } from "lucide-react";
 import { auth } from "@/auth";
+import prisma from "@/lib/prisma";
 import { Navbar } from "@/components/landing/navbar";
 import { HeroSearch } from "@/components/landing/hero-search";
 import { PopularTradesSlider } from "@/components/landing/popular-trades-slider";
@@ -40,6 +41,21 @@ const STEPS = [
 export default async function LandingPage() {
   const session = await auth();
   const isLoggedIn = !!session?.user;
+
+  const [reviewAgg, jobsDone] = await Promise.all([
+    prisma.jobReview.aggregate({ _avg: { rating: true }, _count: true }),
+    prisma.marketplaceJob.count({
+      where: { status: { in: ["COMPLETED", "PAID_OUT", "RESOLVED"] } },
+    }),
+  ]);
+  const avgRating =
+    reviewAgg._count > 0 && reviewAgg._avg.rating != null
+      ? reviewAgg._avg.rating.toFixed(1)
+      : null;
+  const jobsLabel =
+    jobsDone > 0
+      ? `${jobsDone.toLocaleString("en-IN")}+ jobs done`
+      : "Jobs starting daily";
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-white text-slate-900">
@@ -110,11 +126,13 @@ export default async function LandingPage() {
                     Active today
                   </p>
                   <p className="truncate text-sm font-extrabold text-[#0B2A4A]">
-                    2,400+ jobs done
+                    {jobsLabel}
                   </p>
                   <p className="flex items-center gap-1 text-[11px] font-medium text-slate-500">
                     <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                    4.9 avg rating
+                    {avgRating
+                      ? `${avgRating} avg rating`
+                      : "New reviews welcome"}
                   </p>
                 </div>
               </div>

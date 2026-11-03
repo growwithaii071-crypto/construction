@@ -29,14 +29,14 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    label: "Jobs",
+    label: "Marketplace (Escrow)",
     items: [
       { href: "/customer/jobs", label: "My Jobs", icon: Briefcase },
       { href: "/customer/jobs/new", label: "Post a Job", icon: ClipboardList },
     ],
   },
   {
-    label: "Services",
+    label: "Services (Chat)",
     items: [
       { href: "/customer/services", label: "Browse Services", icon: Wrench },
       { href: "/customer/requests", label: "My Requests", icon: ClipboardList },

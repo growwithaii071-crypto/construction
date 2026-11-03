@@ -3,6 +3,12 @@
 import { signIn } from "@/auth";
 import { LoginSchema } from "@/schemas/auth";
 import { AuthError } from "next-auth";
+import {
+  checkRateLimit,
+  getClientIp,
+  rateLimitMessage,
+  RATE_LIMITS,
+} from "@/lib/rate-limit";
 
 interface ActionResult {
   success: boolean;
@@ -20,6 +26,25 @@ export async function loginAction(formData: unknown, callbackUrl?: string): Prom
 
   const { email, password } = parsed.data;
   const redirectTo = callbackUrl ?? "/dashboard";
+
+  const ip = await getClientIp();
+  const emailKey = email.trim().toLowerCase();
+  const ipLimit = checkRateLimit(
+    `login:ip:${ip}`,
+    RATE_LIMITS.loginIp.limit,
+    RATE_LIMITS.loginIp.windowMs
+  );
+  if (!ipLimit.ok) {
+    return { success: false, message: rateLimitMessage(ipLimit.retryAfterSec) };
+  }
+  const emailLimit = checkRateLimit(
+    `login:${ip}:${emailKey}`,
+    RATE_LIMITS.loginEmail.limit,
+    RATE_LIMITS.loginEmail.windowMs
+  );
+  if (!emailLimit.ok) {
+    return { success: false, message: rateLimitMessage(emailLimit.retryAfterSec) };
+  }
 
   try {
     await signIn("credentials", {

@@ -3,6 +3,7 @@ import { UserRole } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
 import { Plus, Briefcase, Clock, MapPin } from "lucide-react";
+import { FlowBadge } from "@/components/marketplace/flow-badge";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "My Jobs — BuildPro" };
@@ -36,6 +37,7 @@ export default async function CustomerJobsPage() {
     <div className="space-y-6 p-4 lg:p-6">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
+          <FlowBadge flow="marketplace" className="mb-2" />
           <h1 className="text-2xl font-bold text-slate-900">My Jobs</h1>
           <p className="mt-1 text-sm text-slate-500">
             Post a job and we invite up to 3 matched traders to quote

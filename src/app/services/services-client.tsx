@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ServiceMCQModal } from "@/components/services/service-mcq-modal";
+import { FlowBadge } from "@/components/marketplace/flow-badge";
 
 type Service = {
   id: string;
@@ -476,6 +477,18 @@ export function ServicesClient({
 
         {/* Results */}
         <main className="min-w-0 space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <FlowBadge flow="chat" />
+            <p className="text-xs text-slate-500">
+              Request &amp; message traders here · For escrow quotes &amp; Stripe pay use{" "}
+              <Link
+                href="/customer/jobs/new"
+                className="font-semibold text-orange-600 hover:text-orange-700"
+              >
+                Post a marketplace job
+              </Link>
+            </p>
+          </div>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-slate-600">
               Found{" "}

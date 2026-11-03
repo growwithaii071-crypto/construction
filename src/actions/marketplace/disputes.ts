@@ -13,6 +13,7 @@ import {
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { createNotification, notifyAdmins } from "@/lib/notifications";
+import { notifyUserWithEmail } from "@/lib/marketplace-notify";
 import { releaseJobPayout, voidFeeIfPending } from "@/lib/marketplace-payouts";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { toStripeAmount } from "@/lib/marketplace-payments";
@@ -103,12 +104,17 @@ export async function raiseDisputeAction(formData: FormData) {
     : null;
 
   if (quote) {
-    void createNotification({
+    void notifyUserWithEmail({
       userId: quote.traderId,
       title: "Dispute opened (Protected job)",
       message: `Customer raised a dispute on “${job.title}”. Funds remain held until admin resolves.`,
       type: "WARNING",
       link: `/construction/jobs/${job.id}`,
+      emailKey: "marketplace_dispute",
+      emailVars: {
+        jobTitle: job.title,
+        reason: parsed.data.reason.slice(0, 280),
+      },
     });
   }
 

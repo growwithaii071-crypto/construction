@@ -7,6 +7,8 @@ import { createJobAction } from "@/actions/marketplace/jobs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { JobPhotoUploader } from "@/components/marketplace/job-photo-uploader";
+import { FlowBadge } from "@/components/marketplace/flow-badge";
 import { cn } from "@/lib/utils";
 
 export function PostJobForm({ categories }: { categories: string[] }) {
@@ -34,6 +36,7 @@ export function PostJobForm({ categories }: { categories: string[] }) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-5">
+      <FlowBadge flow="marketplace" />
       {error && (
         <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -133,17 +136,8 @@ export function PostJobForm({ categories }: { categories: string[] }) {
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="photos">
-          Photo URLs <span className="font-normal text-slate-400">(one per line, optional)</span>
-        </Label>
-        <textarea
-          id="photos"
-          name="photos"
-          rows={2}
-          placeholder="https://…"
-          className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"
-          disabled={pending}
-        />
+        <Label>Job photos <span className="font-normal text-slate-400">(optional)</span></Label>
+        <JobPhotoUploader name="photos" />
       </div>
 
       <Button
