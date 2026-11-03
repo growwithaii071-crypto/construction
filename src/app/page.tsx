@@ -90,13 +90,33 @@ export default async function LandingPage() {
             <div className="relative mx-auto w-full max-w-md lg:mx-0 lg:max-w-none lg:justify-self-end">
               <div className="relative aspect-4/5 overflow-hidden rounded-4xl bg-slate-200 shadow-2xl shadow-slate-300/40 sm:aspect-5/6 lg:ml-auto lg:aspect-auto lg:h-120 lg:w-full lg:max-w-[440px]">
                 <Image
-                  src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=1000&q=80"
-                  alt="Electrician working on a job"
+                  src="/images/hero-tradie.jpg"
+                  alt="Verified BuildPro tradesperson ready for your project"
                   fill
                   priority
                   className="object-cover object-center"
                   sizes="(max-width: 1024px) 100vw, 440px"
                 />
+                <div className="pointer-events-none absolute inset-0 bg-linear-to-t from-[#0B2A4A]/35 via-transparent to-transparent" />
+              </div>
+
+              {/* Floating trust card — bottom left of photo */}
+              <div className="absolute bottom-4 left-4 z-20 flex max-w-[220px] items-center gap-3 rounded-2xl border border-white/90 bg-white/95 px-3.5 py-3 shadow-[0_12px_32px_rgba(11,42,74,0.18)] backdrop-blur-sm sm:bottom-6 sm:left-6">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500 text-white shadow-sm shadow-orange-500/30">
+                  <HardHat className="h-5 w-5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-orange-600">
+                    Active today
+                  </p>
+                  <p className="truncate text-sm font-extrabold text-[#0B2A4A]">
+                    2,400+ jobs done
+                  </p>
+                  <p className="flex items-center gap-1 text-[11px] font-medium text-slate-500">
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    4.9 avg rating
+                  </p>
+                </div>
               </div>
 
               {/* Compact pills overlapping the photo’s right edge */}
