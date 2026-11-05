@@ -147,12 +147,12 @@ export default async function CustomerRequestsPage() {
                   {/* Meta */}
                   <div className="flex flex-wrap gap-4 mt-3 text-xs text-gray-400">
                     {req.location && <span>📍 {req.location}</span>}
-                    {req.budget && <span>💰 Budget: ₹{req.budget.toLocaleString("en-IN")}</span>}
+                    {req.budget && <span>💰 Budget: £{req.budget.toLocaleString("en-GB")}</span>}
                     {(req.service.priceFrom || req.service.priceTo) && (
                       <span>
-                        💵 ₹{req.service.priceFrom?.toLocaleString("en-IN")}
+                        💵 £{req.service.priceFrom?.toLocaleString("en-GB")}
                         {req.service.priceTo && req.service.priceTo !== req.service.priceFrom
-                          ? ` – ₹${req.service.priceTo?.toLocaleString("en-IN")}`
+                          ? ` – £${req.service.priceTo?.toLocaleString("en-GB")}`
                           : ""}
                         {req.service.priceUnit ? ` ${req.service.priceUnit}` : ""}
                       </span>

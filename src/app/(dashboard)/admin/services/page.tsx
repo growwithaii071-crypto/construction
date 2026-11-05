@@ -116,9 +116,9 @@ export default async function AdminServicesPage({
 
                 {(svc.priceFrom || svc.priceTo) && (
                   <p className="mt-3 text-sm font-semibold text-gray-800">
-                    ₹{svc.priceFrom?.toLocaleString("en-IN")}
+                    £{svc.priceFrom?.toLocaleString("en-GB")}
                     {svc.priceTo && svc.priceTo !== svc.priceFrom
-                      ? ` – ₹${svc.priceTo.toLocaleString("en-IN")}`
+                      ? ` – £${svc.priceTo.toLocaleString("en-GB")}`
                       : ""}
                     {svc.priceUnit && (
                       <span className="text-xs font-normal text-gray-400"> {svc.priceUnit}</span>

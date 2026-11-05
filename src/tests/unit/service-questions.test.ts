@@ -79,12 +79,12 @@ describe("getQuestionsForCategory()", () => {
     }
   });
 
-  it("all categories with budget question have ₹ symbol in options", () => {
+  it("all categories with budget question have £ symbol in options", () => {
     for (const [, questions] of Object.entries(SERVICE_MCQ)) {
       const budgetQ = questions.find((q) => q.id === "budget");
       if (budgetQ) {
-        const hasRupee = budgetQ.options.some((o) => o.includes("₹"));
-        expect(hasRupee).toBe(true);
+        const hasPound = budgetQ.options.some((o) => o.includes("£"));
+        expect(hasPound).toBe(true);
       }
     }
   });

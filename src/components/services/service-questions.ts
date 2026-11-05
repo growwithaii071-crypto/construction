@@ -28,7 +28,7 @@ const DEFAULT_QUESTIONS: MCQQuestion[] = [
     id: "budget",
     emoji: "💰",
     question: "What is your budget range?",
-    options: ["Under ₹10,000", "₹10,000 – ₹50,000", "₹50,000 – ₹2 Lakh", "Above ₹2 Lakh"],
+    options: ["Under £10,000", "£10,000 – £50,000", "£50,000 – £2 Lakh", "Above £2 Lakh"],
   },
   {
     id: "location",
@@ -62,7 +62,7 @@ export const SERVICE_MCQ: Record<string, MCQQuestion[]> = {
       id: "budget",
       emoji: "💰",
       question: "What is your approximate budget?",
-      options: ["Under ₹10 Lakh", "₹10 – ₹25 Lakh", "₹25 – ₹50 Lakh", "Above ₹50 Lakh"],
+      options: ["Under £10 Lakh", "£10 – £25 Lakh", "£25 – £50 Lakh", "Above £50 Lakh"],
     },
   ],
 
@@ -89,7 +89,7 @@ export const SERVICE_MCQ: Record<string, MCQQuestion[]> = {
       id: "budget",
       emoji: "💰",
       question: "Approximate budget?",
-      options: ["Under ₹25 Lakh", "₹25 – ₹1 Crore", "₹1 – ₹5 Crore", "Above ₹5 Crore"],
+      options: ["Under £25 Lakh", "£25 – £1 Crore", "£1 – £5 Crore", "Above £5 Crore"],
     },
   ],
 
@@ -116,7 +116,7 @@ export const SERVICE_MCQ: Record<string, MCQQuestion[]> = {
       id: "budget",
       emoji: "💰",
       question: "Expected budget?",
-      options: ["Under ₹5,000", "₹5,000 – ₹25,000", "₹25,000 – ₹1 Lakh", "Above ₹1 Lakh"],
+      options: ["Under £5,000", "£5,000 – £25,000", "£25,000 – £1 Lakh", "Above £1 Lakh"],
     },
   ],
 
@@ -143,7 +143,7 @@ export const SERVICE_MCQ: Record<string, MCQQuestion[]> = {
       id: "budget",
       emoji: "💰",
       question: "Approximate budget?",
-      options: ["Under ₹2,000", "₹2,000 – ₹15,000", "₹15,000 – ₹50,000", "Above ₹50,000"],
+      options: ["Under £2,000", "£2,000 – £15,000", "£15,000 – £50,000", "Above £50,000"],
     },
   ],
 
@@ -170,7 +170,7 @@ export const SERVICE_MCQ: Record<string, MCQQuestion[]> = {
       id: "budget",
       emoji: "💰",
       question: "Budget range?",
-      options: ["Under ₹50,000", "₹50,000 – ₹2 Lakh", "₹2 – ₹10 Lakh", "Above ₹10 Lakh"],
+      options: ["Under £50,000", "£50,000 – £2 Lakh", "£2 – £10 Lakh", "Above £10 Lakh"],
     },
   ],
 
@@ -197,7 +197,7 @@ export const SERVICE_MCQ: Record<string, MCQQuestion[]> = {
       id: "budget",
       emoji: "💰",
       question: "Budget range?",
-      options: ["Under ₹1 Lakh", "₹1 – ₹5 Lakh", "₹5 – ₹15 Lakh", "Above ₹15 Lakh"],
+      options: ["Under £1 Lakh", "£1 – £5 Lakh", "£5 – £15 Lakh", "Above £15 Lakh"],
     },
   ],
 
@@ -224,7 +224,7 @@ export const SERVICE_MCQ: Record<string, MCQQuestion[]> = {
       id: "budget",
       emoji: "💰",
       question: "Budget range?",
-      options: ["Under ₹10,000", "₹10,000 – ₹50,000", "₹50,000 – ₹2 Lakh", "Above ₹2 Lakh"],
+      options: ["Under £10,000", "£10,000 – £50,000", "£50,000 – £2 Lakh", "Above £2 Lakh"],
     },
   ],
 
@@ -251,7 +251,7 @@ export const SERVICE_MCQ: Record<string, MCQQuestion[]> = {
       id: "budget",
       emoji: "💰",
       question: "Budget?",
-      options: ["Under ₹15,000", "₹15,000 – ₹75,000", "₹75,000 – ₹3 Lakh", "Above ₹3 Lakh"],
+      options: ["Under £15,000", "£15,000 – £75,000", "£75,000 – £3 Lakh", "Above £3 Lakh"],
     },
   ],
 
@@ -278,7 +278,7 @@ export const SERVICE_MCQ: Record<string, MCQQuestion[]> = {
       id: "budget",
       emoji: "💰",
       question: "Budget range?",
-      options: ["Under ₹50,000", "₹50,000 – ₹5 Lakh", "₹5 – ₹20 Lakh", "Above ₹20 Lakh"],
+      options: ["Under £50,000", "£50,000 – £5 Lakh", "£5 – £20 Lakh", "Above £20 Lakh"],
     },
   ],
 
@@ -305,7 +305,7 @@ export const SERVICE_MCQ: Record<string, MCQQuestion[]> = {
       id: "budget",
       emoji: "💰",
       question: "Budget?",
-      options: ["Under ₹20,000", "₹20,000 – ₹1 Lakh", "₹1 – ₹5 Lakh", "Above ₹5 Lakh"],
+      options: ["Under £20,000", "£20,000 – £1 Lakh", "£1 – £5 Lakh", "Above £5 Lakh"],
     },
   ],
 };

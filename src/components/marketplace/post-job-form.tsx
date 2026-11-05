@@ -110,7 +110,7 @@ export function PostJobForm({ categories }: { categories: string[] }) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="budgetMin">Budget min (₹)</Label>
+          <Label htmlFor="budgetMin">Budget min (£)</Label>
           <Input
             id="budgetMin"
             name="budgetMin"
@@ -122,7 +122,7 @@ export function PostJobForm({ categories }: { categories: string[] }) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="budgetMax">Budget max (₹)</Label>
+          <Label htmlFor="budgetMax">Budget max (£)</Label>
           <Input
             id="budgetMax"
             name="budgetMax"

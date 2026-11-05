@@ -104,7 +104,7 @@ export default async function MaterialsPage({
                     </p>
                     {m.unitPrice > 0 && (
                       <p className="text-xs text-gray-400">
-                        ₹{Number(m.unitPrice).toLocaleString("en-IN")}/unit
+                        £{Number(m.unitPrice).toLocaleString("en-GB")}/unit
                       </p>
                     )}
                   </div>

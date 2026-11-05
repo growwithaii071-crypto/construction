@@ -91,7 +91,7 @@ export default async function ContractorRequestsPage() {
 
                   <div className="flex flex-wrap gap-4 mt-3 text-xs text-gray-400">
                     {req.location && <span>📍 {req.location}</span>}
-                    {req.budget && <span>💰 Budget: ₹{req.budget.toLocaleString("en-IN")}</span>}
+                    {req.budget && <span>💰 Budget: £{req.budget.toLocaleString("en-GB")}</span>}
                     <span>🕐 {new Date(req.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</span>
                   </div>
                 </div>

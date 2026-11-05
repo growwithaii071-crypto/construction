@@ -160,9 +160,9 @@ export default async function ContractorViewPage({
                           {svc.category}
                           {(svc.priceFrom || svc.priceTo) && (
                             <>
-                              {" · "}₹{svc.priceFrom?.toLocaleString("en-IN") ?? "—"}
+                              {" · "}£{svc.priceFrom?.toLocaleString("en-GB") ?? "—"}
                               {svc.priceTo && svc.priceTo !== svc.priceFrom
-                                ? `–₹${svc.priceTo.toLocaleString("en-IN")}`
+                                ? `–£${svc.priceTo.toLocaleString("en-GB")}`
                                 : ""}
                             </>
                           )}

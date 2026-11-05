@@ -42,9 +42,9 @@ export function RevenueChart() {
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
             <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `₹${v / 1000}K`} />
+            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `£${v / 1000}K`} />
             <Tooltip
-              formatter={(v) => [`₹${(Number(v) / 100000).toFixed(1)}L`, ""]}
+              formatter={(v) => [`£${(Number(v) / 100000).toFixed(1)}L`, ""]}
               contentStyle={{ borderRadius: 8, fontSize: 12 }}
             />
             <Legend />

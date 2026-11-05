@@ -76,9 +76,9 @@ export default async function InvitationDetailPage({
         {(inv.job.budgetMin != null || inv.job.budgetMax != null) && (
           <p className="mt-4 text-sm font-semibold text-slate-800">
             Budget:{" "}
-            {inv.job.budgetMin != null ? `₹${inv.job.budgetMin.toLocaleString("en-IN")}` : "—"}
+            {inv.job.budgetMin != null ? `£${inv.job.budgetMin.toLocaleString("en-GB")}` : "—"}
             {" – "}
-            {inv.job.budgetMax != null ? `₹${inv.job.budgetMax.toLocaleString("en-IN")}` : "—"}
+            {inv.job.budgetMax != null ? `£${inv.job.budgetMax.toLocaleString("en-GB")}` : "—"}
           </p>
         )}
 
@@ -95,7 +95,7 @@ export default async function InvitationDetailPage({
         {existingQuote ? (
           <div className="mt-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
             <p className="font-semibold">
-              Your quote: ₹{existingQuote.amount.toLocaleString("en-IN")}
+              Your quote: £{existingQuote.amount.toLocaleString("en-GB")}
             </p>
             <p className="mt-1 text-emerald-800/80">
               Status: {existingQuote.status.replaceAll("_", " ")} · valid until{" "}

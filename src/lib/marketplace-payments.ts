@@ -5,15 +5,14 @@ import {
 } from "@/generated/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { notifyUserWithEmail } from "@/lib/marketplace-notify";
+import {
+  formatMoney,
+  toStripeAmount,
+  fromStripeAmount,
+  STRIPE_CURRENCY,
+} from "@/lib/money";
 
-/** Stripe expects integer amount in smallest currency unit (paise for INR). */
-export function toStripeAmount(rupees: number) {
-  return Math.round(rupees * 100);
-}
-
-export function fromStripeAmount(paise: number) {
-  return Math.round(paise) / 100;
-}
+export { toStripeAmount, fromStripeAmount };
 
 /**
  * Mark payment succeeded from webhook (source of truth).
@@ -73,7 +72,7 @@ export async function markMarketplacePaymentSucceeded(opts: {
     });
   });
 
-  const amount = payment.customerTotal.toLocaleString("en-IN");
+  const amount = formatMoney(payment.customerTotal);
   void notifyUserWithEmail({
     userId: payment.quote.traderId,
     title: "Job funded — you can start",
@@ -184,7 +183,7 @@ export async function ensurePaymentIntent(paymentId: string, clientUserId: strin
   }
 
   const stripe = getStripe();
-  const amountPaise = toStripeAmount(payment.customerTotal);
+  const amountPence = toStripeAmount(payment.customerTotal);
 
   if (payment.stripePaymentIntentId) {
     const existing = await stripe.paymentIntents.retrieve(payment.stripePaymentIntentId);
@@ -198,9 +197,9 @@ export async function ensurePaymentIntent(paymentId: string, clientUserId: strin
       existing.status === "requires_action"
     ) {
       // Keep amount in sync if pricing changed (shouldn't after lock)
-      if (existing.amount !== amountPaise) {
+      if (existing.amount !== amountPence) {
         const updated = await stripe.paymentIntents.update(existing.id, {
-          amount: amountPaise,
+          amount: amountPence,
         });
         return {
           clientSecret: updated.client_secret!,
@@ -237,8 +236,8 @@ export async function ensurePaymentIntent(paymentId: string, clientUserId: strin
 
   const intent = await stripe.paymentIntents.create(
     {
-      amount: amountPaise,
-      currency: "inr",
+      amount: amountPence,
+      currency: STRIPE_CURRENCY,
       customer: customerId,
       automatic_payment_methods: { enabled: true },
       metadata: {

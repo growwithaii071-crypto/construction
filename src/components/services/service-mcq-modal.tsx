@@ -201,7 +201,7 @@ export function ServiceMCQModal({
             </div>
             <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
               <div
-                className="h-full rounded-full bg-violet-500 transition-all duration-500"
+                className="h-full rounded-full bg-orange-500 transition-all duration-500"
                 style={{ width: `${((current + 1) / totalQ) * 100}%` }}
               />
             </div>
@@ -224,8 +224,8 @@ export function ServiceMCQModal({
                       className={cn(
                         "w-full rounded-xl border px-4 py-3 text-left text-sm font-medium transition-all",
                         selected
-                          ? "border-violet-600 bg-violet-600 text-white shadow-sm"
-                          : "border-gray-200 bg-white text-gray-700 hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700"
+                          ? "border-orange-500 bg-orange-500 text-white shadow-sm"
+                          : "border-gray-200 bg-white text-gray-700 hover:border-orange-300 hover:bg-orange-50 hover:text-orange-700"
                       )}
                     >
                       {selected && <span className="mr-2">✓</span>}
@@ -248,7 +248,7 @@ export function ServiceMCQModal({
                   <button
                     onClick={() => answers[q.id] && setCurrent((c) => c + 1)}
                     disabled={!answers[q.id]}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-violet-600 transition-colors hover:text-violet-700 disabled:opacity-30"
+                    className="flex items-center gap-1.5 text-sm font-semibold text-orange-600 transition-colors hover:text-orange-700 disabled:opacity-30"
                   >
                     Next <ChevronRight className="h-4 w-4" />
                   </button>
@@ -256,7 +256,7 @@ export function ServiceMCQModal({
                   <button
                     onClick={() => allAnswered && setStep("review")}
                     disabled={!allAnswered}
-                    className="flex items-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-violet-700 disabled:opacity-40"
+                    className="flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-orange-600 disabled:opacity-40"
                   >
                     Continue to message <ChevronRight className="h-4 w-4" />
                   </button>
@@ -295,7 +295,7 @@ export function ServiceMCQModal({
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="e.g. Andheri West, Mumbai"
-                    className="h-10 w-full rounded-xl border border-gray-200 px-3 text-sm focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                    className="h-10 w-full rounded-xl border border-gray-200 px-3 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -307,7 +307,7 @@ export function ServiceMCQModal({
                     onChange={(e) => setMessage(e.target.value)}
                     rows={3}
                     placeholder="Hi, I need help with…"
-                    className="w-full resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-violet-500 focus:outline-none"
+                    className="w-full resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none"
                   />
                 </div>
               </div>
@@ -327,7 +327,7 @@ export function ServiceMCQModal({
                   <button
                     onClick={() => void submitRequest()}
                     disabled={loading}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-violet-600 py-2.5 text-sm font-bold text-white transition-colors hover:bg-violet-700 disabled:opacity-60"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-orange-500 py-2.5 text-sm font-bold text-white transition-colors hover:bg-orange-600 disabled:opacity-60"
                   >
                     {loading ? (
                       <>
@@ -354,7 +354,7 @@ export function ServiceMCQModal({
                           `/customer/register?callbackUrl=${encodeURIComponent("/services?resume=1")}`
                         );
                       }}
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-violet-200 bg-violet-50 text-sm font-bold text-violet-700 hover:bg-violet-100"
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-orange-200 bg-orange-50 text-sm font-bold text-orange-800 hover:bg-orange-100"
                     >
                       <UserPlus className="h-4 w-4" /> Create account
                     </button>
@@ -366,7 +366,7 @@ export function ServiceMCQModal({
                           `/login?callbackUrl=${encodeURIComponent("/services?resume=1")}`
                         );
                       }}
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-violet-600 text-sm font-bold text-white hover:bg-violet-700"
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-orange-500 text-sm font-bold text-white hover:bg-orange-600"
                     >
                       <LogIn className="h-4 w-4" /> Login & message
                     </button>
@@ -394,7 +394,7 @@ export function ServiceMCQModal({
               {requestId && (
                 <Link
                   href={`/customer/messages/${requestId}`}
-                  className="mt-5 rounded-xl bg-violet-600 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-violet-700"
+                  className="mt-5 rounded-xl bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-orange-600"
                 >
                   Open chat
                 </Link>

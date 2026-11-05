@@ -142,10 +142,10 @@ export function PopularTradesSlider() {
         <Link
           href="/services"
           data-trade-card
-          className="flex w-36 shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-blue-50/50 px-3 py-5 text-blue-700 transition-all hover:-translate-y-0.5 hover:bg-blue-50 sm:w-40"
+          className="flex w-36 shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-orange-200 bg-orange-50/50 px-3 py-5 text-[#0B2A4A] transition-all hover:-translate-y-0.5 hover:bg-orange-50 sm:w-40"
           style={{ scrollSnapAlign: "start" }}
         >
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500 text-white shadow-sm">
             <ArrowRight className="h-5 w-5" />
           </div>
           <span className="text-xs font-bold sm:text-sm">View All</span>

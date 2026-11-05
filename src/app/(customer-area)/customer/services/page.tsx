@@ -206,9 +206,9 @@ export default async function CustomerServicesPage({
 
                 {(service.priceFrom || service.priceTo) && (
                   <p className="text-sm font-semibold text-gray-800">
-                    ₹{service.priceFrom?.toLocaleString("en-IN")}
+                    £{service.priceFrom?.toLocaleString("en-GB")}
                     {service.priceTo && service.priceTo !== service.priceFrom
-                      ? ` – ₹${service.priceTo?.toLocaleString("en-IN")}` : ""}
+                      ? ` – £${service.priceTo?.toLocaleString("en-GB")}` : ""}
                     {service.priceUnit && (
                       <span className="text-gray-400 font-normal text-xs"> {service.priceUnit}</span>
                     )}

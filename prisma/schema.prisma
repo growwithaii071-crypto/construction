@@ -851,6 +851,14 @@ model EmailTemplate {
 enum TraderFeeType {
   PERCENTAGE
   FIXED
+  /// Fixed lead fee by job size band (Small / Medium / Large)
+  LEAD_BY_SIZE
+}
+
+enum JobSize {
+  SMALL
+  MEDIUM
+  LARGE
 }
 
 enum ProtectionDefaultMode {
@@ -927,7 +935,7 @@ enum DisputeStatus {
 model PricingConfig {
   id                     String                   @id @default(auto()) @map("_id") @db.ObjectId
   key                    String                   @unique @default("default")
-  traderFeeType          TraderFeeType            @default(PERCENTAGE)
+  traderFeeType          TraderFeeType            @default(LEAD_BY_SIZE)
   traderFeeRate          Float                    @default(0.10)
   traderFeeCap           Float?
   protectionFeeEnabled   Boolean                  @default(true)
@@ -939,6 +947,21 @@ model PricingConfig {
   autoConfirmDays        Int                      @default(5)
   matchingInviteCount    Int                      @default(3)
   maxReassignments       Int                      @default(6)
+  /// Always GBP (£) — platform is single-currency.
+  leadCurrency           String                   @default("GBP")
+  /// Budget under this → SMALL (default £1,000)
+  smallBudgetMax         Float                    @default(1000)
+  /// Budget under this (and ≥ smallBudgetMax) → MEDIUM; else LARGE (default £10,000)
+  mediumBudgetMax        Float                    @default(10000)
+  smallLeadMin           Float                    @default(8)
+  smallLeadMax           Float                    @default(12)
+  smallLeadDefault       Float                    @default(10)
+  mediumLeadMin          Float                    @default(12)
+  mediumLeadMax          Float                    @default(25)
+  mediumLeadDefault      Float                    @default(18)
+  largeLeadMin           Float                    @default(25)
+  largeLeadMax           Float                    @default(100)
+  largeLeadDefault       Float                    @default(37.5)
   /// Per-category overrides: { "Plumbing": { traderFeeRate: 0.08, traderFeeCap: 5000 } }
   categoryOverrides      Json?
   termsVersion           String                   @default("v1.0")
@@ -958,6 +981,8 @@ model MarketplaceJob {
   photos           String[]
   budgetMin        Float?
   budgetMax        Float?
+  /// Derived from budget vs PricingConfig lead bands
+  jobSize          JobSize?
   status           MarketplaceJobStatus @default(OPEN)
   protectionStatus ProtectionStatus     @default(UNDECIDED)
   startDate        DateTime?

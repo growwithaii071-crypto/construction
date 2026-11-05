@@ -121,7 +121,7 @@ export default function AddServicePage() {
           <label className="text-sm font-medium text-gray-700">Pricing (optional)</label>
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <p className="text-xs text-gray-400 mb-1">Min Price (₹)</p>
+              <p className="text-xs text-gray-400 mb-1">Min Price (£)</p>
               <input
                 name="priceFrom"
                 type="number"
@@ -131,7 +131,7 @@ export default function AddServicePage() {
               />
             </div>
             <div>
-              <p className="text-xs text-gray-400 mb-1">Max Price (₹)</p>
+              <p className="text-xs text-gray-400 mb-1">Max Price (£)</p>
               <input
                 name="priceTo"
                 type="number"

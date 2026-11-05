@@ -182,9 +182,10 @@ export default async function CustomerJobDetailPage({
         {(job.budgetMin != null || job.budgetMax != null) && (
           <p className="mt-3 text-sm font-semibold text-slate-800">
             Budget:{" "}
-            {job.budgetMin != null ? `₹${job.budgetMin.toLocaleString("en-IN")}` : "—"}
+            {job.budgetMin != null ? `£${job.budgetMin.toLocaleString("en-GB")}` : "—"}
             {" – "}
-            {job.budgetMax != null ? `₹${job.budgetMax.toLocaleString("en-IN")}` : "—"}
+            {job.budgetMax != null ? `£${job.budgetMax.toLocaleString("en-GB")}` : "—"}
+            {job.jobSize ? ` · ${job.jobSize}` : ""}
           </p>
         )}
       </div>
@@ -193,7 +194,12 @@ export default async function CustomerJobDetailPage({
         <AcceptQuotePanel
           quoteId={acceptQuote.id}
           traderName={acceptQuote.trader.name.split(" — ")[0] ?? "Trader"}
-          preview={buildPricePreview(acceptQuote.amount, config, job.category)}
+          preview={buildPricePreview(
+            acceptQuote.amount,
+            config,
+            job.category,
+            job.jobSize
+          )}
           expired={acceptQuote.validUntil < new Date()}
         />
       )}
@@ -300,7 +306,7 @@ export default async function CustomerJobDetailPage({
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-[#0B2A4A]">
-                      ₹{q.amount.toLocaleString("en-IN")}
+                      £{q.amount.toLocaleString("en-GB")}
                     </p>
                     {canAccept && q.status === QuoteStatus.SUBMITTED && (
                       <Link

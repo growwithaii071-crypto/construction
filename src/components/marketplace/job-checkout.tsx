@@ -81,7 +81,7 @@ function CheckoutForm({
         ) : (
           <>
             <Lock className="h-4 w-4" />
-            Pay ₹{amount.toLocaleString("en-IN")}
+            Pay £{amount.toLocaleString("en-GB")}
           </>
         )}
       </button>
@@ -176,14 +176,14 @@ export function JobCheckout({
         <div className="mt-3 space-y-1.5 text-sm">
           <div className="flex justify-between text-slate-600">
             <span>Quote</span>
-            <span>₹{boot.quoteAmount.toLocaleString("en-IN")}</span>
+            <span>£{boot.quoteAmount.toLocaleString("en-GB")}</span>
           </div>
           {boot.protectionOptedIn ? (
             <div className="flex justify-between text-slate-600">
               <span className="inline-flex items-center gap-1">
                 <Shield className="h-3.5 w-3.5 text-orange-500" /> Protection fee
               </span>
-              <span>₹{boot.protectionFee.toLocaleString("en-IN")}</span>
+              <span>£{boot.protectionFee.toLocaleString("en-GB")}</span>
             </div>
           ) : (
             <p className="text-xs text-slate-400">
@@ -192,7 +192,7 @@ export function JobCheckout({
           )}
           <div className="flex justify-between border-t border-slate-100 pt-2 font-bold text-[#0B2A4A]">
             <span>Total</span>
-            <span>₹{boot.amount.toLocaleString("en-IN")}</span>
+            <span>£{boot.amount.toLocaleString("en-GB")}</span>
           </div>
           <p className="text-[11px] text-slate-400">
             Protection choice locked · Terms {boot.termsVersion}

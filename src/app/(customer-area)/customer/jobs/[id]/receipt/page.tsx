@@ -156,14 +156,14 @@ export default async function CustomerJobReceiptPage({
             <tr className="border-b border-slate-50">
               <td className="py-2.5">Quoted work</td>
               <td className="py-2.5 text-right font-medium">
-                ₹{payment.quoteAmount.toLocaleString("en-IN")}
+                £{payment.quoteAmount.toLocaleString("en-GB")}
               </td>
             </tr>
             {payment.protectionOptedIn && payment.protectionFee > 0 && (
               <tr className="border-b border-slate-50">
                 <td className="py-2.5">Payment protection fee</td>
                 <td className="py-2.5 text-right font-medium">
-                  ₹{payment.protectionFee.toLocaleString("en-IN")}
+                  £{payment.protectionFee.toLocaleString("en-GB")}
                 </td>
               </tr>
             )}
@@ -173,7 +173,7 @@ export default async function CustomerJobReceiptPage({
                   Platform success fee (deducted from trader payout)
                 </td>
                 <td className="py-2.5 text-right">
-                  ₹{quote.feeLedger.amount.toLocaleString("en-IN")}
+                  £{quote.feeLedger.amount.toLocaleString("en-GB")}
                 </td>
               </tr>
             )}
@@ -182,7 +182,7 @@ export default async function CustomerJobReceiptPage({
             <tr>
               <td className="pt-4 text-base font-extrabold text-[#0B2A4A]">You paid</td>
               <td className="pt-4 text-right text-lg font-extrabold text-[#0B2A4A]">
-                ₹{payment.customerTotal.toLocaleString("en-IN")}
+                £{payment.customerTotal.toLocaleString("en-GB")}
               </td>
             </tr>
           </tfoot>
@@ -190,7 +190,7 @@ export default async function CustomerJobReceiptPage({
 
         {job.payouts[0] && (
           <p className="mt-4 text-xs text-slate-500">
-            Trader net payout recorded: ₹{job.payouts[0].netAmount.toLocaleString("en-IN")}
+            Trader net payout recorded: £{job.payouts[0].netAmount.toLocaleString("en-GB")}
             {job.payouts[0].stripeTransferId
               ? ` · Transfer ${job.payouts[0].stripeTransferId}`
               : ""}

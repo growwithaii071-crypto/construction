@@ -53,7 +53,7 @@ export default async function ExpensesPage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Expenses</h1>
-          <p className="text-sm text-gray-500">Total: ₹{(total / 100000).toFixed(2)}L</p>
+          <p className="text-sm text-gray-500">Total: £{(total / 100000).toFixed(2)}L</p>
         </div>
         <Button asChild className="bg-orange-500 hover:bg-orange-600">
           <Link href="/expenses/new">
@@ -109,7 +109,7 @@ export default async function ExpensesPage({
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-gray-900">
-                    ₹{Number(exp.amount).toLocaleString("en-IN")}
+                    £{Number(exp.amount).toLocaleString("en-GB")}
                   </p>
                   <p className="text-xs text-gray-400">{exp.submittedBy?.name}</p>
                 </div>

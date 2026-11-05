@@ -70,9 +70,9 @@ export default async function DisputeDetailPage({
               Trader: <strong>{quote.trader.name}</strong> ({quote.trader.email})
             </p>
             <p className="mt-1">
-              Quote ₹{quote.amount.toLocaleString("en-IN")}
+              Quote £{quote.amount.toLocaleString("en-GB")}
               {quote.feeLedger
-                ? ` · Fee ₹${quote.feeLedger.amount.toLocaleString("en-IN")} (${quote.feeLedger.status})`
+                ? ` · Fee £${quote.feeLedger.amount.toLocaleString("en-GB")} (${quote.feeLedger.status})`
                 : ""}
             </p>
             <p className="mt-1 text-xs text-slate-400">

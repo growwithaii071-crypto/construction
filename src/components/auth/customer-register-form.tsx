@@ -243,7 +243,7 @@ export function CustomerRegisterForm() {
         <Button
           type="submit"
           disabled={isPending}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white h-11 rounded-xl font-semibold mt-1 transition-colors"
+          className="w-full bg-orange-500 hover:bg-orange-600 text-white h-11 rounded-xl font-semibold mt-1 transition-colors"
         >
           {isPending ? (
             <>
@@ -258,7 +258,7 @@ export function CustomerRegisterForm() {
 
       <p className="text-center text-sm text-gray-500">
         Already have an account?{" "}
-        <Link href={loginHref} className="text-blue-600 hover:text-blue-700 font-semibold">
+        <Link href={loginHref} className="text-orange-600 hover:text-orange-700 font-semibold">
           Sign in
         </Link>
       </p>

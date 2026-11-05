@@ -5,6 +5,14 @@ import Link from "next/link";
 import { Inbox, MapPin, Clock } from "lucide-react";
 import { FlowBadge } from "@/components/marketplace/flow-badge";
 import { maintainLiveInvitations } from "@/lib/matching";
+import {
+  getPricingConfig,
+  getLeadBand,
+  formatLeadPriceRange,
+  resolveJobSize,
+} from "@/lib/pricing";
+import { MONEY_SYMBOL } from "@/lib/money";
+import { JobSize } from "@/generated/prisma";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Job Invitations — BuildPro" };
@@ -33,12 +41,16 @@ export default async function ContractorInvitationsPage() {
           location: true,
           budgetMin: true,
           budgetMax: true,
+          jobSize: true,
           status: true,
           protectionStatus: true,
         },
       },
     },
   });
+
+  const pricing = await getPricingConfig();
+  const sym = MONEY_SYMBOL;
 
   const open = invitations.filter((i) =>
     [InvitationStatus.SENT, InvitationStatus.VIEWED].includes(
@@ -92,6 +104,10 @@ export default async function ContractorInvitationsPage() {
             const isLive = [InvitationStatus.SENT, InvitationStatus.VIEWED].includes(
               inv.status as typeof InvitationStatus.SENT
             );
+            const size =
+              inv.job.jobSize ??
+              resolveJobSize(inv.job.budgetMin, inv.job.budgetMax, pricing);
+            const band = getLeadBand(size as JobSize, pricing);
             return (
               <Link
                 key={inv.id}
@@ -105,6 +121,13 @@ export default async function ContractorInvitationsPage() {
                     <h2 className="font-bold text-slate-900">{inv.job.title}</h2>
                     <p className="mt-0.5 text-sm text-slate-500">{inv.job.category}</p>
                     <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-400">
+                      <span className="rounded-full bg-orange-50 px-2 py-0.5 font-bold text-orange-800">
+                        {band.label} · lead {formatLeadPriceRange(band, pricing)} (+VAT)
+                      </span>
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 font-bold text-slate-600">
+                        Fee {sym}
+                        {band.leadDefault}
+                      </span>
                       {inv.job.location && (
                         <span className="inline-flex items-center gap-1">
                           <MapPin className="h-3 w-3" />

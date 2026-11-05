@@ -32,9 +32,9 @@ const HERO_FEATURES = [
 ];
 
 const STEPS = [
-  { n: 1, title: "Post or Search", desc: "Describe your job or browse traders", icon: FileText, color: "bg-blue-600" },
-  { n: 2, title: "Get Quotes", desc: "Chat and compare offers", icon: MessageSquare, color: "bg-emerald-500" },
-  { n: 3, title: "Choose & Hire", desc: "Pick the right pro", icon: CalendarCheck, color: "bg-violet-600" },
+  { n: 1, title: "Post or Search", desc: "Describe your job or browse traders", icon: FileText, color: "bg-[#0B2A4A]" },
+  { n: 2, title: "Get Quotes", desc: "Chat and compare offers", icon: MessageSquare, color: "bg-orange-500" },
+  { n: 3, title: "Choose & Hire", desc: "Pick the right pro", icon: CalendarCheck, color: "bg-[#0B2A4A]" },
   { n: 4, title: "Get It Done", desc: "Track work to completion", icon: Shield, color: "bg-orange-500" },
 ];
 
@@ -69,8 +69,8 @@ export default async function LandingPage() {
           <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-8">
             {/* Copy */}
             <div className="max-w-xl">
-              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-[#0B2A4A] shadow-sm">
-                <Shield className="h-3.5 w-3.5 text-blue-600" />
+              <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-[#0B2A4A] shadow-sm">
+                <Shield className="h-3.5 w-3.5 text-orange-500" />
                 Trusted Tradespeople · Local to You
               </div>
 
@@ -94,7 +94,7 @@ export default async function LandingPage() {
                       key={f.label}
                       className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm"
                     >
-                      <Icon className="h-3.5 w-3.5 text-blue-600" />
+                      <Icon className="h-3.5 w-3.5 text-orange-500" />
                       {f.label}
                     </span>
                   );
@@ -147,7 +147,7 @@ export default async function LandingPage() {
                       className="flex items-center gap-2.5 rounded-full border border-white/90 bg-white/95 py-2 pr-4 pl-2 shadow-[0_8px_24px_rgba(11,42,74,0.12)] backdrop-blur-sm"
                       style={{ marginLeft: i % 2 === 1 ? "0.75rem" : "0" }}
                     >
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#E8F1FB] text-[#1D6FBF]">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-600">
                         <Icon className="h-4 w-4" strokeWidth={2.25} />
                       </span>
                       <span className="whitespace-nowrap text-[13px] font-bold tracking-tight text-[#0B2A4A]">
@@ -169,8 +169,8 @@ export default async function LandingPage() {
                 href: "/customer/register",
                 cta: "Post a Job",
                 icon: ClipboardList,
-                iconBg: "bg-blue-100 text-blue-700",
-                btn: "bg-blue-600 hover:bg-blue-700 text-white",
+                iconBg: "bg-orange-100 text-orange-700",
+                btn: "bg-orange-500 hover:bg-orange-600 text-white",
               },
               {
                 title: "Find a Trade",
@@ -178,8 +178,8 @@ export default async function LandingPage() {
                 href: "/services",
                 cta: "Search Now",
                 icon: Search,
-                iconBg: "bg-emerald-100 text-emerald-700",
-                btn: "bg-emerald-600 hover:bg-emerald-700 text-white",
+                iconBg: "bg-[#E8F1FB] text-[#0B2A4A]",
+                btn: "bg-[#0B2A4A] hover:bg-[#0a2440] text-white",
               },
               {
                 title: "My Jobs",
@@ -187,8 +187,8 @@ export default async function LandingPage() {
                 href: isLoggedIn ? "/customer/requests" : "/login?callbackUrl=/customer/requests",
                 cta: "View My Jobs",
                 icon: Briefcase,
-                iconBg: "bg-violet-100 text-violet-700",
-                btn: "bg-violet-600 hover:bg-violet-700 text-white",
+                iconBg: "bg-orange-50 text-orange-700",
+                btn: "bg-orange-500 hover:bg-orange-600 text-white",
               },
             ].map((card) => {
               const Icon = card.icon;

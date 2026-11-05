@@ -194,7 +194,7 @@ export function ProjectForm({ clients, managers, project }: ProjectFormProps) {
             </CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="budget">Budget (₹)</Label>
+                <Label htmlFor="budget">Budget (£)</Label>
                 <Input
                   id="budget"
                   name="budget"
@@ -205,7 +205,7 @@ export function ProjectForm({ clients, managers, project }: ProjectFormProps) {
                 />
               </div>
               <div>
-                <Label htmlFor="contractValue">Contract Value (₹)</Label>
+                <Label htmlFor="contractValue">Contract Value (£)</Label>
                 <Input
                   id="contractValue"
                   name="contractValue"

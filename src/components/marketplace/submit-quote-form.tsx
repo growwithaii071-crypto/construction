@@ -58,7 +58,7 @@ export function SubmitQuoteForm({ invitationId }: { invitationId: string }) {
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="amount">Quote amount (₹)</Label>
+        <Label htmlFor="amount">Quote amount (£)</Label>
         <Input
           id="amount"
           name="amount"

@@ -70,7 +70,7 @@ export default function ConstructionPortalLayout({ children }: { children: React
               <div className="grid grid-cols-3 gap-4 mb-10">
                 {[
                   { val: "800+", label: "Contractors" },
-                  { val: "₹500Cr+", label: "Projects" },
+                  { val: "£500Cr+", label: "Projects" },
                   { val: "4.9★", label: "Avg Rating" },
                 ].map((s) => (
                   <div key={s.label} className="bg-white/5 border border-white/10 rounded-2xl p-4 text-center">

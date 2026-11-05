@@ -102,13 +102,13 @@ export default async function ContractorJobDetailPage({
         <div className="mt-5 grid gap-2 rounded-xl bg-slate-50 px-4 py-3 text-sm">
           <div className="flex justify-between">
             <span className="text-slate-500">Your quote</span>
-            <span className="font-bold">₹{quote.amount.toLocaleString("en-IN")}</span>
+            <span className="font-bold">£{quote.amount.toLocaleString("en-GB")}</span>
           </div>
           {quote.feeLedger && (
             <div className="flex justify-between">
               <span className="text-slate-500">Success fee ({quote.feeLedger.status})</span>
               <span className="font-semibold text-slate-800">
-                ₹{quote.feeLedger.amount.toLocaleString("en-IN")}
+                £{quote.feeLedger.amount.toLocaleString("en-GB")}
               </span>
             </div>
           )}
@@ -116,7 +116,7 @@ export default async function ContractorJobDetailPage({
             <div className="flex justify-between border-t border-slate-200 pt-2">
               <span className="text-slate-500">Net payout</span>
               <span className="font-extrabold text-emerald-700">
-                ₹{payout.netAmount.toLocaleString("en-IN")}
+                £{payout.netAmount.toLocaleString("en-GB")}
               </span>
             </div>
           )}

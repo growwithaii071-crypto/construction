@@ -68,7 +68,7 @@ export async function startJobAction(jobId: string) {
   ) {
     const release = await releaseJobPayout(jobId, traderId);
     payoutNote = release.ok
-      ? `Unprotected payout released: ₹${release.netAmount.toLocaleString("en-IN")}`
+      ? `Unprotected payout released: £${release.netAmount.toLocaleString("en-GB")}`
       : `Payout pending: ${release.reason}`;
   }
 
@@ -199,7 +199,7 @@ export async function confirmJobAction(jobId: string) {
     if (job.protectionStatus === ProtectionStatus.PROTECTED || !releaseAtStart) {
       const release = await releaseJobPayout(jobId, clientId);
       message = release.ok
-        ? `Confirmed. Trader paid ₹${release.netAmount.toLocaleString("en-IN")}.`
+        ? `Confirmed. Trader paid £${release.netAmount.toLocaleString("en-GB")}.`
         : `Confirmed, but payout failed: ${release.reason}`;
     } else {
       // Unprotected already released at start — mark PAID_OUT

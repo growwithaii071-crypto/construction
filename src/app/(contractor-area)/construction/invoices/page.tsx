@@ -59,12 +59,12 @@ export default async function InvoicesPage() {
         </div>
         <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
           <p className="text-xs text-gray-500 font-medium">Amount Collected</p>
-          <p className="text-3xl font-extrabold text-green-600 mt-1">₹{totalPaid.toLocaleString("en-IN")}</p>
+          <p className="text-3xl font-extrabold text-green-600 mt-1">£{totalPaid.toLocaleString("en-GB")}</p>
           <p className="text-xs text-gray-400 mt-0.5">From paid invoices</p>
         </div>
         <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm">
           <p className="text-xs text-gray-500 font-medium">Outstanding</p>
-          <p className="text-3xl font-extrabold text-amber-600 mt-1">₹{totalPending.toLocaleString("en-IN")}</p>
+          <p className="text-3xl font-extrabold text-amber-600 mt-1">£{totalPending.toLocaleString("en-GB")}</p>
           <p className="text-xs text-gray-400 mt-0.5">Pending collection</p>
         </div>
       </div>
@@ -117,7 +117,7 @@ export default async function InvoicesPage() {
                       </td>
                       <td className="py-4 px-4 text-right">
                         {r.budget ? (
-                          <p className="font-bold text-gray-900">₹{r.budget.toLocaleString("en-IN")}</p>
+                          <p className="font-bold text-gray-900">£{r.budget.toLocaleString("en-GB")}</p>
                         ) : (
                           <p className="text-gray-300 text-xs">Not set</p>
                         )}

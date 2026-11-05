@@ -1,8 +1,14 @@
 import { requireAuth } from "@/lib/auth-utils";
 import { UserRole } from "@/generated/prisma";
 import Link from "next/link";
-import { ArrowLeft, BadgeIndianRupee } from "lucide-react";
-import { getPricingConfig, buildPricePreview } from "@/lib/pricing";
+import { ArrowLeft, BadgePoundSterling } from "lucide-react";
+import {
+  getPricingConfig,
+  buildPricePreview,
+  listLeadBands,
+  formatLeadPriceRange,
+} from "@/lib/pricing";
+import { MONEY_SYMBOL } from "@/lib/money";
 import { PricingConfigForm } from "@/components/admin/pricing-config-form";
 import type { Metadata } from "next";
 
@@ -12,10 +18,12 @@ export default async function PricingSettingsPage() {
   await requireAuth([UserRole.ADMIN, UserRole.SUPER_ADMIN]);
 
   const config = await getPricingConfig();
-  const sample = buildPricePreview(50000, config);
+  const bands = listLeadBands(config);
+  const sym = MONEY_SYMBOL;
+  const sampleMedium = buildPricePreview(5000, config, null, "MEDIUM");
 
   const initial = {
-    traderFeeType: config.traderFeeType as "PERCENTAGE" | "FIXED",
+    traderFeeType: config.traderFeeType as "PERCENTAGE" | "FIXED" | "LEAD_BY_SIZE",
     traderFeeRatePct:
       config.traderFeeType === "PERCENTAGE"
         ? Number((config.traderFeeRate * 100).toFixed(2))
@@ -32,6 +40,17 @@ export default async function PricingSettingsPage() {
     matchingInviteCount: config.matchingInviteCount,
     maxReassignments: config.maxReassignments,
     termsVersion: config.termsVersion,
+    smallBudgetMax: config.smallBudgetMax,
+    mediumBudgetMax: config.mediumBudgetMax,
+    smallLeadMin: config.smallLeadMin,
+    smallLeadMax: config.smallLeadMax,
+    smallLeadDefault: config.smallLeadDefault,
+    mediumLeadMin: config.mediumLeadMin,
+    mediumLeadMax: config.mediumLeadMax,
+    mediumLeadDefault: config.mediumLeadDefault,
+    largeLeadMin: config.largeLeadMin,
+    largeLeadMax: config.largeLeadMax,
+    largeLeadDefault: config.largeLeadDefault,
   };
 
   return (
@@ -46,38 +65,70 @@ export default async function PricingSettingsPage() {
         </Link>
         <div className="mt-2 flex items-center gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
-            <BadgeIndianRupee className="h-5 w-5" />
+            <BadgePoundSterling className="h-5 w-5" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-slate-900">
               Marketplace pricing
             </h1>
             <p className="text-sm text-slate-500">
-              Trader success fees, payment protection and matching rules — change without a release
+              Lead prices by job size, protection fee, and max traders per lead
             </p>
           </div>
         </div>
       </div>
 
-      {/* Live preview */}
-      <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">
-          Preview · ₹50,000 quote
+      <div className="overflow-x-auto rounded-2xl border border-orange-100 bg-orange-50/40">
+        <table className="min-w-full text-left text-sm">
+          <thead className="text-xs font-semibold uppercase tracking-wide text-orange-800/80">
+            <tr>
+              <th className="px-4 py-3">Job size</th>
+              <th className="px-4 py-3">Examples</th>
+              <th className="px-4 py-3">Lead price (+VAT)</th>
+              <th className="px-4 py-3">Charge</th>
+              <th className="px-4 py-3">Max traders</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-orange-100/80 bg-white/70">
+            {bands.map((b) => (
+              <tr key={b.size}>
+                <td className="px-4 py-3 font-semibold text-[#0B2A4A]">
+                  {b.label}
+                  <p className="text-xs font-normal text-slate-500">{b.budgetLabel}</p>
+                </td>
+                <td className="px-4 py-3 text-xs text-slate-600">{b.examples}</td>
+                <td className="px-4 py-3 font-semibold text-slate-800">
+                  {formatLeadPriceRange(b, config)}
+                </td>
+                <td className="px-4 py-3 text-slate-700">
+                  {sym}
+                  {b.leadDefault}
+                </td>
+                <td className="px-4 py-3 font-bold text-slate-900">{b.maxTraders}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Preview · Medium job · {sym}5,000 quote
         </p>
         <div className="mt-3 grid gap-3 sm:grid-cols-3">
           <PreviewStat
-            label="Trader success fee"
-            value={`₹${sample.traderSuccessFee.toLocaleString("en-IN")}`}
-            hint={sample.traderFeeLabel}
+            label="Trader lead fee"
+            value={`${sym}${sampleMedium.traderSuccessFee.toLocaleString("en-GB")}`}
+            hint={sampleMedium.traderFeeLabel}
           />
           <PreviewStat
             label="Customer (Protected)"
-            value={`₹${sample.customerTotalProtected.toLocaleString("en-IN")}`}
-            hint={`incl. ₹${sample.protectionFee.toLocaleString("en-IN")} protection`}
+            value={`${sym}${sampleMedium.customerTotalProtected.toLocaleString("en-GB")}`}
+            hint={`incl. ${sym}${sampleMedium.protectionFee.toLocaleString("en-GB")} protection`}
           />
           <PreviewStat
             label="Customer (Unprotected)"
-            value={`₹${sample.customerTotalUnprotected.toLocaleString("en-IN")}`}
+            value={`${sym}${sampleMedium.customerTotalUnprotected.toLocaleString("en-GB")}`}
             hint="Quote only"
           />
         </div>

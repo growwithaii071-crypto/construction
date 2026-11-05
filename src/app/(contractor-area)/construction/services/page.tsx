@@ -68,8 +68,8 @@ export default async function ContractorServicesPage() {
               <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">{service.description}</p>
               {(service.priceFrom || service.priceTo) && (
                 <p className="text-sm font-semibold text-gray-800">
-                  ₹{service.priceFrom?.toLocaleString("en-IN")}
-                  {service.priceTo && service.priceTo !== service.priceFrom ? ` – ₹${service.priceTo?.toLocaleString("en-IN")}` : ""}
+                  £{service.priceFrom?.toLocaleString("en-GB")}
+                  {service.priceTo && service.priceTo !== service.priceFrom ? ` – £${service.priceTo?.toLocaleString("en-GB")}` : ""}
                   {service.priceUnit && <span className="text-gray-400 font-normal"> {service.priceUnit}</span>}
                 </p>
               )}

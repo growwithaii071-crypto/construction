@@ -13,7 +13,7 @@ import {
   CreditCard,
   ExternalLink,
   Landmark,
-  BadgeIndianRupee,
+  BadgePoundSterling,
   Webhook,
   KeyRound,
   Users,
@@ -278,7 +278,7 @@ export default async function StripeSettingsPage() {
                     {p.job.title}
                   </p>
                   <p className="text-[11px] text-slate-400">
-                    ₹{p.customerTotal.toLocaleString("en-IN")} ·{" "}
+                    £{p.customerTotal.toLocaleString("en-GB")} ·{" "}
                     {p.updatedAt.toLocaleString("en-IN", {
                       day: "numeric",
                       month: "short",
@@ -326,7 +326,7 @@ export default async function StripeSettingsPage() {
           value={String(payoutAgg._count)}
           hint={
             payoutAgg._sum.netAmount != null
-              ? `₹${payoutAgg._sum.netAmount.toLocaleString("en-IN")} net to traders`
+              ? `£${payoutAgg._sum.netAmount.toLocaleString("en-GB")} net to traders`
               : "No transfers yet"
           }
         />
@@ -335,8 +335,8 @@ export default async function StripeSettingsPage() {
       {(feePending._count ?? 0) > 0 && (
         <div className="rounded-xl border border-amber-100 bg-amber-50/80 px-4 py-3 text-sm text-amber-950">
           <p className="font-semibold">
-            Pending trader success fees: {feePending._count} · ₹
-            {(feePending._sum.amount ?? 0).toLocaleString("en-IN")}
+            Pending trader success fees: {feePending._count} · £
+            {(feePending._sum.amount ?? 0).toLocaleString("en-GB")}
           </p>
           <p className="mt-0.5 text-xs text-amber-800/90">
             These collect when jobs pay out (quote − fee stays on the platform Stripe balance).
@@ -351,7 +351,7 @@ export default async function StripeSettingsPage() {
           className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-orange-200 hover:shadow-md"
         >
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
-            <BadgeIndianRupee className="h-5 w-5" />
+            <BadgePoundSterling className="h-5 w-5" />
           </span>
           <div>
             <p className="font-semibold text-slate-900">Marketplace pricing</p>

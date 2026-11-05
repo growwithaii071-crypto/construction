@@ -64,7 +64,7 @@ export async function requestServiceAction(formData: unknown) {
       serviceTitle: service.title,
       category: service.category ?? "—",
       location: parsed.data.location || "—",
-      budget: parsed.data.budget != null ? `₹${parsed.data.budget}` : "—",
+      budget: parsed.data.budget != null ? `£${parsed.data.budget}` : "—",
       message: parsed.data.message || "—",
       requestsUrl: `${getAppUrl()}/construction/requests`,
     }).catch(() => {});

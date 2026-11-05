@@ -368,7 +368,7 @@ Defaults when Admin has not changed pricing:
 | Auto-confirm | 5 days after complete |
 | Live invites | 3 |
 
-Example: quote **₹10,000** Protected → protection fee **₹300** → customer pays **≈ ₹10,300**. Trader success fee **₹1,000** is deducted from trader payout (platform fee), not necessarily charged as an extra customer line beyond protection.
+Example: quote **£10,000** Protected → protection fee **£300** → customer pays **≈ £10,300**. Trader success fee **£1,000** is deducted from trader payout (platform fee), not necessarily charged as an extra customer line beyond protection.
 
 ---
 

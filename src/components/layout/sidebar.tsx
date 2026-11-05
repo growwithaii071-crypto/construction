@@ -31,7 +31,7 @@ import {
   Boxes,
   Cog,
   Wallet,
-  BadgeIndianRupee,
+  BadgePoundSterling,
   Scale,
   CreditCard,
   type LucideIcon,
@@ -133,7 +133,7 @@ const NAV: NavItem[] = [
     icon: Cog,
     children: [
       { href: "/settings", label: "General", icon: Settings },
-      { href: "/settings/pricing", label: "Marketplace Pricing", icon: BadgeIndianRupee },
+      { href: "/settings/pricing", label: "Marketplace Pricing", icon: BadgePoundSterling },
       { href: "/settings/stripe", label: "Stripe / Payments", icon: CreditCard },
       { href: "/settings/email", label: "Email / SMTP", icon: Mail },
       { href: "/settings/email-templates", label: "Email Templates", icon: Mails },

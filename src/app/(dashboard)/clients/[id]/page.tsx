@@ -159,7 +159,7 @@ export default async function ClientViewPage({
                       )}
                       {req.budget != null && (
                         <p className="text-xs text-slate-400">
-                          Budget: ₹{req.budget.toLocaleString("en-IN")}
+                          Budget: £{req.budget.toLocaleString("en-GB")}
                         </p>
                       )}
                       {req.message && (

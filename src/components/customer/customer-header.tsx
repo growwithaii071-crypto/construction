@@ -37,12 +37,12 @@ export function CustomerHeader({ user }: CustomerHeaderProps) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/customer/dashboard" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-sm">
+            <div className="w-9 h-9 bg-[#0B2A4A] rounded-xl flex items-center justify-center shadow-sm">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div>
               <p className="font-bold text-gray-900 text-sm leading-none">BuildPro</p>
-              <p className="text-blue-600 text-[10px] font-medium leading-none mt-0.5">Customer Portal</p>
+              <p className="text-orange-500 text-[10px] font-medium leading-none mt-0.5">Customer Portal</p>
             </div>
           </Link>
 
@@ -75,12 +75,12 @@ export function CustomerHeader({ user }: CustomerHeaderProps) {
                 onClick={() => setDropdownOpen((v) => !v)}
                 className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-gray-100 transition-colors"
               >
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                <div className="w-8 h-8 bg-[#0B2A4A] rounded-full flex items-center justify-center text-white text-xs font-bold">
                   {initials}
                 </div>
                 <div className="hidden sm:block text-left">
                   <p className="text-sm font-semibold text-gray-900 leading-none">{user.name}</p>
-                  <p className="text-xs text-blue-600 font-medium leading-none mt-0.5">Customer</p>
+                  <p className="text-xs text-orange-500 font-medium leading-none mt-0.5">Customer</p>
                 </div>
                 <ChevronDown className="w-3.5 h-3.5 text-gray-400 hidden sm:block" />
               </button>

@@ -17,6 +17,7 @@ import { notifyUserWithEmail } from "@/lib/marketplace-notify";
 import { releaseJobPayout, voidFeeIfPending } from "@/lib/marketplace-payouts";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { toStripeAmount } from "@/lib/marketplace-payments";
+import { STRIPE_CURRENCY } from "@/lib/money";
 
 const ReasonSchema = z.object({
   jobId: z.string().min(1),
@@ -202,7 +203,7 @@ const ResolveSchema = z.object({
   disputeId: z.string().min(1),
   resolution: z.enum(["FULL_RELEASE", "PARTIAL_RELEASE", "REFUNDED"]),
   notes: z.string().max(2000).optional(),
-  /** Rupees to trader on partial (remainder refunded to customer) */
+  /** Pounds to trader on partial (remainder refunded to customer) */
   traderAmount: z.coerce.number().min(0).optional(),
 });
 
@@ -337,7 +338,7 @@ export async function resolveDisputeAction(formData: FormData) {
         const transfer = await stripe.transfers.create(
           {
             amount: toStripeAmount(net),
-            currency: "inr",
+            currency: STRIPE_CURRENCY,
             destination: trader.stripeAccountId,
             transfer_group: job.id,
             metadata: { disputeId: dispute.id, partial: "true" },
@@ -384,7 +385,7 @@ export async function resolveDisputeAction(formData: FormData) {
           status: DisputeStatus.PARTIAL_RELEASE,
           resolution:
             parsed.data.notes ||
-            `Partial: trader ₹${traderAmount}, customer refund ≈ ₹${refundAmount}`,
+            `Partial: trader £${traderAmount}, customer refund ≈ £${refundAmount}`,
         },
       });
       await prisma.marketplaceJob.update({

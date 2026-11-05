@@ -8,11 +8,12 @@ export function SiteFooter() {
         <div className="mb-12 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <div className="mb-4 flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600">
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B2A4A] ring-1 ring-white/10">
                 <HardHat className="h-4 w-4 text-white" />
+                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-orange-500 ring-2 ring-[#0a0818]" />
               </div>
               <span className="text-lg font-bold text-white">
-                Build<span className="text-violet-400">Pro</span>
+                Build<span className="text-orange-500">Pro</span>
               </span>
             </div>
             <p className="mb-5 text-sm leading-relaxed text-white/40">

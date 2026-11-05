@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
       serviceTitle: service.title,
       category: service.category ?? "—",
       location: location || "—",
-      budget: budget ? `₹${budget}` : "—",
+      budget: budget ? `£${budget}` : "—",
       message: message || "—",
       requestsUrl: `${getAppUrl()}/construction/requests`,
       messagesUrl: `${getAppUrl()}/construction/messages/${created.id}`,

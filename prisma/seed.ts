@@ -717,7 +717,7 @@ async function main() {
     data: [
       {
         title: "Invoice Payment Received",
-        message: "Payment of ₹59,00,000 received for Invoice INV-2024-001",
+        message: "Payment of £59,00,000 received for Invoice INV-2024-001",
         type: "SUCCESS",
         userId: adminUser.id,
       },

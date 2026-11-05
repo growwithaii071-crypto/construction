@@ -8,6 +8,7 @@ import {
 } from "@/generated/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { toStripeAmount } from "@/lib/marketplace-payments";
+import { STRIPE_CURRENCY } from "@/lib/money";
 import { getPricingConfig } from "@/lib/pricing";
 import { createNotification } from "@/lib/notifications";
 
@@ -84,7 +85,7 @@ export async function releaseJobPayout(jobId: string, actorId?: string): Promise
       const transfer = await stripe.transfers.create(
         {
           amount: toStripeAmount(netAmount),
-          currency: "inr",
+          currency: STRIPE_CURRENCY,
           destination: trader.stripeAccountId,
           transfer_group: jobId,
           metadata: {
@@ -156,7 +157,7 @@ export async function releaseJobPayout(jobId: string, actorId?: string): Promise
   void createNotification({
     userId: quote.traderId,
     title: "Payout released",
-    message: `₹${netAmount.toLocaleString("en-IN")} transferred for “${job.title}” (after success fee).`,
+    message: `£${netAmount.toLocaleString("en-GB")} transferred for “${job.title}” (after success fee).`,
     type: "SUCCESS",
     link: "/construction/payouts",
   });

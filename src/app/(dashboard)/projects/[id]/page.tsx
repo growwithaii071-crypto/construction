@@ -150,7 +150,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
             {budgetUsed}%
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            ₹{(totalCost / 100000).toFixed(1)}L / ₹{(totalBudget / 100000).toFixed(1)}L
+            £{(totalCost / 100000).toFixed(1)}L / £{(totalBudget / 100000).toFixed(1)}L
           </p>
         </Card>
         <Card className="p-4">
@@ -220,7 +220,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                     <div>
                       <p className="text-gray-400 text-xs">Budget</p>
                       <p className="font-medium mt-0.5">
-                        ₹{project.budgetAmount.toLocaleString("en-IN")}
+                        £{project.budgetAmount.toLocaleString("en-GB")}
                       </p>
                     </div>
                   )}
@@ -228,7 +228,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                     <div>
                       <p className="text-gray-400 text-xs">Contract Value</p>
                       <p className="font-medium mt-0.5">
-                        ₹{Number(project.contractValue).toLocaleString("en-IN")}
+                        £{Number(project.contractValue).toLocaleString("en-GB")}
                       </p>
                     </div>
                   )}
@@ -343,7 +343,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold">
-                          ₹{Number(inv.totalAmount).toLocaleString("en-IN")}
+                          £{Number(inv.totalAmount).toLocaleString("en-GB")}
                         </p>
                         <Badge variant="outline" className="text-xs">
                           {inv.status}

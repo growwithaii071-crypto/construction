@@ -8,7 +8,7 @@ import {
   ChevronRight,
   Shield,
   Settings2,
-  BadgeIndianRupee,
+  BadgePoundSterling,
   CreditCard,
 } from "lucide-react";
 import type { Metadata } from "next";
@@ -52,7 +52,7 @@ const EMAIL_ITEMS: SettingItem[] = [
 
 const MARKETPLACE_ITEMS: SettingItem[] = [
   {
-    icon: BadgeIndianRupee,
+    icon: BadgePoundSterling,
     label: "Pricing & protection",
     desc: "Trader success fees, payment protection rates and matching rules",
     href: "/settings/pricing",
@@ -150,7 +150,7 @@ export default async function SettingsPage() {
       {isAdmin && (
         <section className="space-y-3">
           <div className="flex items-center gap-2">
-            <BadgeIndianRupee className="h-4 w-4 text-slate-400" />
+            <BadgePoundSterling className="h-4 w-4 text-slate-400" />
             <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Marketplace
             </h2>

@@ -100,7 +100,7 @@ export default function NewInvoicePage() {
               </CardHeader>
               <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <Label>Subtotal (₹) *</Label>
+                  <Label>Subtotal (£) *</Label>
                   <Input
                     type="number"
                     value={subtotal || ""}
@@ -123,19 +123,19 @@ export default function NewInvoicePage() {
                   <input type="hidden" name="taxRate" value={taxRate} />
                 </div>
                 <div>
-                  <Label>Total (₹)</Label>
+                  <Label>Total (£)</Label>
                   <Input
-                    value={total.toLocaleString("en-IN")}
+                    value={total.toLocaleString("en-GB")}
                     readOnly
                     className="mt-1 bg-gray-50"
                   />
                 </div>
                 <div className="sm:col-span-3 bg-blue-50 rounded-lg p-3 text-sm">
                   <span className="text-blue-700">
-                    Tax Amount: ₹{tax.toLocaleString("en-IN")} ({taxRate}%)
+                    Tax Amount: £{tax.toLocaleString("en-GB")} ({taxRate}%)
                   </span>
                   <span className="ml-4 font-bold text-blue-900">
-                    Total: ₹{total.toLocaleString("en-IN")}
+                    Total: £{total.toLocaleString("en-GB")}
                   </span>
                 </div>
               </CardContent>

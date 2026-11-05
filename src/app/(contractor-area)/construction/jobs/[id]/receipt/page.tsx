@@ -91,7 +91,7 @@ export default async function ContractorJobReceiptPage({
             <tr className="border-b border-slate-50">
               <td className="py-2.5 text-slate-600">Accepted quote</td>
               <td className="py-2.5 text-right font-medium">
-                ₹{quote.amount.toLocaleString("en-IN")}
+                £{quote.amount.toLocaleString("en-GB")}
               </td>
             </tr>
             {quote.feeLedger && (
@@ -100,7 +100,7 @@ export default async function ContractorJobReceiptPage({
                   Success fee ({quote.feeLedger.status})
                 </td>
                 <td className="py-2.5 text-right font-medium text-rose-700">
-                  −₹{quote.feeLedger.amount.toLocaleString("en-IN")}
+                  −£{quote.feeLedger.amount.toLocaleString("en-GB")}
                 </td>
               </tr>
             )}
@@ -108,18 +108,18 @@ export default async function ContractorJobReceiptPage({
               <tr className="border-b border-slate-50">
                 <td className="py-2.5 text-slate-600">Customer paid (incl. protection)</td>
                 <td className="py-2.5 text-right font-medium">
-                  ₹{payment.customerTotal.toLocaleString("en-IN")}
+                  £{payment.customerTotal.toLocaleString("en-GB")}
                 </td>
               </tr>
             )}
             <tr>
               <td className="pt-4 font-extrabold text-[#0B2A4A]">Your net payout</td>
               <td className="pt-4 text-right text-lg font-extrabold text-emerald-700">
-                ₹
+                £
                 {(
                   payout?.netAmount ??
                   Math.max(0, quote.amount - (quote.feeLedger?.amount ?? 0))
-                ).toLocaleString("en-IN")}
+                ).toLocaleString("en-GB")}
               </td>
             </tr>
           </tbody>

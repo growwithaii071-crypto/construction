@@ -161,13 +161,13 @@ export async function submitQuoteAction(formData: FormData) {
     void notifyUserWithEmail({
       userId: inv.job.clientId,
       title: "New quote received",
-      message: `${traderName} quoted ₹${quote.amount.toLocaleString("en-IN")} on “${inv.job.title}”.`,
+      message: `${traderName} quoted £${quote.amount.toLocaleString("en-GB")} on “${inv.job.title}”.`,
       type: "SUCCESS",
       link: `/customer/jobs/${inv.jobId}`,
       emailKey: "marketplace_new_quote",
       emailVars: {
         jobTitle: inv.job.title,
-        amount: quote.amount.toLocaleString("en-IN"),
+        amount: `£${quote.amount.toLocaleString("en-GB")}`,
         traderName,
       },
     });
@@ -208,7 +208,12 @@ export async function getQuotePricePreviewAction(quoteId: string) {
   }
 
   const config = await getPricingConfig();
-  const preview = buildPricePreview(quote.amount, config, quote.job.category);
+  const preview = buildPricePreview(
+    quote.amount,
+    config,
+    quote.job.category,
+    quote.job.jobSize
+  );
 
   return {
     success: true as const,
@@ -281,14 +286,24 @@ export async function acceptQuoteAction(formData: FormData) {
       }
 
       const config = await getPricingConfig();
-      const preview = buildPricePreview(quote.amount, config, quote.job.category);
+      const preview = buildPricePreview(
+        quote.amount,
+        config,
+        quote.job.category,
+        quote.job.jobSize
+      );
       const protectionFee = protectionOptedIn
         ? calcProtectionFee(quote.amount, config, quote.job.category)
         : 0;
       const customerTotal = protectionOptedIn
         ? preview.customerTotalProtected
         : preview.customerTotalUnprotected;
-      const traderFee = calcTraderSuccessFee(quote.amount, config, quote.job.category);
+      const traderFee = calcTraderSuccessFee(
+        quote.amount,
+        config,
+        quote.job.category,
+        quote.job.jobSize
+      );
 
       await tx.quote.update({
         where: { id: quote.id },

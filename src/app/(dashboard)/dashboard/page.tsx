@@ -146,10 +146,10 @@ export default async function DashboardPage() {
         />
         <StatsCard
           title="Total Revenue"
-          value={`₹${formatAmount(Number(stats.totalRevenue))}`}
+          value={`£${formatAmount(Number(stats.totalRevenue))}`}
           icon={TrendingUp}
           color="green"
-          sub={`₹${formatAmount(Number(stats.pendingRevenue))} pending`}
+          sub={`£${formatAmount(Number(stats.pendingRevenue))} pending`}
           href="/invoices"
         />
         <StatsCard

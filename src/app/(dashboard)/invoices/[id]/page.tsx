@@ -155,10 +155,10 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               <div className="px-4 py-3 grid grid-cols-4 border-t">
                 <span className="col-span-2 text-sm">Construction Services</span>
                 <span className="text-right text-sm">
-                  ₹{Number(invoice.subtotal).toLocaleString("en-IN")}
+                  £{Number(invoice.subtotal).toLocaleString("en-GB")}
                 </span>
                 <span className="text-right text-sm">
-                  ₹{Number(invoice.subtotal).toLocaleString("en-IN")}
+                  £{Number(invoice.subtotal).toLocaleString("en-GB")}
                 </span>
               </div>
             </div>
@@ -167,20 +167,20 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               <div className="w-64 space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Subtotal</span>
-                  <span>₹{Number(invoice.subtotal).toLocaleString("en-IN")}</span>
+                  <span>£{Number(invoice.subtotal).toLocaleString("en-GB")}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">GST ({Number(invoice.taxRate)}%)</span>
-                  <span>₹{Number(invoice.taxAmount).toLocaleString("en-IN")}</span>
+                  <span>£{Number(invoice.taxAmount).toLocaleString("en-GB")}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">
                   <span>Total</span>
-                  <span>₹{Number(invoice.totalAmount).toLocaleString("en-IN")}</span>
+                  <span>£{Number(invoice.totalAmount).toLocaleString("en-GB")}</span>
                 </div>
                 {Number(invoice.paidAmount) > 0 && (
                   <div className="flex justify-between text-green-600">
                     <span>Paid</span>
-                    <span>₹{Number(invoice.paidAmount).toLocaleString("en-IN")}</span>
+                    <span>£{Number(invoice.paidAmount).toLocaleString("en-GB")}</span>
                   </div>
                 )}
               </div>
@@ -208,19 +208,19 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
               <div className="flex justify-between">
                 <span className="text-gray-500">Total</span>
                 <span className="font-bold">
-                  ₹{Number(invoice.totalAmount).toLocaleString("en-IN")}
+                  £{Number(invoice.totalAmount).toLocaleString("en-GB")}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Paid</span>
                 <span className="text-green-600">
-                  ₹{Number(invoice.paidAmount ?? 0).toLocaleString("en-IN")}
+                  £{Number(invoice.paidAmount ?? 0).toLocaleString("en-GB")}
                 </span>
               </div>
               <div className="flex justify-between font-medium border-t pt-2">
                 <span>Balance</span>
                 <span className="text-red-600">
-                  ₹
+                  £
                   {(Number(invoice.totalAmount) - Number(invoice.paidAmount ?? 0)).toLocaleString(
                     "en-IN"
                   )}

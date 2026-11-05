@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { DollarSign, TrendingUp, CheckCircle2, Clock, ArrowRight, IndianRupee } from "lucide-react";
+import { DollarSign, TrendingUp, CheckCircle2, Clock, ArrowRight, PoundSterling } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
@@ -46,14 +46,14 @@ export default async function EarningsPage() {
   const stats = [
     {
       label: "Total Earned",
-      value: `₹${(data?.totalEarned ?? 0).toLocaleString("en-IN")}`,
+      value: `£${(data?.totalEarned ?? 0).toLocaleString("en-GB")}`,
       sub: "From completed jobs",
-      icon: IndianRupee,
+      icon: PoundSterling,
       color: "green",
     },
     {
       label: "Pending Earnings",
-      value: `₹${(data?.pendingEarnings ?? 0).toLocaleString("en-IN")}`,
+      value: `£${(data?.pendingEarnings ?? 0).toLocaleString("en-GB")}`,
       sub: "Active jobs in progress",
       icon: Clock,
       color: "amber",
@@ -127,7 +127,7 @@ export default async function EarningsPage() {
           </div>
           {!data?.completed.length ? (
             <div className="px-6 py-14 text-center">
-              <IndianRupee className="w-10 h-10 text-gray-200 mx-auto mb-3" />
+              <PoundSterling className="w-10 h-10 text-gray-200 mx-auto mb-3" />
               <p className="text-gray-400 text-sm">No completed jobs yet</p>
               <p className="text-gray-300 text-xs mt-1">Earnings will appear here as jobs are completed</p>
             </div>
@@ -153,7 +153,7 @@ export default async function EarningsPage() {
                       </td>
                       <td className="py-3.5 px-6 text-right">
                         {r.budget ? (
-                          <p className="font-bold text-green-600">₹{r.budget.toLocaleString("en-IN")}</p>
+                          <p className="font-bold text-green-600">£{r.budget.toLocaleString("en-GB")}</p>
                         ) : (
                           <p className="text-gray-300 text-xs">—</p>
                         )}
@@ -165,7 +165,7 @@ export default async function EarningsPage() {
                   <tr className="border-t-2 border-gray-100 bg-green-50/30">
                     <td colSpan={2} className="px-6 py-3 text-sm font-bold text-gray-700">Total Earned</td>
                     <td className="px-6 py-3 text-right text-base font-extrabold text-green-600">
-                      ₹{(data?.totalEarned ?? 0).toLocaleString("en-IN")}
+                      £{(data?.totalEarned ?? 0).toLocaleString("en-GB")}
                     </td>
                   </tr>
                 </tfoot>
@@ -199,7 +199,7 @@ export default async function EarningsPage() {
                     </span>
                   </div>
                   {r.budget ? (
-                    <p className="text-sm font-bold text-amber-600 mt-1.5">₹{r.budget.toLocaleString("en-IN")}</p>
+                    <p className="text-sm font-bold text-amber-600 mt-1.5">£{r.budget.toLocaleString("en-GB")}</p>
                   ) : (
                     <p className="text-xs text-gray-300 mt-1">No budget set</p>
                   )}
@@ -210,7 +210,7 @@ export default async function EarningsPage() {
           {(data?.pendingEarnings ?? 0) > 0 && (
             <div className="px-5 py-3 bg-amber-50 border-t border-amber-100">
               <p className="text-xs text-amber-600 font-medium">Estimated upcoming</p>
-              <p className="text-base font-extrabold text-amber-700">₹{(data?.pendingEarnings ?? 0).toLocaleString("en-IN")}</p>
+              <p className="text-base font-extrabold text-amber-700">£{(data?.pendingEarnings ?? 0).toLocaleString("en-GB")}</p>
             </div>
           )}
         </div>

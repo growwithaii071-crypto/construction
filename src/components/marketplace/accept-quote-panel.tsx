@@ -87,11 +87,11 @@ export function AcceptQuotePanel({ quoteId, traderName, preview, expired }: Prop
               Protected
             </p>
             <p className="mt-2 text-lg font-extrabold text-[#0B2A4A]">
-              ₹{preview.customerTotalProtected.toLocaleString("en-IN")}
+              £{preview.customerTotalProtected.toLocaleString("en-GB")}
             </p>
             <p className="mt-1 text-xs text-slate-500">
-              Quote ₹{preview.quoteAmount.toLocaleString("en-IN")} + protection ₹
-              {preview.protectionFee.toLocaleString("en-IN")} (
+              Quote £{preview.quoteAmount.toLocaleString("en-GB")} + protection £
+              {preview.protectionFee.toLocaleString("en-GB")} (
               {(preview.protectionFeeRate * 100).toFixed(1)}%)
             </p>
             <p className="mt-2 text-[11px] leading-snug text-slate-400">
@@ -114,7 +114,7 @@ export function AcceptQuotePanel({ quoteId, traderName, preview, expired }: Prop
               Unprotected
             </p>
             <p className="mt-2 text-lg font-extrabold text-[#0B2A4A]">
-              ₹{preview.customerTotalUnprotected.toLocaleString("en-IN")}
+              £{preview.customerTotalUnprotected.toLocaleString("en-GB")}
             </p>
             <p className="mt-1 text-xs text-slate-500">Quote only — no protection fee</p>
             <p className="mt-2 text-[11px] leading-snug text-slate-400">
@@ -124,14 +124,14 @@ export function AcceptQuotePanel({ quoteId, traderName, preview, expired }: Prop
         </div>
       ) : (
         <p className="text-sm text-slate-600">
-          Total: <strong>₹{preview.customerTotalUnprotected.toLocaleString("en-IN")}</strong>
+          Total: <strong>£{preview.customerTotalUnprotected.toLocaleString("en-GB")}</strong>
         </p>
       )}
 
       <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm">
         <div className="flex justify-between font-semibold text-slate-800">
           <span>You pay</span>
-          <span>₹{total.toLocaleString("en-IN")}</span>
+          <span>£{total.toLocaleString("en-GB")}</span>
         </div>
         <p className="mt-1 text-xs text-slate-400">Terms {preview.termsVersion}</p>
       </div>
@@ -173,7 +173,7 @@ export function AcceptQuotePanel({ quoteId, traderName, preview, expired }: Prop
             Accepting…
           </>
         ) : (
-          `Accept & continue · ₹${total.toLocaleString("en-IN")}`
+          `Accept & continue · £${total.toLocaleString("en-GB")}`
         )}
       </button>
     </div>

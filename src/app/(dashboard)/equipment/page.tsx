@@ -91,7 +91,7 @@ export default async function EquipmentPage({
               <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-500">
                 {eq.serialNumber && <span>SN: {eq.serialNumber}</span>}
                 {eq.purchaseCost && (
-                  <span>Cost: ₹{Number(eq.purchaseCost).toLocaleString("en-IN")}</span>
+                  <span>Cost: £{Number(eq.purchaseCost).toLocaleString("en-GB")}</span>
                 )}
               </div>
             </Card>

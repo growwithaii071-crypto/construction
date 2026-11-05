@@ -65,11 +65,11 @@ type Props = {
 
 function DummyTraderIcon() {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center gap-1 rounded-xl bg-linear-to-br from-blue-100 via-slate-100 to-blue-50 text-blue-600">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-1 rounded-xl bg-linear-to-br from-orange-100 via-slate-100 to-orange-50 text-[#0B2A4A]">
       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-sm">
         <UserRound className="h-8 w-8" strokeWidth={1.5} />
       </div>
-      <HardHat className="h-4 w-4 text-blue-500/80" />
+      <HardHat className="h-4 w-4 text-orange-500/80" />
     </div>
   );
 }
@@ -219,13 +219,13 @@ export function ServicesClient({
     <div className="space-y-5">
       <div>
         <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
-          <MapPin className="h-3.5 w-3.5 text-blue-600" />
+          <MapPin className="h-3.5 w-3.5 text-orange-600" />
           Location
         </label>
         <select
           value={locationInput}
           onChange={(e) => setLocationInput(e.target.value)}
-          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
         >
           <option value="">All locations</option>
           {cities.map((c) => (
@@ -238,13 +238,13 @@ export function ServicesClient({
 
       <div>
         <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
-          <Wrench className="h-3.5 w-3.5 text-blue-600" />
+          <Wrench className="h-3.5 w-3.5 text-orange-600" />
           Trade / Category
         </label>
         <select
           value={sideCategory}
           onChange={(e) => setSideCategory(e.target.value)}
-          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
         >
           <option value="">All Trades</option>
           {categories.map((c) => (
@@ -270,7 +270,7 @@ export function ServicesClient({
                 name="jobType"
                 checked={sideJobType === opt.value}
                 onChange={() => setSideJobType(opt.value)}
-                className="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 border-slate-300 text-orange-600 focus:ring-orange-500"
               />
               {opt.label}
             </label>
@@ -280,7 +280,7 @@ export function ServicesClient({
 
       <div>
         <label className="mb-1.5 block text-sm font-semibold text-slate-800">
-          Price range (₹ from)
+          Price range (£ from)
         </label>
         <div className="grid grid-cols-2 gap-2">
           <input
@@ -289,7 +289,7 @@ export function ServicesClient({
             placeholder="Min"
             value={sidePriceMin}
             onChange={(e) => setSidePriceMin(e.target.value)}
-            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           />
           <input
             type="number"
@@ -297,7 +297,7 @@ export function ServicesClient({
             placeholder="Max"
             value={sidePriceMax}
             onChange={(e) => setSidePriceMax(e.target.value)}
-            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
           />
         </div>
       </div>
@@ -307,7 +307,7 @@ export function ServicesClient({
         <select
           value={sideAvailability}
           onChange={(e) => setSideAvailability(e.target.value)}
-          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
         >
           <option value="any">Any Time</option>
           <option value="today">Available today</option>
@@ -320,7 +320,7 @@ export function ServicesClient({
         <select
           value={sideExperience}
           onChange={(e) => setSideExperience(e.target.value)}
-          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
         >
           <option value="any">Any Level</option>
           <option value="junior">1–5 years</option>
@@ -345,7 +345,7 @@ export function ServicesClient({
                 type="checkbox"
                 checked={sideRating === opt.value}
                 onChange={() => setSideRating(sideRating === opt.value ? "" : opt.value)}
-                className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                className="h-4 w-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
               />
               {opt.label}
             </label>
@@ -358,9 +358,9 @@ export function ServicesClient({
           type="checkbox"
           checked={sideVerified}
           onChange={(e) => setSideVerified(e.target.checked)}
-          className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+          className="h-4 w-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500"
         />
-        <BadgeCheck className="h-4 w-4 text-blue-600" />
+        <BadgeCheck className="h-4 w-4 text-orange-600" />
         Verified traders only
       </label>
 
@@ -368,7 +368,7 @@ export function ServicesClient({
         <button
           type="button"
           onClick={() => applyFilters()}
-          className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-blue-600 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700"
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-orange-500 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-orange-600"
         >
           <Search className="h-4 w-4" />
           Apply filters
@@ -390,12 +390,13 @@ export function ServicesClient({
       <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
           <Link href="/" className="hidden shrink-0 items-center gap-2 sm:flex">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 shadow-sm">
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-[#0B2A4A] shadow-sm">
               <HardHat className="h-4 w-4 text-white" />
+              <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white" />
             </div>
             <div className="leading-tight">
-              <p className="text-base font-extrabold tracking-tight text-slate-900">
-                Build<span className="text-blue-600">Pro</span>
+              <p className="text-base font-extrabold tracking-tight text-[#0B2A4A]">
+                Build<span className="text-orange-500">Pro</span>
               </p>
               <p className="text-[10px] font-medium text-slate-400">Find · Hire · Get It Done</p>
             </div>
@@ -408,15 +409,15 @@ export function ServicesClient({
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search for tradesmen (e.g. plumber, electrician, painter…)"
-                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:border-orange-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               />
             </div>
             <div className="relative hidden w-48 shrink-0 md:block">
-              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-600" />
+              <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-600" />
               <select
                 value={locationInput}
                 onChange={(e) => setLocationInput(e.target.value)}
-                className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-9 pr-8 text-sm font-medium text-slate-700 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-9 pr-8 text-sm font-medium text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               >
                 <option value="">All locations</option>
                 {cities.map((c) => (
@@ -440,14 +441,14 @@ export function ServicesClient({
             </button>
             <Link
               href="/customer/register"
-              className="hidden h-10 items-center rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 sm:inline-flex"
+              className="hidden h-10 items-center rounded-xl bg-orange-500 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-orange-600 sm:inline-flex"
             >
               Post a Job
             </Link>
             {isLoggedIn ? (
               <Link
                 href="/customer/dashboard"
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-blue-700"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-50 text-[#0B2A4A]"
               >
                 <User className="h-4 w-4" />
               </Link>
@@ -497,7 +498,7 @@ export function ServicesClient({
               {searchQuery ? (
                 <>
                   {" "}
-                  for <span className="font-semibold text-blue-700">&ldquo;{searchQuery}&rdquo;</span>
+                  for <span className="font-semibold text-orange-600">&ldquo;{searchQuery}&rdquo;</span>
                 </>
               ) : null}
               <span className="text-slate-400"> · {totalCount} listed</span>
@@ -507,7 +508,7 @@ export function ServicesClient({
               <select
                 value={sortBy}
                 onChange={(e) => router.push(buildUrl({ sort: e.target.value }))}
-                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                className="h-9 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-800 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
               >
                 <option value="best">Best Match</option>
                 <option value="rating">Highest Rated</option>
@@ -522,7 +523,7 @@ export function ServicesClient({
               <Wrench className="mx-auto mb-4 h-12 w-12 text-slate-200" />
               <h2 className="text-lg font-semibold text-slate-800">No tradesmen found</h2>
               <p className="mt-1 text-sm text-slate-500">Try different filters or clear your search.</p>
-              <Link href="/services" className="mt-4 inline-block text-sm font-semibold text-blue-600 hover:text-blue-700">
+              <Link href="/services" className="mt-4 inline-block text-sm font-semibold text-orange-600 hover:text-[#0B2A4A]">
                 ← Clear all filters
               </Link>
             </div>
@@ -533,7 +534,7 @@ export function ServicesClient({
                 const expanded = expandedId === service.id;
                 const price =
                   service.priceFrom != null
-                    ? `₹${service.priceFrom.toLocaleString("en-IN")}`
+                    ? `£${service.priceFrom.toLocaleString("en-GB")}`
                     : "Quote";
                 const unit =
                   service.priceUnit?.toLowerCase().includes("hr") ||
@@ -563,9 +564,9 @@ export function ServicesClient({
                       {/* Details */}
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="text-lg font-bold text-blue-700">{name}</h3>
+                          <h3 className="text-lg font-bold text-[#0B2A4A]">{name}</h3>
                           {service.verified ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600">
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-orange-600">
                               <BadgeCheck className="h-4 w-4" />
                               Verified Tradesman
                             </span>
@@ -592,7 +593,7 @@ export function ServicesClient({
                           {service.tags.map((tag) => (
                             <span
                               key={tag}
-                              className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700"
+                              className="rounded-full bg-orange-50 px-2.5 py-0.5 text-xs font-medium text-[#0B2A4A]"
                             >
                               {tag}
                             </span>
@@ -607,7 +608,7 @@ export function ServicesClient({
                           <button
                             type="button"
                             onClick={() => setExpandedId(expanded ? null : service.id)}
-                            className="mt-0.5 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                            className="mt-0.5 text-sm font-semibold text-orange-600 hover:text-[#0B2A4A]"
                           >
                             {expanded ? "Show less" : "Read more"}
                           </button>
@@ -638,14 +639,14 @@ export function ServicesClient({
                           <button
                             type="button"
                             onClick={() => setSelectedService(service)}
-                            className="h-10 flex-1 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 sm:flex-none"
+                            className="h-10 flex-1 rounded-lg bg-orange-500 px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-orange-600 sm:flex-none"
                           >
                             Contact
                           </button>
                           {service.contractor.phone ? (
                             <a
                               href={`tel:${service.contractor.phone}`}
-                              className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-blue-600 px-3 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 sm:flex-none"
+                              className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-orange-500 px-3 text-sm font-semibold text-[#0B2A4A] transition-colors hover:bg-orange-50 sm:flex-none"
                             >
                               <Phone className="h-3.5 w-3.5" />
                               Call
@@ -654,7 +655,7 @@ export function ServicesClient({
                             <button
                               type="button"
                               onClick={() => setSelectedService(service)}
-                              className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-blue-600 px-3 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 sm:flex-none"
+                              className="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-orange-500 px-3 text-sm font-semibold text-[#0B2A4A] transition-colors hover:bg-orange-50 sm:flex-none"
                             >
                               <Phone className="h-3.5 w-3.5" />
                               Call

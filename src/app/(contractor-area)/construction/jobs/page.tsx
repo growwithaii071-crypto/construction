@@ -68,10 +68,10 @@ export default async function ContractorJobsPage() {
                         {q.job.location}
                       </span>
                     )}
-                    <span>Quote ₹{q.amount.toLocaleString("en-IN")}</span>
+                    <span>Quote £{q.amount.toLocaleString("en-GB")}</span>
                     {q.feeLedger && (
                       <span>
-                        Fee ₹{q.feeLedger.amount.toLocaleString("en-IN")} ({q.feeLedger.status})
+                        Fee £{q.feeLedger.amount.toLocaleString("en-GB")} ({q.feeLedger.status})
                       </span>
                     )}
                   </div>

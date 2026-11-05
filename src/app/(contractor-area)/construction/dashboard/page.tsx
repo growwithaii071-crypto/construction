@@ -174,7 +174,7 @@ export default async function ContractorDashboardPage() {
         <div className="bg-linear-to-r from-green-500 to-emerald-600 rounded-2xl p-5 shadow-sm flex items-center justify-between">
           <div>
             <p className="text-green-100 text-sm font-medium">Total Earned (All Time)</p>
-            <p className="text-3xl font-extrabold text-white mt-0.5">₹{(data?.totalEarned ?? 0).toLocaleString("en-IN")}</p>
+            <p className="text-3xl font-extrabold text-white mt-0.5">£{(data?.totalEarned ?? 0).toLocaleString("en-GB")}</p>
           </div>
           <Link href="/construction/earnings" className="flex items-center gap-2 bg-white/20 hover:bg-white/30 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition-colors">
             Details <ArrowRight className="w-4 h-4" />

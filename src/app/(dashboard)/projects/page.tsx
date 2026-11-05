@@ -7,7 +7,7 @@ import {
   Building2,
   HardHat,
   Calendar,
-  IndianRupee,
+  PoundSterling,
   MapPin,
   Wrench,
 } from "lucide-react";
@@ -215,10 +215,10 @@ export default async function ProjectsPage({
                   )}
                   {(job.budget || job.service.priceFrom) && (
                     <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <IndianRupee className="w-3.5 h-3.5" />
+                      <PoundSterling className="w-3.5 h-3.5" />
                       {job.budget
-                        ? `Budget: ₹${job.budget.toLocaleString("en-IN")}`
-                        : `From ₹${job.service.priceFrom?.toLocaleString("en-IN")}`}
+                        ? `Budget: £${job.budget.toLocaleString("en-GB")}`
+                        : `From £${job.service.priceFrom?.toLocaleString("en-GB")}`}
                     </div>
                   )}
                   <div className="flex items-center gap-2 text-xs text-gray-500">

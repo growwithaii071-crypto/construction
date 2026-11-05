@@ -58,7 +58,7 @@ export function ResolveDisputeForm({
 
       {resolution === "PARTIAL_RELEASE" && (
         <div className="space-y-1.5">
-          <Label htmlFor="traderAmount">Amount to trader (₹)</Label>
+          <Label htmlFor="traderAmount">Amount to trader (£)</Label>
           <Input
             id="traderAmount"
             name="traderAmount"
@@ -71,7 +71,7 @@ export function ResolveDisputeForm({
             required
           />
           <p className="text-xs text-slate-400">
-            Quote ₹{quoteAmount.toLocaleString("en-IN")} — remainder (+ protection fee) refunded to customer
+            Quote £{quoteAmount.toLocaleString("en-GB")} — remainder (+ protection fee) refunded to customer
           </p>
         </div>
       )}

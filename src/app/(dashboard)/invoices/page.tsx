@@ -75,7 +75,7 @@ export default async function InvoicesPage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Invoices</h1>
           <p className="text-sm text-gray-500">
-            {invoices.length} invoices · ₹{(totalAmount / 100000).toFixed(1)}L total
+            {invoices.length} invoices · £{(totalAmount / 100000).toFixed(1)}L total
           </p>
         </div>
         <Button asChild className="bg-orange-500 hover:bg-orange-600">
@@ -180,11 +180,11 @@ export default async function InvoicesPage({
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-gray-900">
-                        ₹{Number(inv.totalAmount).toLocaleString("en-IN")}
+                        £{Number(inv.totalAmount).toLocaleString("en-GB")}
                       </p>
                       {Number(inv.paidAmount) > 0 && (
                         <p className="text-xs text-green-600">
-                          Paid: ₹{Number(inv.paidAmount).toLocaleString("en-IN")}
+                          Paid: £{Number(inv.paidAmount).toLocaleString("en-GB")}
                         </p>
                       )}
                     </div>

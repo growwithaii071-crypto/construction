@@ -61,7 +61,7 @@ export function HeroSearch() {
 
         <div className="mt-2 grid gap-2 sm:grid-cols-2">
           <div className="relative">
-            <Wrench className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-blue-600" />
+            <Wrench className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-orange-500" />
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}

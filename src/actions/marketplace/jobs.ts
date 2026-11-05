@@ -11,6 +11,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { inviteTradersToJob, maintainLiveInvitations } from "@/lib/matching";
 import { createNotification } from "@/lib/notifications";
+import { getPricingConfig, resolveJobSize } from "@/lib/pricing";
 
 const CreateJobSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters").max(120),
@@ -54,6 +55,9 @@ export async function createJobAction(formData: FormData) {
   }
 
   try {
+    const pricing = await getPricingConfig();
+    const jobSize = resolveJobSize(data.budgetMin, data.budgetMax, pricing);
+
     const job = await prisma.marketplaceJob.create({
       data: {
         title: data.title,
@@ -62,6 +66,7 @@ export async function createJobAction(formData: FormData) {
         location: data.location || null,
         budgetMin: data.budgetMin ?? null,
         budgetMax: data.budgetMax ?? null,
+        jobSize,
         photos: data.photos ?? [],
         status: MarketplaceJobStatus.OPEN,
         clientId: session.user.id!,
@@ -74,7 +79,7 @@ export async function createJobAction(formData: FormData) {
         entityId: job.id,
         action: "created",
         actorId: session.user.id,
-        after: { title: job.title, category: job.category },
+        after: { title: job.title, category: job.category, jobSize },
       },
     });
 

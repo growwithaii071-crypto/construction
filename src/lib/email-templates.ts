@@ -125,11 +125,11 @@ export const DEFAULT_EMAIL_TEMPLATES = [
     key: "marketplace_new_quote",
     name: "New Marketplace Quote",
     description: "Customer: trader submitted a quote",
-    subject: "New quote on {{jobTitle}} — ₹{{amount}}",
+    subject: "New quote on {{jobTitle}} — {{amount}}",
     variables: ["userName", "jobTitle", "amount", "traderName", "actionUrl", "appName"],
     bodyHtml: `
       <h2 style="color:#1e3a5f;margin:0 0 16px;">New quote received</h2>
-      <p style="color:#555;line-height:1.6;">Hi {{userName}}, <strong>{{traderName}}</strong> quoted <strong>₹{{amount}}</strong> on <strong>{{jobTitle}}</strong>.</p>
+      <p style="color:#555;line-height:1.6;">Hi {{userName}}, <strong>{{traderName}}</strong> quoted <strong>{{amount}}</strong> on <strong>{{jobTitle}}</strong>.</p>
       <div style="text-align:center;margin:28px 0;">
         <a href="{{actionUrl}}" style="background:#ea580c;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;display:inline-block;">Review quote</a>
       </div>
@@ -143,7 +143,7 @@ export const DEFAULT_EMAIL_TEMPLATES = [
     variables: ["userName", "jobTitle", "amount", "actionUrl", "appName"],
     bodyHtml: `
       <h2 style="color:#1e3a5f;margin:0 0 16px;">Payment successful</h2>
-      <p style="color:#555;line-height:1.6;">Hi {{userName}}, payment for <strong>{{jobTitle}}</strong> (₹{{amount}}) is confirmed.</p>
+      <p style="color:#555;line-height:1.6;">Hi {{userName}}, payment for <strong>{{jobTitle}}</strong> ({{amount}}) is confirmed.</p>
       <div style="text-align:center;margin:28px 0;">
         <a href="{{actionUrl}}" style="background:#16a34a;color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-weight:600;display:inline-block;">View job</a>
       </div>

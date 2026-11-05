@@ -11,6 +11,7 @@ import {
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getPricingConfig } from "@/lib/pricing";
+import { MONEY_CODE } from "@/lib/money";
 
 async function requireAdmin() {
   return requireAuth([UserRole.ADMIN, UserRole.SUPER_ADMIN]);
@@ -30,12 +31,23 @@ const PricingSchema = z.object({
   matchingInviteCount: z.coerce.number().int().min(1).max(10),
   maxReassignments: z.coerce.number().int().min(0).max(50),
   termsVersion: z.string().min(1).max(40),
+  smallBudgetMax: z.coerce.number().min(0),
+  mediumBudgetMax: z.coerce.number().min(0),
+  smallLeadMin: z.coerce.number().min(0),
+  smallLeadMax: z.coerce.number().min(0),
+  smallLeadDefault: z.coerce.number().min(0),
+  mediumLeadMin: z.coerce.number().min(0),
+  mediumLeadMax: z.coerce.number().min(0),
+  mediumLeadDefault: z.coerce.number().min(0),
+  largeLeadMin: z.coerce.number().min(0),
+  largeLeadMax: z.coerce.number().min(0),
+  largeLeadDefault: z.coerce.number().min(0),
 });
 
 export async function savePricingConfigAction(formData: FormData) {
   const session = await requireAdmin();
 
-  const feeType = String(formData.get("traderFeeType") || "PERCENTAGE");
+  const feeType = String(formData.get("traderFeeType") || "LEAD_BY_SIZE");
   const rawRate = Number(formData.get("traderFeeRate"));
   // UI shows percentage as 10 for 10%; store as 0.10 when PERCENTAGE
   const traderFeeRate =
@@ -57,9 +69,20 @@ export async function savePricingConfigAction(formData: FormData) {
     quoteValidDays: formData.get("quoteValidDays"),
     invitationExpiryHours: formData.get("invitationExpiryHours"),
     autoConfirmDays: formData.get("autoConfirmDays"),
-    matchingInviteCount: formData.get("matchingInviteCount"),
+    matchingInviteCount: formData.get("matchingInviteCount") || 3,
     maxReassignments: formData.get("maxReassignments"),
     termsVersion: formData.get("termsVersion") || "v1.0",
+    smallBudgetMax: formData.get("smallBudgetMax"),
+    mediumBudgetMax: formData.get("mediumBudgetMax"),
+    smallLeadMin: formData.get("smallLeadMin"),
+    smallLeadMax: formData.get("smallLeadMax"),
+    smallLeadDefault: formData.get("smallLeadDefault"),
+    mediumLeadMin: formData.get("mediumLeadMin"),
+    mediumLeadMax: formData.get("mediumLeadMax"),
+    mediumLeadDefault: formData.get("mediumLeadDefault"),
+    largeLeadMin: formData.get("largeLeadMin"),
+    largeLeadMax: formData.get("largeLeadMax"),
+    largeLeadDefault: formData.get("largeLeadDefault"),
   });
 
   if (!parsed.success) {
@@ -67,6 +90,13 @@ export async function savePricingConfigAction(formData: FormData) {
   }
 
   const data = parsed.data;
+  if (data.mediumBudgetMax <= data.smallBudgetMax) {
+    return {
+      success: false as const,
+      message: "Medium budget max must be greater than small budget max.",
+    };
+  }
+
   const traderFeeCap =
     data.traderFeeCap === "" || data.traderFeeCap === undefined
       ? null
@@ -92,6 +122,18 @@ export async function savePricingConfigAction(formData: FormData) {
         matchingInviteCount: data.matchingInviteCount,
         maxReassignments: data.maxReassignments,
         termsVersion: data.termsVersion,
+        leadCurrency: MONEY_CODE,
+        smallBudgetMax: data.smallBudgetMax,
+        mediumBudgetMax: data.mediumBudgetMax,
+        smallLeadMin: data.smallLeadMin,
+        smallLeadMax: data.smallLeadMax,
+        smallLeadDefault: data.smallLeadDefault,
+        mediumLeadMin: data.mediumLeadMin,
+        mediumLeadMax: data.mediumLeadMax,
+        mediumLeadDefault: data.mediumLeadDefault,
+        largeLeadMin: data.largeLeadMin,
+        largeLeadMax: data.largeLeadMax,
+        largeLeadDefault: data.largeLeadDefault,
         updatedById: session.user.id,
       },
     });
@@ -105,16 +147,18 @@ export async function savePricingConfigAction(formData: FormData) {
         before: {
           traderFeeType: before.traderFeeType,
           traderFeeRate: before.traderFeeRate,
-          traderFeeCap: before.traderFeeCap,
-          protectionFeeRate: before.protectionFeeRate,
-          protectionFeeDefault: before.protectionFeeDefault,
+          smallLeadDefault: before.smallLeadDefault,
+          mediumLeadDefault: before.mediumLeadDefault,
+          largeLeadDefault: before.largeLeadDefault,
+          matchingInviteCount: before.matchingInviteCount,
         },
         after: {
           traderFeeType: updated.traderFeeType,
           traderFeeRate: updated.traderFeeRate,
-          traderFeeCap: updated.traderFeeCap,
-          protectionFeeRate: updated.protectionFeeRate,
-          protectionFeeDefault: updated.protectionFeeDefault,
+          smallLeadDefault: updated.smallLeadDefault,
+          mediumLeadDefault: updated.mediumLeadDefault,
+          largeLeadDefault: updated.largeLeadDefault,
+          matchingInviteCount: updated.matchingInviteCount,
         },
       },
     });

@@ -232,7 +232,7 @@ One transaction:
 | Protection fee | 3% of quote, only if Protected | customer, added on top |
 | Trader success fee | 10% of quote (optional cap) | taken from trader payout |
 
-Example: quote ₹10,000 Protected → customer pays about ₹10,300. Trader net is about ₹9,000 after the success fee.
+Example: quote £10,000 Protected → customer pays about £10,300. Trader net is about £9,000 after the success fee.
 
 **5. Pay** — `getCheckoutBootstrapAction` (`src/actions/marketplace/payments.ts`)
 
@@ -494,13 +494,17 @@ Invoice money here is **recorded in the app**. It does not go through Stripe esc
 
 `savePricingConfigAction` writes the singleton `PricingConfig` (`key = default`):
 
-- Trader fee type, rate, cap, and per-category overrides
+- **Lead by job size (default):** Small / Medium / Large bands with lead price min–max (+VAT) and a default charge
+  - Small (under £1k): £8–£12 (default £10) · max **3** traders
+  - Medium (£1k–£10k): £12–£25 (default £18) · max **3** traders
+  - Large (£10k+): £25–£100 (default £37.50) · max **3** traders
+- Legacy trader fee types: percentage or fixed (optional)
 - Protection fee on/off, rate, default opt-in or opt-out
 - When unprotected jobs release (`JOB_START` or `COMPLETION`)
 - Quote validity days, invitation expiry hours, auto-confirm days
-- How many live invites, max reassignments, terms version
+- `matchingInviteCount` = max traders per lead, max reassignments, terms version
 
-Accept and price preview read this row. Amounts already stored on a payment are not rewritten.
+Job post stores `jobSize` from budget. Accept / fee ledger use the band’s default lead charge. Amounts already stored on a payment are not rewritten.
 
 ---
 

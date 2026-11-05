@@ -71,7 +71,7 @@ export default function NewExpensePage() {
               <Input name="title" required placeholder="e.g. Cement purchase" className="mt-1" />
             </div>
             <div>
-              <Label>Amount (₹) *</Label>
+              <Label>Amount (£) *</Label>
               <Input
                 name="amount"
                 type="number"

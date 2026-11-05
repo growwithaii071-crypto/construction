@@ -83,7 +83,7 @@ export function ServiceRequestForm({ serviceId, serviceTitle }: ServiceRequestFo
             name="budget"
             type="number"
             min="0"
-            placeholder="Your budget in ₹ (optional)"
+            placeholder="Your budget in £ (optional)"
             className="w-full h-9 px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <button
