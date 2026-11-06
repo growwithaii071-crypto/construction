@@ -447,7 +447,7 @@ Settings
    /settings/pricing      marketplace rates (the money rules)
    /settings/stripe       Stripe env status, webhook URL, Connect overview (keys stay in env)
    Cron                   GET /api/cron/marketplace — invite expiry, expire quotes, auto-confirm
-                          Schedule: vercel.json `"0 * * * *"` (hourly). Auth: `Authorization: Bearer CRON_SECRET`
+                          Schedule: vercel.json `"0 2 * * *"` (once daily, 02:00 UTC — Vercel Hobby allows only daily crons). Auth: `Authorization: Bearer CRON_SECRET`
                           (set `CRON_SECRET` in Vercel env; Vercel Cron sends the same header automatically).
    Receipts               /customer/jobs/[id]/receipt · /construction/jobs/[id]/receipt (print → PDF)
    Reviews                JobReview after COMPLETED/PAID_OUT/RESOLVED; landing avg from live reviews

@@ -381,7 +381,7 @@ export default async function StripeSettingsPage() {
       <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">
         <p className="font-semibold text-slate-800">Marketplace cron</p>
         <p className="mt-1">
-          Hourly job: invite expiry, quote expiry, auto-confirm payouts →{" "}
+          Daily job (02:00 UTC, Vercel Hobby): invite expiry, quote expiry, auto-confirm payouts →{" "}
           <code className="rounded bg-white px-1">GET /api/cron/marketplace</code> with{" "}
           <code className="rounded bg-white px-1">Authorization: Bearer CRON_SECRET</code>. Set{" "}
           <code className="rounded bg-white px-1">CRON_SECRET</code> on Vercel (same value Vercel
