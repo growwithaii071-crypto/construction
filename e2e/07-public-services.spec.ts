@@ -294,7 +294,7 @@ test.describe("🧩 MCQ Modal — Unauthenticated User", () => {
       if (await loginSendBtn.isVisible()) {
         await loginSendBtn.click();
         // Should redirect to /login
-        await expect(page).toHaveURL(/toHaveURL(/\/login//, { timeout: 5000 });
+        await expect(page).toHaveURL(/\/login/, { timeout: 5000 });
 
         // localStorage should have pendingServiceRequest
         const stored = await page.evaluate(() => localStorage.getItem("pendingServiceRequest"));

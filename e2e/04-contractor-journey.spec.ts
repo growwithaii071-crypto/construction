@@ -410,13 +410,13 @@ test.describe("🏗️ Contractor — Sign Out", () => {
   test("can sign out and is redirected to login page", async ({ page }) => {
     await loginAsContractor(page);
     await signOut(page);
-    await expect(page).toHaveURL(/\/login/|toHaveURL(/toHaveURL(/\/login/, { timeout: 8000 });
+    await expect(page).toHaveURL(/\/login/, { timeout: 8000 });
   });
 
   test("after sign out, /construction/dashboard requires login again", async ({ page }) => {
     await loginAsContractor(page);
     await signOut(page);
     await page.goto("/construction/dashboard");
-    await expect(page).toHaveURL(/\/constructiontoHaveURL(/toHaveURL(/\/login/, { timeout: 8000 });
+    await expect(page).toHaveURL(/\/login/, { timeout: 8000 });
   });
 });

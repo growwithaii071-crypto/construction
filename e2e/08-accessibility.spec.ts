@@ -104,7 +104,7 @@ test.describe("♿ Accessibility — Login Forms", () => {
     // Should attempt login (redirect or error)
     await page.waitForTimeout(2000);
     const url = page.url();
-    expect(url).toMatch(/customer\/dashboard|customertoHaveURL(/toHaveURL(/\/login/);
+    expect(url).toMatch(/customer\/dashboard|\/login/);
   });
 
   test("contractor login page has no ERR_TOO_MANY_REDIRECTS", async ({ page }) => {

@@ -186,13 +186,13 @@ test.describe("👤 Customer — Sign Out", () => {
   test("can sign out from customer dashboard", async ({ page }) => {
     await loginAsCustomer(page);
     await signOut(page);
-    await expect(page).toHaveURL(/toHaveURL(/\/login/|toHaveURL(/toHaveURL(/\/login/, { timeout: 8000 });
+    await expect(page).toHaveURL(/\/login/, { timeout: 8000 });
   });
 
   test("after sign out, /customer/dashboard redirects to login", async ({ page }) => {
     await loginAsCustomer(page);
     await signOut(page);
     await page.goto("/customer/dashboard");
-    await expect(page).toHaveURL(/toHaveURL(/\/login//, { timeout: 8000 });
+    await expect(page).toHaveURL(/\/login/, { timeout: 8000 });
   });
 });
