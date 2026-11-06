@@ -120,9 +120,9 @@ export default async function ContractorDashboardPage() {
       <ContractorOnboardingChecklist
         hasService={(data?.totalServices ?? 0) > 0}
         connectDone={Boolean(
-          verification?.onboardingDone && verification?.payoutsEnabled
+          verification?.stripeOnboardingDone && verification?.stripePayoutsEnabled
         )}
-        feeCardDone={Boolean(verification?.feeMethodSaved)}
+        feeCardDone={Boolean(verification?.feePaymentMethodId)}
       />
 
       {verification && !verification.verified && (
