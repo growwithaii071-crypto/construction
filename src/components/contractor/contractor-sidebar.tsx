@@ -44,7 +44,7 @@ const NAV_SECTIONS = [
     ],
   },
   {
-    label: "Marketplace (Escrow)",
+    label: "Marketplace",
     items: [
       { href: "/construction/invitations", label: "Job Invitations", icon: Inbox },
       { href: "/construction/jobs", label: "Accepted Jobs", icon: Briefcase },
@@ -61,9 +61,9 @@ const NAV_SECTIONS = [
   {
     label: "Finance",
     items: [
+      { href: "/construction/billing", label: "Credits & Plans", icon: FileText },
       { href: "/construction/payouts", label: "Payouts & Verify", icon: Landmark },
       { href: "/construction/earnings", label: "Earnings", icon: DollarSign },
-      { href: "/construction/invoices", label: "Invoices", icon: FileText },
     ],
   },
   {

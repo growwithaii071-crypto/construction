@@ -7,7 +7,9 @@ import { ArrowLeft, MapPin, BadgeCheck, FileText } from "lucide-react";
 import { TraderJobActions } from "@/components/marketplace/job-lifecycle-actions";
 import { JobStatusTimeline } from "@/components/marketplace/job-status-timeline";
 import { FlowBadge } from "@/components/marketplace/flow-badge";
+import { PayCommissionPanel } from "@/components/contractor/pay-commission-panel";
 import { processAutoConfirms } from "@/lib/marketplace-payouts";
+import { getStripePublishableKey } from "@/lib/stripe";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Job — BuildPro Contractor" };
@@ -40,6 +42,9 @@ export default async function ContractorJobDetailPage({
   });
 
   const job = quote.job;
+  const publishableKey = getStripePublishableKey();
+  const commissionPending =
+    job.status === "AWARDED" && quote.feeLedger?.status === "PENDING";
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-4 lg:p-6">
@@ -106,7 +111,9 @@ export default async function ContractorJobDetailPage({
           </div>
           {quote.feeLedger && (
             <div className="flex justify-between">
-              <span className="text-slate-500">Success fee ({quote.feeLedger.status})</span>
+              <span className="text-slate-500">
+                Platform commission ({quote.feeLedger.status})
+              </span>
               <span className="font-semibold text-slate-800">
                 £{quote.feeLedger.amount.toLocaleString("en-GB")}
               </span>
@@ -131,25 +138,29 @@ export default async function ContractorJobDetailPage({
           </div>
         )}
 
+        {commissionPending && quote.feeLedger && (
+          <div className="mt-5">
+            <PayCommissionPanel
+              jobId={job.id}
+              amount={quote.feeLedger.amount}
+              publishableKey={publishableKey}
+            />
+          </div>
+        )}
+
         <div className="mt-6 flex flex-wrap items-center gap-3">
           <TraderJobActions jobId={job.id} status={job.status} />
           <Link
-            href={`/construction/jobs/${job.id}/receipt`}
+            href="/construction/billing"
             className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
           >
-            <FileText className="h-4 w-4" />
-            Receipt / payout PDF
+            Credits &amp; invoices
           </Link>
         </div>
 
-        {job.protectionStatus === "UNPROTECTED" && job.status === "FUNDED" && (
+        {job.status === "AWARDED" && (
           <p className="mt-3 text-xs text-slate-400">
-            Unprotected: marking started may release your payout (minus success fee) immediately.
-          </p>
-        )}
-        {job.protectionStatus === "PROTECTED" && (
-          <p className="mt-3 text-xs text-slate-400">
-            Protected: payout releases after the customer confirms completion (or auto-confirm).
+            Customer pays you directly. Pay BuildPro commission before starting work.
           </p>
         )}
       </div>

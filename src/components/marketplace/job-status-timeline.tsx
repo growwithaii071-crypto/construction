@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 const STEPS = [
   { key: "posted", label: "Posted" },
   { key: "quotes", label: "Quotes" },
-  { key: "paid", label: "Paid" },
+  { key: "awarded", label: "Awarded" },
   { key: "done", label: "Done" },
 ] as const;
 
@@ -15,6 +15,7 @@ function stepIndex(status: string): number {
     case "QUOTES_RECEIVED":
     case "AWAITING_PAYMENT":
       return 1;
+    case "AWARDED":
     case "FUNDED":
     case "IN_PROGRESS":
     case "DISPUTED":
@@ -110,7 +111,7 @@ export function JobStatusTimeline({
         })}
       </ol>
       <p className="mt-3 text-center text-[11px] text-slate-400">
-        Posted → Quotes → Paid → Done · पोस्ट → कोट → पेमेंट → पूरा
+        Posted → Quotes → Awarded → Done
       </p>
     </div>
   );

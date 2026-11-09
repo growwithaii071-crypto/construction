@@ -7,14 +7,14 @@ BuildPro is one Next.js app with **four surfaces**:
 | Surface | Who | URL prefix | Purpose |
 |---------|-----|------------|---------|
 | Public site | Anyone | `/`, `/services` | Marketing, search trades, sign up |
-| Customer portal | Homeowner (`CLIENT`) | `/customer/*` | Post jobs, pay, message traders |
-| Contractor portal | Trader (`CONTRACTOR`) | `/construction/*` | Services, quotes, payouts |
+| Customer portal | Homeowner (`CLIENT`) | `/customer/*` | Post jobs, hire traders, message |
+| Contractor portal | Trader (`CONTRACTOR`) | `/construction/*` | Services, quotes, credits, commission |
 | Staff dashboard | Admin and site staff | `/dashboard`, `/projects`, … | Projects, finance, users, pricing, disputes |
 
 There are **two customer–trader ways of working**. They share users and notifications, and they do not share payment.
 
-1. **Marketplace jobs** — post a job, match traders, quote, Stripe escrow, start / complete / confirm, dispute or payout.
-2. **Service requests** — browse a trader’s listed service, send a request, chat. Status only. No escrow.
+1. **Marketplace jobs** — post a job, match traders, quote (credits/subscribe), accept → trader pays commission → invoice. Customer pays the trader off-platform.
+2. **Service requests** — browse a trader’s listed service, send a request, chat. Status only. No platform payment.
 
 Staff also run an internal **construction management** system (projects, tasks, materials, invoices). That is separate from marketplace jobs.
 
@@ -135,21 +135,21 @@ Passwords are bcrypt hashes. Sessions are JWT, not database sessions. A dead ref
 
 ---
 
-## 5. Marketplace jobs (main money path)
+## 5. Marketplace jobs (credits + commission)
 
-This is the flow from **Post a job** through **payout**.
+Six-step money path (GBP only). Customer pays the trader **off-platform**. BuildPro charges traders for quoting (credits or subscription) and for wins (commission + invoice).
 
 ### Screens
 
 | Step | Customer UI | Contractor UI | Staff UI |
 |------|-------------|---------------|----------|
-| Setup | — | Add service `/construction/services/new`. Verify `/construction/payouts` | Pricing `/settings/pricing` |
+| Setup | — | Services + `/construction/billing` (credits/plans). Optional `/construction/payouts` | Pricing `/settings/pricing` |
 | Post | `/customer/jobs/new` | — | — |
 | Match | Job detail shows invites | `/construction/invitations` | — |
-| Quote | Quotes on job detail | Invitation detail, submit quote | — |
-| Accept + pay | Accept panel, then `/customer/jobs/[id]/pay` | — | — |
-| Work | Status on job detail | `/construction/jobs/[id]` Start / Complete | — |
-| Close | Confirm, or Raise dispute / Report problem | Earnings, payouts | `/disputes` |
+| Quote | Quotes on job detail | Invitation detail (needs credits or subscription) | — |
+| Accept | Accept panel → job `AWARDED` | Pay commission on `/construction/jobs/[id]` | — |
+| Work | Status on job detail | Start (after commission paid) / Complete | — |
+| Close | Confirm completion | Invoices on `/construction/billing` | `/disputes` |
 
 ### Sequence
 
@@ -166,22 +166,23 @@ sequenceDiagram
   S->>DB: JobInvitation x up to 3
   S-->>T: notification
 
-  T->>S: submitQuoteAction
+  T->>S: buyCredits / subscribe (optional)
+  T->>ST: PaymentIntent (credits or subscription)
+  ST->>S: webhook → credits / subscriptionEndsAt
+
+  T->>S: submitQuoteAction (1 credit or free if subscribed)
   S->>DB: Quote SUBMITTED, job QUOTES_RECEIVED
 
-  C->>S: acceptQuoteAction (protection true/false)
-  S->>DB: quote ACCEPTED, payment PENDING, job AWAITING_PAYMENT
-  C->>S: getCheckoutBootstrapAction
-  S->>ST: PaymentIntent
-  C->>ST: card
-  ST->>S: webhook payment_intent.succeeded
-  S->>DB: payment SUCCEEDED, job FUNDED
+  C->>S: acceptQuoteAction
+  S->>DB: quote ACCEPTED, FeeLedger PENDING, PlatformInvoice ISSUED, job AWARDED
+
+  T->>S: createCommissionCheckoutAction
+  T->>ST: PaymentIntent (commission)
+  ST->>S: webhook → fee COLLECTED, invoice PAID
 
   T->>S: startJobAction → IN_PROGRESS
   T->>S: completeJobAction → COMPLETED
-  C->>S: confirmJobAction
-  S->>ST: Transfer to Connect (quote minus success fee)
-  S->>DB: Payout, fee COLLECTED, job PAID_OUT
+  C->>S: confirmJobAction → PAID_OUT (no escrow transfer)
 ```
 
 ### Backend, step by step
@@ -203,91 +204,86 @@ sequenceDiagram
 - Notifies each trader with a link to `/construction/invitations/[id]`.
 - If a trader declines, or an invite expires, `maintainLiveInvitations` tops the list back up until `maxReassignments` (default **6**).
 
-**3. Contractor quotes** — `submitQuoteAction` (`src/actions/marketplace/quotes.ts`)
+**3. Contractor access** — `/construction/billing` + `src/actions/marketplace/billing.ts`
 
-- Must be the invited trader and `assertTraderVerified`.
-- Invite must be `SENT` or `VIEWED` and not past `expiresAt`.
+| Product | Default | Effect |
+|---------|---------|--------|
+| Credit pack | pack size + pack price from `PricingConfig` | Adds credits; 1 credit per quote |
+| Subscription | days + price from config | Unlimited quotes while `subscriptionEndsAt` is future |
+
+**4. Contractor quotes** — `submitQuoteAction` (`src/actions/marketplace/quotes.ts`)
+
+- Must be the invited trader.
+- Requires subscription **or** at least 1 credit (`NEED_CREDITS` otherwise).
 - Creates `Quote` (`SUBMITTED`, valid for `quoteValidDays`, default **14**).
+- Deducts 1 credit when not subscribed.
 - Marks the invitation `QUOTED`.
 - If the job was `OPEN`, sets it to `QUOTES_RECEIVED`.
 - Notifies the customer.
 
-**4. Customer accepts** — `acceptQuoteAction`
+**5. Customer accepts** — `acceptQuoteAction`
 
 One transaction:
 
 - Quote must be `SUBMITTED` and the job `OPEN` or `QUOTES_RECEIVED`.
 - Only one quote can be `ACCEPTED`. Others become `NOT_SELECTED`.
-- Amounts come from `PricingConfig`, not from the browser.
-- Creates `FeeLedger` (`PENDING`) for the trader success fee.
-- Creates `MarketplacePayment` (`PENDING`) with customer total and protection flag.
-- Job → `AWAITING_PAYMENT`, `protectionStatus` = `PROTECTED` or `UNPROTECTED`.
+- Creates `FeeLedger` (`PENDING`) for platform commission (`commissionRate`, min/max from config).
+- Creates `PlatformInvoice` (`ISSUED`, kind `COMMISSION`).
+- Job → `AWARDED` (no customer Stripe payment).
 - Remaining live invitations → `EXPIRED`.
 
-**Price (defaults, admin can change them)**
+**Commission (defaults, admin can change)**
 
 | Line | Default | Who pays |
 |------|---------|----------|
-| Quote | trader’s amount | customer |
-| Protection fee | 3% of quote, only if Protected | customer, added on top |
-| Trader success fee | 10% of quote (optional cap) | taken from trader payout |
+| Quote | trader’s amount | customer → trader (off-platform) |
+| Platform commission | ~8% of quote (clamped) | trader → BuildPro via Stripe |
 
-Example: quote £10,000 Protected → customer pays about £10,300. Trader net is about £9,000 after the success fee.
+**6. Trader pays commission** — `createCommissionCheckoutAction`
 
-**5. Pay** — `getCheckoutBootstrapAction` (`src/actions/marketplace/payments.ts`)
+- Trader pays from job detail (`PayCommissionPanel`).
+- Webhook marks fee `COLLECTED` and invoice `PAID`.
 
-- Customer opens `/customer/jobs/[id]/pay`.
-- Server creates or reuses a Stripe PaymentIntent for the pending `MarketplacePayment`.
-- Card is confirmed in the browser with the publishable key.
-- Job stays `AWAITING_PAYMENT` until the webhook runs.
+**7. Webhook** — `POST /api/stripe/webhook`
 
-**6. Webhook** — `POST /api/stripe/webhook` (alias `POST /api/payments/webhook`)
+| Stripe event / metadata | Effect |
+|-------------------------|--------|
+| credits pack PI | Add credits |
+| subscription PI | Extend `subscriptionEndsAt` |
+| commission PI | Fee `COLLECTED`, invoice `PAID` |
+| `account.updated` | Connect onboarding flags |
+| Legacy escrow PI | Still supported for old `AWAITING_PAYMENT` jobs |
 
-| Stripe event | Effect |
-|--------------|--------|
-| `payment_intent.succeeded` | Payment `SUCCEEDED`, job `FUNDED`, parties notified |
-| `payment_intent.payment_failed` | Payment `FAILED` |
-| `charge.refunded` | Payment refunded / partially refunded |
-| `account.updated` | Connect onboarding and payouts flags on the trader |
-| `setup_intent.succeeded` | Saves the trader fee card |
-
-Events are deduped with an `AuditLog` row (`entity = stripe_event`).
-
-**7. Work** — `src/actions/marketplace/lifecycle.ts`
+**8. Work** — `src/actions/marketplace/lifecycle.ts`
 
 | Action | Who | From status | To status |
 |--------|-----|-------------|-----------|
-| `startJobAction` | Accepted trader | `FUNDED` | `IN_PROGRESS` |
-| `completeJobAction` | Accepted trader | `FUNDED` or `IN_PROGRESS` | `COMPLETED` |
-| `confirmJobAction` | Customer | `FUNDED`, `IN_PROGRESS`, or `COMPLETED` | payout, then `PAID_OUT` |
+| `startJobAction` | Accepted trader | `AWARDED` + fee `COLLECTED` (or legacy `FUNDED`) | `IN_PROGRESS` |
+| `completeJobAction` | Accepted trader | `AWARDED` / `FUNDED` / `IN_PROGRESS` | `COMPLETED` |
+| `confirmJobAction` | Customer | in progress / completed | `PAID_OUT` (no escrow transfer on award path) |
 | `cancelJobAction` | Customer | `OPEN` or `QUOTES_RECEIVED` | `CANCELLED` |
-| `cancelFundedJobAction` | Customer | funded, before payout | refund path, `CANCELLED` |
-| `runAutoConfirmAction` | System | `COMPLETED` past `autoConfirmDays` (default 5) | same as confirm |
+| `cancelFundedJobAction` | Customer | `AWARDED` / legacy funded, before start | void fee, `CANCELLED` |
 
-**Payout rules** (`src/lib/marketplace-payouts.ts`)
-
-- **Protected:** money stays in escrow until the customer confirms, or auto-confirm. Then Stripe Transfer of `quote − success fee` to the trader Connect account. Fee ledger → `COLLECTED`. Job → `PAID_OUT`.
-- **Unprotected:** if admin setting `unprotectedReleaseAt` is `JOB_START` (the default), payout runs when the trader marks started. Customer can only **report a problem** (no refund guarantee).
-- **Disputed:** `releaseJobPayout` refuses. Payout stays blocked until an admin resolves it.
-
-**8. Decline** — contractor `declineInvitationAction`, or `POST /api/jobs/[id]/invitations/[iid]/decline`. Frees a slot and invites the next match.
+**9. Decline** — contractor `declineInvitationAction`, or `POST /api/jobs/[id]/invitations/[iid]/decline`. Frees a slot and invites the next match.
 
 ### Job status
 
 ```
 OPEN
   → QUOTES_RECEIVED          (first quote)
-  → AWAITING_PAYMENT         (quote accepted)
-  → FUNDED                   (webhook)
-  → IN_PROGRESS              (trader start)
+  → AWARDED                  (quote accepted — current path)
+  → IN_PROGRESS              (trader start after commission)
   → COMPLETED                (trader complete)
-  → PAID_OUT                 (confirm / auto-confirm / unprotected release)
+  → PAID_OUT                 (customer confirm)
+
+Legacy escrow (still in schema)
+  → AWAITING_PAYMENT → FUNDED → …
 
 Side exits
-  CANCELLED   before accept, or funded cancel
+  CANCELLED   before accept, or cancel before start
   EXPIRED     where a timeout job is marked
-  DISPUTED    protected dispute open (payout blocked)
-  RESOLVED    dispute closed; full release then also sets PAID_OUT
+  DISPUTED    protected dispute open (legacy escrow)
+  RESOLVED    dispute closed
 ```
 
 ### Same actions over HTTP
@@ -361,7 +357,7 @@ Messages on that request
 - Status emails use templates such as `service_request_accepted`.
 - `POST /api/service-request` is the HTTP form of the same create.
 
-Use this path when the customer picked a specific trader’s listing. Use marketplace jobs when the customer wants matching and escrow.
+Use this path when the customer picked a specific trader’s listing. Use marketplace jobs when the customer wants matching, quotes, and off-platform hire.
 
 ---
 

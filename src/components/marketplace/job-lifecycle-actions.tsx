@@ -30,7 +30,7 @@ export function TraderJobActions({
 
   return (
     <div className="flex flex-wrap gap-2">
-      {status === "FUNDED" && (
+      {(status === "FUNDED" || status === "AWARDED") && (
         <button
           type="button"
           disabled={pending}
@@ -88,15 +88,21 @@ export function CustomerJobActions({
           className="inline-flex h-10 items-center gap-2 rounded-xl bg-emerald-600 px-4 text-sm font-bold text-white hover:bg-emerald-700 disabled:opacity-60"
         >
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ThumbsUp className="h-4 w-4" />}
-          Confirm &amp; release payout
+          Confirm job complete
         </button>
       )}
-      {(status === "FUNDED" || status === "AWAITING_PAYMENT") && (
+      {(status === "FUNDED" ||
+        status === "AWAITING_PAYMENT" ||
+        status === "AWARDED") && (
         <button
           type="button"
           disabled={pending}
           onClick={() => {
-            if (!confirm("Cancel before work starts? Fee will be voided and payment refunded if paid."))
+            if (
+              !confirm(
+                "Cancel before work starts? Any pending platform fee will be voided."
+              )
+            )
               return;
             run(() => cancelFundedJobAction(jobId));
           }}

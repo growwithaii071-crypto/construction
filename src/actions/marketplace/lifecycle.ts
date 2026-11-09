@@ -8,6 +8,7 @@ import {
   MarketplacePaymentStatus,
   ProtectionStatus,
   QuoteStatus,
+  FeeLedgerStatus,
 } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
 import { notifyUserWithEmail } from "@/lib/marketplace-notify";
@@ -40,8 +41,25 @@ export async function startJobAction(jobId: string) {
   const job = await loadJobForTrader(jobId, traderId);
   if (!job) return { success: false as const, message: "Job not found." };
 
-  if (job.status !== MarketplaceJobStatus.FUNDED) {
-    return { success: false as const, message: "Job must be funded before starting." };
+  const canStartFromEscrow = job.status === MarketplaceJobStatus.FUNDED;
+  const canStartFromAward =
+    job.status === MarketplaceJobStatus.AWARDED &&
+    (await prisma.feeLedger.findFirst({
+      where: {
+        quoteId: job.acceptedQuoteId ?? undefined,
+        traderId,
+        status: FeeLedgerStatus.COLLECTED,
+      },
+    }));
+
+  if (!canStartFromEscrow && !canStartFromAward) {
+    return {
+      success: false as const,
+      message:
+        job.status === MarketplaceJobStatus.AWARDED
+          ? "Pay platform commission before starting work."
+          : "Job is not ready to start yet.",
+    };
   }
 
   await prisma.marketplaceJob.update({
@@ -63,6 +81,7 @@ export async function startJobAction(jobId: string) {
 
   let payoutNote: string | undefined;
   if (
+    canStartFromEscrow &&
     job.protectionStatus === ProtectionStatus.UNPROTECTED &&
     (await unprotectedReleasesAtStart())
   ) {
@@ -126,7 +145,7 @@ export async function completeJobAction(jobId: string) {
   void notifyUserWithEmail({
     userId: job.clientId,
     title: "Work marked complete",
-    message: `Please confirm “${job.title}” to release payment${job.protectionStatus === ProtectionStatus.PROTECTED ? " (protected escrow)" : ""}.`,
+    message: `Please confirm “${job.title}” is finished.`,
     type: "SUCCESS",
     link: `/customer/jobs/${jobId}`,
     emailKey: "marketplace_job_completed",
@@ -186,34 +205,46 @@ export async function confirmJobAction(jobId: string) {
     },
   });
 
-  // Protected: always release on confirm
-  // Unprotected: release on confirm if configured for COMPLETION, or if not yet paid out
-  const alreadyPaid = await prisma.payout.findFirst({ where: { jobId } });
+  // Award path: customer paid trader off-platform — just close the job.
+  const hasEscrowPayment = await prisma.marketplacePayment.findFirst({
+    where: { jobId, status: MarketplacePaymentStatus.SUCCEEDED },
+  });
+
   let message = "Job confirmed.";
 
-  if (!alreadyPaid) {
-    const releaseAtStart =
-      job.protectionStatus === ProtectionStatus.UNPROTECTED &&
-      (await unprotectedReleasesAtStart());
-
-    if (job.protectionStatus === ProtectionStatus.PROTECTED || !releaseAtStart) {
-      const release = await releaseJobPayout(jobId, clientId);
-      message = release.ok
-        ? `Confirmed. Trader paid £${release.netAmount.toLocaleString("en-GB")}.`
-        : `Confirmed, but payout failed: ${release.reason}`;
-    } else {
-      // Unprotected already released at start — mark PAID_OUT
-      await prisma.marketplaceJob.update({
-        where: { id: jobId },
-        data: { status: MarketplaceJobStatus.PAID_OUT },
-      });
-      message = "Confirmed. (Unprotected payout was released at start.)";
-    }
-  } else {
+  if (!hasEscrowPayment) {
     await prisma.marketplaceJob.update({
       where: { id: jobId },
       data: { status: MarketplaceJobStatus.PAID_OUT },
     });
+    message = "Confirmed. Thanks — job closed.";
+  } else {
+    // Legacy escrow: Protected always release on confirm; unprotected may already be paid.
+    const alreadyPaid = await prisma.payout.findFirst({ where: { jobId } });
+
+    if (!alreadyPaid) {
+      const releaseAtStart =
+        job.protectionStatus === ProtectionStatus.UNPROTECTED &&
+        (await unprotectedReleasesAtStart());
+
+      if (job.protectionStatus === ProtectionStatus.PROTECTED || !releaseAtStart) {
+        const release = await releaseJobPayout(jobId, clientId);
+        message = release.ok
+          ? `Confirmed. Trader paid £${release.netAmount.toLocaleString("en-GB")}.`
+          : `Confirmed, but payout failed: ${release.reason}`;
+      } else {
+        await prisma.marketplaceJob.update({
+          where: { id: jobId },
+          data: { status: MarketplaceJobStatus.PAID_OUT },
+        });
+        message = "Confirmed. (Unprotected payout was released at start.)";
+      }
+    } else {
+      await prisma.marketplaceJob.update({
+        where: { id: jobId },
+        data: { status: MarketplaceJobStatus.PAID_OUT },
+      });
+    }
   }
 
   revalidatePath(`/customer/jobs/${jobId}`);
@@ -243,11 +274,12 @@ export async function cancelFundedJobAction(jobId: string) {
 
   if (
     job.status !== MarketplaceJobStatus.AWAITING_PAYMENT &&
-    job.status !== MarketplaceJobStatus.FUNDED
+    job.status !== MarketplaceJobStatus.FUNDED &&
+    job.status !== MarketplaceJobStatus.AWARDED
   ) {
     return {
       success: false as const,
-      message: "Can only cancel before work starts (funded / awaiting payment).",
+      message: "Can only cancel before work starts.",
     };
   }
 

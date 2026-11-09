@@ -323,9 +323,19 @@ export default async function CustomerJobDetailPage({
           </ul>
         )}
 
+        {job.status === "AWARDED" && (
+          <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+            <p className="font-bold">Quote accepted — you hired this trader.</p>
+            <p className="mt-1">
+              Pay the trader directly for the job. They settle BuildPro commission on their
+              side before starting work.
+            </p>
+          </div>
+        )}
+
         {job.status === "AWAITING_PAYMENT" && (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-100 bg-orange-50 px-4 py-3 text-sm text-[#0B2A4A]">
-            <p>Quote accepted — pay securely to fund the job.</p>
+            <p>Legacy escrow job — pay securely to fund the job.</p>
             <Link
               href={`/customer/jobs/${job.id}/pay`}
               className="inline-flex h-10 items-center rounded-xl bg-orange-500 px-4 text-sm font-bold text-white hover:bg-orange-600"

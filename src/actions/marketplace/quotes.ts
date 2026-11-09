@@ -9,19 +9,21 @@ import {
   QuoteStatus,
   FeeLedgerStatus,
   ProtectionStatus,
-  MarketplacePaymentStatus,
 } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { assertTraderVerified } from "@/lib/trader-verification";
 import {
   getPricingConfig,
   buildPricePreview,
-  calcTraderSuccessFee,
-  calcProtectionFee,
 } from "@/lib/pricing";
+import {
+  consumeQuoteCreditOrPass,
+  calcCommission,
+  createCommissionInvoice,
+} from "@/lib/trader-billing";
 import { createNotification } from "@/lib/notifications";
 import { notifyUserWithEmail } from "@/lib/marketplace-notify";
+import { formatMoney } from "@/lib/money";
 
 const SubmitQuoteSchema = z.object({
   invitationId: z.string().min(1),
@@ -43,18 +45,6 @@ export async function submitQuoteAction(formData: FormData) {
 
   if (!parsed.success) {
     return { success: false as const, message: parsed.error.issues[0]?.message ?? "Invalid input" };
-  }
-
-  try {
-    await assertTraderVerified(traderId);
-  } catch (err) {
-    return {
-      success: false as const,
-      message:
-        err instanceof Error
-          ? err.message
-          : "Complete verification before quoting.",
-    };
   }
 
   const inv = await prisma.jobInvitation.findUnique({
@@ -97,6 +87,15 @@ export async function submitQuoteAction(formData: FormData) {
   });
   if (existing) {
     return { success: false as const, message: "You already submitted a quote for this job." };
+  }
+
+  const access = await consumeQuoteCreditOrPass(traderId);
+  if (!access.ok) {
+    return {
+      success: false as const,
+      code: "NEED_CREDITS" as const,
+      message: access.reason,
+    };
   }
 
   const config = await getPricingConfig();
@@ -153,7 +152,11 @@ export async function submitQuoteAction(formData: FormData) {
         entityId: quote.id,
         action: "submitted",
         actorId: traderId,
-        after: { amount: quote.amount, jobId: inv.jobId },
+        after: {
+          amount: quote.amount,
+          jobId: inv.jobId,
+          quoteAccess: access.via,
+        },
       },
     });
 
@@ -227,13 +230,13 @@ export async function getQuotePricePreviewAction(quoteId: string) {
 
 const AcceptSchema = z.object({
   quoteId: z.string().min(1),
-  protection: z.enum(["true", "false"]),
   confirmExpired: z.enum(["true", "false"]).optional(),
 });
 
 /**
- * Atomic accept: only one ACCEPTED quote per job.
- * Client sends protection flag only — amounts from pricing_config.
+ * Accept quote (new flow):
+ * Customer accepts → job AWARDED → trader pays platform commission → invoice recorded.
+ * Customer pays the trader off-platform.
  */
 export async function acceptQuoteAction(formData: FormData) {
   const session = await requireAuth([UserRole.CLIENT]);
@@ -241,7 +244,6 @@ export async function acceptQuoteAction(formData: FormData) {
 
   const parsed = AcceptSchema.safeParse({
     quoteId: formData.get("quoteId"),
-    protection: formData.get("protection"),
     confirmExpired: formData.get("confirmExpired") || undefined,
   });
 
@@ -249,7 +251,6 @@ export async function acceptQuoteAction(formData: FormData) {
     return { success: false as const, message: parsed.error.issues[0]?.message ?? "Invalid input" };
   }
 
-  const protectionOptedIn = parsed.data.protection === "true";
   const quoteId = parsed.data.quoteId;
 
   try {
@@ -286,24 +287,8 @@ export async function acceptQuoteAction(formData: FormData) {
       }
 
       const config = await getPricingConfig();
-      const preview = buildPricePreview(
-        quote.amount,
-        config,
-        quote.job.category,
-        quote.job.jobSize
-      );
-      const protectionFee = protectionOptedIn
-        ? calcProtectionFee(quote.amount, config, quote.job.category)
-        : 0;
-      const customerTotal = protectionOptedIn
-        ? preview.customerTotalProtected
-        : preview.customerTotalUnprotected;
-      const traderFee = calcTraderSuccessFee(
-        quote.amount,
-        config,
-        quote.job.category,
-        quote.job.jobSize
-      );
+      const commission = calcCommission(quote.amount, config);
+      const rate = config.commissionRate ?? 0.08;
 
       await tx.quote.update({
         where: { id: quote.id },
@@ -319,40 +304,25 @@ export async function acceptQuoteAction(formData: FormData) {
         data: { status: QuoteStatus.NOT_SELECTED },
       });
 
-      await tx.feeLedger.create({
+      const fee = await tx.feeLedger.create({
         data: {
           quoteId: quote.id,
           traderId: quote.traderId,
-          amount: traderFee,
+          amount: commission,
+          rate,
           status: FeeLedgerStatus.PENDING,
-        },
-      });
-
-      await tx.marketplacePayment.create({
-        data: {
-          jobId: quote.jobId,
-          quoteId: quote.id,
-          customerTotal,
-          protectionOptedIn,
-          protectionFee,
-          quoteAmount: quote.amount,
-          termsVersion: config.termsVersion,
-          status: MarketplacePaymentStatus.PENDING,
         },
       });
 
       await tx.marketplaceJob.update({
         where: { id: quote.jobId },
         data: {
-          status: MarketplaceJobStatus.AWAITING_PAYMENT,
-          protectionStatus: protectionOptedIn
-            ? ProtectionStatus.PROTECTED
-            : ProtectionStatus.UNPROTECTED,
+          status: MarketplaceJobStatus.AWARDED,
+          protectionStatus: ProtectionStatus.UNDECIDED,
           acceptedQuoteId: quote.id,
         },
       });
 
-      // Expire remaining live invitations
       await tx.jobInvitation.updateMany({
         where: {
           jobId: quote.jobId,
@@ -368,11 +338,10 @@ export async function acceptQuoteAction(formData: FormData) {
           action: "accepted",
           actorId: clientId,
           after: {
-            protectionOptedIn,
-            customerTotal,
-            protectionFee,
-            traderFee,
+            commission,
+            rate,
             termsVersion: config.termsVersion,
+            flow: "credits_commission",
           },
         },
       });
@@ -382,13 +351,22 @@ export async function acceptQuoteAction(formData: FormData) {
         quoteId: quote.id,
         traderId: quote.traderId,
         jobTitle: quote.job.title,
-        customerTotal,
-        protectionOptedIn,
-        traderFee,
+        commission,
+        rate,
+        feeLedgerId: fee.id,
       };
     });
 
-    // Notify non-selected + accepted trader
+    await createCommissionInvoice({
+      traderId: result.traderId,
+      quoteId: result.quoteId,
+      jobId: result.jobId,
+      jobTitle: result.jobTitle,
+      feeLedgerId: result.feeLedgerId,
+      amount: result.commission,
+      rate: result.rate,
+    });
+
     const others = await prisma.quote.findMany({
       where: { jobId: result.jobId, status: QuoteStatus.NOT_SELECTED },
       select: { traderId: true },
@@ -398,7 +376,7 @@ export async function acceptQuoteAction(formData: FormData) {
       void createNotification({
         userId: o.traderId,
         title: "Quote not selected",
-        message: `The customer chose another quote for “${result.jobTitle}”. No fee was charged.`,
+        message: `The customer chose another quote for “${result.jobTitle}”.`,
         type: "INFO",
         link: "/construction/invitations",
       });
@@ -407,7 +385,7 @@ export async function acceptQuoteAction(formData: FormData) {
     void createNotification({
       userId: result.traderId,
       title: "Your quote was accepted!",
-      message: `“${result.jobTitle}” — awaiting customer payment (${result.protectionOptedIn ? "Protected" : "Unprotected"}).`,
+      message: `“${result.jobTitle}” — pay platform commission ${formatMoney(result.commission)} to continue.`,
       type: "SUCCESS",
       link: `/construction/jobs/${result.jobId}`,
     });
@@ -415,13 +393,15 @@ export async function acceptQuoteAction(formData: FormData) {
     revalidatePath(`/customer/jobs/${result.jobId}`);
     revalidatePath("/customer/jobs");
     revalidatePath("/construction/invitations");
+    revalidatePath("/construction/jobs");
+    revalidatePath("/construction/billing");
 
     return {
       success: true as const,
       jobId: result.jobId,
       quoteId: result.quoteId,
-      customerTotal: result.customerTotal,
-      message: "Quote accepted. Proceed to payment.",
+      commission: result.commission,
+      message: "Quote accepted. The trader will pay platform commission next.",
     };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Could not accept quote.";

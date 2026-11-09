@@ -65,6 +65,13 @@ const DEFAULTS = {
   largeLeadMin: 25,
   largeLeadMax: 100,
   largeLeadDefault: 37.5,
+  commissionRate: 0.08,
+  commissionMin: 0,
+  commissionMax: null as number | null,
+  creditPackPrice: 25,
+  creditPackSize: 5,
+  subscriptionPrice: 49,
+  subscriptionDays: 30,
   termsVersion: "v1.0",
 };
 
@@ -104,6 +111,13 @@ export async function getPricingConfig(): Promise<PricingConfig> {
         largeLeadMin: DEFAULTS.largeLeadMin,
         largeLeadMax: DEFAULTS.largeLeadMax,
         largeLeadDefault: DEFAULTS.largeLeadDefault,
+        commissionRate: DEFAULTS.commissionRate,
+        commissionMin: DEFAULTS.commissionMin,
+        commissionMax: DEFAULTS.commissionMax,
+        creditPackPrice: DEFAULTS.creditPackPrice,
+        creditPackSize: DEFAULTS.creditPackSize,
+        subscriptionPrice: DEFAULTS.subscriptionPrice,
+        subscriptionDays: DEFAULTS.subscriptionDays,
         termsVersion: DEFAULTS.termsVersion,
       },
     });
@@ -131,6 +145,12 @@ export async function getPricingConfig(): Promise<PricingConfig> {
         largeLeadDefault: DEFAULTS.largeLeadDefault,
         matchingInviteCount: existing.matchingInviteCount || 3,
         traderFeeType: TraderFeeType.LEAD_BY_SIZE,
+        commissionRate: DEFAULTS.commissionRate,
+        commissionMin: DEFAULTS.commissionMin,
+        creditPackPrice: DEFAULTS.creditPackPrice,
+        creditPackSize: DEFAULTS.creditPackSize,
+        subscriptionPrice: DEFAULTS.subscriptionPrice,
+        subscriptionDays: DEFAULTS.subscriptionDays,
       },
     });
   }
@@ -138,11 +158,21 @@ export async function getPricingConfig(): Promise<PricingConfig> {
   const patch: {
     largeLeadMax?: number;
     leadCurrency?: string;
+    commissionRate?: number;
+    creditPackPrice?: number;
+    creditPackSize?: number;
+    subscriptionPrice?: number;
+    subscriptionDays?: number;
   } = {};
-  // Bump Large lead max £50 → £100 if still on the old default.
   if (existing.largeLeadMax === 50) patch.largeLeadMax = 100;
-  // Platform is GBP-only.
   if (existing.leadCurrency !== MONEY_CODE) patch.leadCurrency = MONEY_CODE;
+  if ((existing as { commissionRate?: number | null }).commissionRate == null) {
+    patch.commissionRate = DEFAULTS.commissionRate;
+    patch.creditPackPrice = DEFAULTS.creditPackPrice;
+    patch.creditPackSize = DEFAULTS.creditPackSize;
+    patch.subscriptionPrice = DEFAULTS.subscriptionPrice;
+    patch.subscriptionDays = DEFAULTS.subscriptionDays;
+  }
 
   if (Object.keys(patch).length > 0) {
     return prisma.pricingConfig.update({

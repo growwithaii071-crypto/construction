@@ -19,11 +19,11 @@ export function FlowBadge({
       )}
       title={
         isMarket
-          ? "Escrow jobs: quotes, Stripe pay, protect / dispute"
+          ? "Marketplace: post job → quotes (credits) → accept → trader commission → invoice"
           : "Service chat: request a listed trader and message"
       }
     >
-      {isMarket ? "Marketplace · Escrow" : "Services · Chat"}
+      {isMarket ? "Marketplace · Quotes" : "Services · Chat"}
     </span>
   );
 }

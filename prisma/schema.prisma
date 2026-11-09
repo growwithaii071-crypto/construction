@@ -190,6 +190,13 @@ model User {
   stripePayoutsEnabled  Boolean @default(false)
   feePaymentMethodId    String?
 
+  /// Quote credits (1 credit = 1 marketplace quote). Subscription bypasses credits.
+  quoteCredits          Int     @default(0)
+
+  creditPurchases       CreditPurchase[]
+  subscriptions         TraderSubscription[]
+  platformInvoices      PlatformInvoice[]  @relation("InvoiceTrader")
+
   @@map("users")
 }
 
@@ -874,6 +881,9 @@ enum UnprotectedReleaseTiming {
 enum MarketplaceJobStatus {
   OPEN
   QUOTES_RECEIVED
+  /// Quote accepted — trader must pay platform commission
+  AWARDED
+  /// Legacy escrow path (kept for old jobs)
   AWAITING_PAYMENT
   FUNDED
   IN_PROGRESS
@@ -883,6 +893,31 @@ enum MarketplaceJobStatus {
   CANCELLED
   DISPUTED
   RESOLVED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+enum CreditPurchaseStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum PlatformInvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  VOID
+}
+
+enum PlatformInvoiceKind {
+  COMMISSION
+  CREDITS
+  SUBSCRIPTION
 }
 
 enum ProtectionStatus {
@@ -962,6 +997,16 @@ model PricingConfig {
   largeLeadMin           Float                    @default(25)
   largeLeadMax           Float                    @default(100)
   largeLeadDefault       Float                    @default(37.5)
+  /// Platform commission on accepted quote (trader pays), e.g. 0.08 = 8%
+  commissionRate         Float                    @default(0.08)
+  commissionMin          Float                    @default(0)
+  commissionMax          Float?
+  /// Credits: price per pack and how many quotes that pack unlocks
+  creditPackPrice        Float                    @default(25)
+  creditPackSize         Int                      @default(5)
+  /// Monthly subscription (£) — unlimited quotes while ACTIVE
+  subscriptionPrice      Float                    @default(49)
+  subscriptionDays       Int                      @default(30)
   /// Per-category overrides: { "Plumbing": { traderFeeRate: 0.08, traderFeeCap: 5000 } }
   categoryOverrides      Json?
   termsVersion           String                   @default("v1.0")
@@ -1088,19 +1133,83 @@ model MarketplacePayment {
 }
 
 model FeeLedger {
-  id        String          @id @default(auto()) @map("_id") @db.ObjectId
-  quoteId   String          @unique @db.ObjectId
-  traderId  String          @db.ObjectId
-  amount    Float
-  status    FeeLedgerStatus @default(PENDING)
-  createdAt DateTime        @default(now())
-  updatedAt DateTime        @updatedAt
+  id                    String          @id @default(auto()) @map("_id") @db.ObjectId
+  quoteId               String          @unique @db.ObjectId
+  traderId              String          @db.ObjectId
+  amount                Float
+  status                FeeLedgerStatus @default(PENDING)
+  /// Stripe PaymentIntent when trader pays commission
+  stripePaymentIntentId String?
+  rate                  Float?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
 
   quote  Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   trader User  @relation("FeeTrader", fields: [traderId], references: [id])
 
   @@index([traderId, status])
+  @@index([stripePaymentIntentId])
   @@map("fee_ledger")
+}
+
+model CreditPurchase {
+  id                    String               @id @default(auto()) @map("_id") @db.ObjectId
+  traderId              String               @db.ObjectId
+  credits               Int
+  amount                Float
+  status                CreditPurchaseStatus @default(PENDING)
+  stripePaymentIntentId String?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  trader User @relation(fields: [traderId], references: [id])
+
+  @@index([traderId, status])
+  @@index([stripePaymentIntentId])
+  @@map("credit_purchases")
+}
+
+model TraderSubscription {
+  id                    String             @id @default(auto()) @map("_id") @db.ObjectId
+  traderId              String             @db.ObjectId
+  status                SubscriptionStatus @default(ACTIVE)
+  price                 Float
+  startsAt              DateTime           @default(now())
+  endsAt                DateTime
+  stripePaymentIntentId String?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  trader User @relation(fields: [traderId], references: [id])
+
+  @@index([traderId, status])
+  @@index([endsAt])
+  @@map("trader_subscriptions")
+}
+
+/// Platform billing record (commission / credits / subscription)
+model PlatformInvoice {
+  id           String                @id @default(auto()) @map("_id") @db.ObjectId
+  invoiceNo    String                @unique
+  traderId     String                @db.ObjectId
+  kind         PlatformInvoiceKind
+  status       PlatformInvoiceStatus @default(SENT)
+  amount       Float
+  description  String
+  quoteId      String?               @db.ObjectId
+  jobId        String?               @db.ObjectId
+  feeLedgerId  String?               @db.ObjectId
+  purchaseId   String?               @db.ObjectId
+  subscriptionId String?             @db.ObjectId
+  paidAt       DateTime?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  trader User @relation("InvoiceTrader", fields: [traderId], references: [id])
+
+  @@index([traderId, status])
+  @@index([kind, status])
+  @@map("platform_invoices")
 }
 
 model Payout {

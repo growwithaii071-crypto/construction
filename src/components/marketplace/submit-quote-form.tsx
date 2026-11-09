@@ -35,7 +35,9 @@ export function SubmitQuoteForm({ invitationId }: { invitationId: string }) {
   return (
     <form onSubmit={onSubmit} className="mt-6 space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
       <h3 className="font-bold text-slate-900">Submit your quote</h3>
-      <p className="text-xs text-slate-500">Nothing is charged when you quote. Fee only if accepted.</p>
+      <p className="text-xs text-slate-500">
+        Uses 1 credit (or free with subscription). Commission is only due if the customer accepts.
+      </p>
 
       {error && (
         <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -43,6 +45,15 @@ export function SubmitQuoteForm({ invitationId }: { invitationId: string }) {
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
+          {(error.toLowerCase().includes("credit") ||
+            error.toLowerCase().includes("subscribe")) && (
+            <Link
+              href="/construction/billing"
+              className="mt-2 inline-block text-xs font-bold text-orange-700"
+            >
+              Buy credits or subscribe →
+            </Link>
+          )}
           {error.toLowerCase().includes("verif") && (
             <Link href="/construction/payouts" className="mt-2 inline-block text-xs font-bold text-orange-700">
               Complete payouts verification →

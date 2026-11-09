@@ -7,6 +7,7 @@ import { ArrowLeft, MapPin, BadgeCheck } from "lucide-react";
 import { markInvitationViewedAction } from "@/actions/marketplace/jobs";
 import { DeclineInvitationButton } from "@/components/marketplace/decline-invitation-button";
 import { SubmitQuoteForm } from "@/components/marketplace/submit-quote-form";
+import { getTraderQuoteAccess } from "@/lib/trader-billing";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Invitation — BuildPro" };
@@ -40,6 +41,8 @@ export default async function InvitationDetailPage({
   const isLive = [InvitationStatus.SENT, InvitationStatus.VIEWED].includes(
     inv.status as typeof InvitationStatus.SENT
   );
+
+  const access = await getTraderQuoteAccess(session.user.id!);
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-4 lg:p-6">
@@ -85,10 +88,22 @@ export default async function InvitationDetailPage({
         <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">
           <p className="flex items-center gap-2 font-semibold">
             <BadgeCheck className="h-4 w-4" />
-            Free to quote
+            {access.subscribed
+              ? "Subscription active — quotes included"
+              : access.credits > 0
+                ? `${access.credits} credit${access.credits === 1 ? "" : "s"} left`
+                : "Credits required to quote"}
           </p>
           <p className="mt-1 text-blue-800/80">
-            Success fee applies only if the customer accepts your quote.
+            Platform commission is due only if the customer accepts your quote.
+            {!access.canQuote && (
+              <>
+                {" "}
+                <Link href="/construction/billing" className="font-bold underline">
+                  Buy credits or subscribe →
+                </Link>
+              </>
+            )}
           </p>
         </div>
 
@@ -105,7 +120,19 @@ export default async function InvitationDetailPage({
         ) : (
           isLive && (
             <>
-              <SubmitQuoteForm invitationId={inv.id} />
+              {access.canQuote ? (
+                <SubmitQuoteForm invitationId={inv.id} />
+              ) : (
+                <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                  <p className="font-bold">Need credits or a subscription to quote</p>
+                  <Link
+                    href="/construction/billing"
+                    className="mt-2 inline-flex h-10 items-center rounded-xl bg-orange-500 px-4 text-sm font-bold text-white hover:bg-orange-600"
+                  >
+                    Credits &amp; plans →
+                  </Link>
+                </div>
+              )}
               <div className="mt-3">
                 <DeclineInvitationButton invitationId={inv.id} />
               </div>

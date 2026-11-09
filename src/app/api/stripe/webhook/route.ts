@@ -8,6 +8,11 @@ import {
   markMarketplacePaymentRefunded,
 } from "@/lib/marketplace-payments";
 import {
+  fulfillCreditPurchase,
+  fulfillSubscription,
+  fulfillCommission,
+} from "@/actions/marketplace/billing";
+import {
   checkRateLimit,
   clientIpFromRequest,
   RATE_LIMITS,
@@ -159,10 +164,19 @@ export async function POST(req: NextRequest) {
         break;
       case "payment_intent.succeeded": {
         const pi = event.data.object as Stripe.PaymentIntent;
-        await markMarketplacePaymentSucceeded({
-          paymentIntentId: pi.id,
-          eventId: event.id,
-        });
+        const kind = pi.metadata?.buildproKind;
+        if (kind === "credits" && pi.metadata.buildproPurchaseId) {
+          await fulfillCreditPurchase(pi.metadata.buildproPurchaseId, pi.id);
+        } else if (kind === "subscription" && pi.metadata.buildproSubscriptionId) {
+          await fulfillSubscription(pi.metadata.buildproSubscriptionId, pi.id);
+        } else if (kind === "commission" && pi.metadata.buildproFeeLedgerId) {
+          await fulfillCommission(pi.metadata.buildproFeeLedgerId, pi.id);
+        } else {
+          await markMarketplacePaymentSucceeded({
+            paymentIntentId: pi.id,
+            eventId: event.id,
+          });
+        }
         break;
       }
       case "payment_intent.payment_failed": {
