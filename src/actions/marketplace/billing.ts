@@ -381,7 +381,3 @@ export async function confirmBillingPaymentAction(opts: {
   if (opts.kind === "commission") await fulfillCommission(opts.id);
   return { success: true as const, message: "Payment recorded." };
 }
-
-export function billingReturnUrl() {
-  return `${getAppUrl()}/construction/billing`;
-}
