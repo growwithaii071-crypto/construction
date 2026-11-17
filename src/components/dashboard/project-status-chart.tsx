@@ -8,15 +8,24 @@ interface Props {
   active: number;
   completed: number;
   planning: number;
+  onHold?: number;
+  cancelled?: number;
 }
 
-export function ProjectStatusChart({ total, active, completed, planning }: Props) {
-  const onHold = Math.max(0, total - active - completed - planning);
+export function ProjectStatusChart({
+  total,
+  active,
+  completed,
+  planning,
+  onHold = 0,
+  cancelled = 0,
+}: Props) {
   const data = [
     { name: "In Progress", value: active, color: "#3b82f6" },
     { name: "Completed", value: completed, color: "#22c55e" },
     { name: "Planning", value: planning, color: "#f97316" },
     { name: "On Hold", value: onHold, color: "#94a3b8" },
+    { name: "Cancelled", value: cancelled, color: "#ef4444" },
   ].filter((d) => d.value > 0);
 
   return (
@@ -26,7 +35,7 @@ export function ProjectStatusChart({ total, active, completed, planning }: Props
       </CardHeader>
       <CardContent>
         {total === 0 ? (
-          <div className="h-[260px] flex items-center justify-center text-gray-400 text-sm">
+          <div className="flex h-[260px] items-center justify-center text-sm text-gray-400">
             No projects yet
           </div>
         ) : (

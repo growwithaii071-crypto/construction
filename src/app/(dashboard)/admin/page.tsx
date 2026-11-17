@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma";
 import { requireAuth, ROLE_LABELS } from "@/lib/auth-utils";
 import { UserRole } from "@/generated/prisma";
 import { format } from "date-fns";
+import { getMarketplaceAdminStats } from "@/lib/dashboard-metrics";
+import { formatMoney } from "@/lib/money";
 import {
   Users,
   ShieldCheck,
@@ -23,6 +25,7 @@ import {
   Mails,
   Wrench,
   ChevronRight,
+  CreditCard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
@@ -67,6 +70,7 @@ async function getAdminData() {
       staffRolesCount,
       recentUsers,
       roleCounts,
+      market,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { isActive: true } }),
@@ -92,6 +96,7 @@ async function getAdminData() {
         },
       }),
       prisma.user.groupBy({ by: ["role"], _count: true }),
+      getMarketplaceAdminStats(),
     ]);
 
     const sevenDaysAgo = new Date();
@@ -115,6 +120,7 @@ async function getAdminData() {
       },
       recentUsers,
       roleCounts,
+      market,
     };
   } catch {
     return null;
@@ -145,10 +151,17 @@ export default async function AdminPage() {
     );
   }
 
-  const { totals, recentUsers, roleCounts } = data;
+  const { totals, recentUsers, roleCounts, market } = data;
   const roleMap = Object.fromEntries(roleCounts.map((r) => [r.role, r._count]));
 
   const quickLinks = [
+    {
+      href: "/transactions",
+      icon: CreditCard,
+      label: "Transactions",
+      desc: "Payments & refunds",
+      tone: "bg-emerald-50 text-emerald-600",
+    },
     {
       href: "/users",
       icon: Users,
@@ -299,6 +312,37 @@ export default async function AdminPage() {
           sub="need attention"
           href="/issues"
           alert={totals.openIssues > 5}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatCard
+          icon={CreditCard}
+          label="Marketplace volume"
+          value={formatMoney(market.paymentVolume)}
+          sub={`${market.paymentsSucceeded} payments`}
+          href="/transactions"
+        />
+        <StatCard
+          icon={TrendingUp}
+          label="Commission collected"
+          value={formatMoney(market.commissionCollected)}
+          sub="platform fees"
+          href="/transactions?tab=commissions"
+        />
+        <StatCard
+          icon={FolderKanban}
+          label="Live marketplace jobs"
+          value={market.jobsOpen + market.jobsAwarded + market.jobsFunded}
+          sub={`${market.jobsOpen} open · ${market.jobsFunded} in work`}
+          href="/projects"
+        />
+        <StatCard
+          icon={HardHat}
+          label="Connected traders"
+          value={market.tradersConnected}
+          sub="Stripe Connect ready"
+          href="/contractors"
         />
       </div>
 
@@ -512,7 +556,7 @@ function StatCard({
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
-  value: number;
+  value: number | string;
   sub: string;
   href?: string;
   alert?: boolean;
