@@ -228,6 +228,14 @@ export async function POST(req: NextRequest) {
           await markMarketplacePaymentSucceeded({
             paymentIntentId: pi.id,
             eventId: event.id,
+            autoSplit: pi.metadata?.buildproAutoSplit === "1",
+            feeLedgerId: pi.metadata?.buildproFeeLedgerId,
+            applicationFee: pi.metadata?.buildproApplicationFee
+              ? Number(pi.metadata.buildproApplicationFee)
+              : undefined,
+            traderNet: pi.metadata?.buildproTraderNet
+              ? Number(pi.metadata.buildproTraderNet)
+              : undefined,
           });
         }
         break;

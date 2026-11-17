@@ -326,13 +326,9 @@ export default async function CustomerJobDetailPage({
         {(job.status === "AWARDED" || job.status === "AWAITING_PAYMENT") && (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-100 bg-orange-50 px-4 py-3 text-sm text-[#0B2A4A]">
             <div>
-              <p className="font-bold">
-                {job.status === "AWARDED"
-                  ? "Quote accepted — pay securely via Stripe Checkout"
-                  : "Pay securely to fund the job"}
-              </p>
+              <p className="font-bold">Pay via Stripe — auto-split commission</p>
               <p className="mt-0.5 text-xs text-[#0B2A4A]/80">
-                Or settle with the trader off-platform. Platform commission is paid by the trader.
+                One payment: BuildPro keeps platform % · remainder goes to the trader.
               </p>
             </div>
             <Link

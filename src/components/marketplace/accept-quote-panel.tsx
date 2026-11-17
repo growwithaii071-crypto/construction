@@ -51,8 +51,8 @@ export function AcceptQuotePanel({ quoteId, traderName, preview, expired }: Prop
       <div>
         <h3 className="font-bold text-slate-900">Accept quote from {traderName}</h3>
         <p className="mt-1 text-sm text-slate-500">
-          You hire this trader at the quoted price. Pay them directly (off-platform). The trader
-          then pays BuildPro commission.
+          You hire this trader at the quoted price. Next you pay via Stripe Checkout — BuildPro
+          keeps platform commission % and the rest goes to the trader automatically.
         </p>
       </div>
 
@@ -68,7 +68,8 @@ export function AcceptQuotePanel({ quoteId, traderName, preview, expired }: Prop
           <span>{formatMoney(preview.quoteAmount)}</span>
         </div>
         <p className="mt-1 text-xs text-slate-400">
-          Platform commission is paid by the trader · Terms {preview.termsVersion}
+          Next: pay via Stripe — commission % auto-split to BuildPro · Terms{" "}
+          {preview.termsVersion}
         </p>
       </div>
 

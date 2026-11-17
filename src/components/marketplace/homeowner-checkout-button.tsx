@@ -9,9 +9,11 @@ import { formatMoney } from "@/lib/money";
 export function HomeownerCheckoutButton({
   jobId,
   amountHint,
+  disabled,
 }: {
   jobId: string;
   amountHint?: number;
+  disabled?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -47,7 +49,7 @@ export function HomeownerCheckoutButton({
       )}
       <button
         type="button"
-        disabled={pending}
+        disabled={pending || disabled}
         onClick={onPay}
         className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-orange-500 text-sm font-bold text-white hover:bg-orange-600 disabled:opacity-60"
       >
@@ -57,11 +59,11 @@ export function HomeownerCheckoutButton({
           <CreditCard className="h-4 w-4" />
         )}
         {amountHint != null
-          ? `Pay securely · ${formatMoney(amountHint)}`
-          : "Pay securely with Stripe"}
+          ? `Pay & auto-split · ${formatMoney(amountHint)}`
+          : "Pay & auto-split with Stripe"}
       </button>
       <p className="text-center text-[11px] text-slate-400">
-        Hosted Stripe Checkout · card details never touch BuildPro servers
+        Commission stays with BuildPro · remainder goes to the trader Connect account
       </p>
     </div>
   );

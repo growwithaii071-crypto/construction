@@ -158,9 +158,16 @@ export default async function ContractorJobDetailPage({
           </Link>
         </div>
 
-        {job.status === "AWARDED" && (
+        {job.status === "FUNDED" && quote.feeLedger?.status === "COLLECTED" && (
           <p className="mt-3 text-xs text-slate-400">
-            Customer pays you directly. Pay BuildPro commission before starting work.
+            Customer paid via Stripe auto-split — your net share is on your Connect account.
+            Platform commission was taken at checkout.
+          </p>
+        )}
+        {commissionPending && (
+          <p className="mt-3 text-xs text-slate-400">
+            If the customer has not paid via Checkout yet, settle platform commission here
+            before starting (or wait for auto-split checkout).
           </p>
         )}
       </div>

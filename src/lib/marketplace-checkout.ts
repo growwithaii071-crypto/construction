@@ -3,17 +3,22 @@ import {
   MarketplaceJobStatus,
   MarketplacePaymentStatus,
   QuoteStatus,
+  FeeLedgerStatus,
+  PayoutTransferStatus,
 } from "@/generated/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { getAppUrl } from "@/lib/app-url";
 import { getPricingConfig } from "@/lib/pricing";
 import { toStripeAmount, STRIPE_CURRENCY, formatMoney } from "@/lib/money";
 import { markMarketplacePaymentSucceeded } from "@/lib/marketplace-payments";
+import { buildConnectSplit } from "@/lib/connect-split";
+import { markCommissionPaid } from "@/lib/trader-billing";
 
 /**
  * Create (or reuse) a Stripe Checkout Session for the homeowner to pay a job.
- * Works for AWAITING_PAYMENT (legacy escrow) and AWARDED (optional platform pay).
- * Secret key stays server-side only.
+ * Auto-splits via Connect destination charge:
+ *   application_fee_amount → BuildPro
+ *   transfer_data.destination → trader Connect account
  */
 export async function createHomeownerCheckoutSession(
   jobId: string,
@@ -30,6 +35,18 @@ export async function createHomeownerCheckoutSession(
       quotes: {
         where: { status: QuoteStatus.ACCEPTED },
         take: 1,
+        include: {
+          trader: {
+            select: {
+              id: true,
+              name: true,
+              stripeAccountId: true,
+              stripeOnboardingDone: true,
+              stripePayoutsEnabled: true,
+            },
+          },
+          feeLedger: true,
+        },
       },
     },
   });
@@ -53,10 +70,36 @@ export async function createHomeownerCheckoutSession(
   const quote =
     job.quotes[0] ??
     (job.acceptedQuoteId
-      ? await prisma.quote.findUnique({ where: { id: job.acceptedQuoteId } })
+      ? await prisma.quote.findUnique({
+          where: { id: job.acceptedQuoteId },
+          include: {
+            trader: {
+              select: {
+                id: true,
+                name: true,
+                stripeAccountId: true,
+                stripeOnboardingDone: true,
+                stripePayoutsEnabled: true,
+              },
+            },
+            feeLedger: true,
+          },
+        })
       : null);
   if (!quote) {
     throw new Error("No accepted quote for this job.");
+  }
+
+  const trader = quote.trader;
+  if (!trader.stripeAccountId) {
+    throw new Error(
+      "This trader has not connected Stripe yet. They must finish payouts setup before you can pay."
+    );
+  }
+  if (!trader.stripeOnboardingDone || !trader.stripePayoutsEnabled) {
+    throw new Error(
+      "This trader’s Stripe account is not ready to receive payouts yet."
+    );
   }
 
   let payment = job.payments[0] ?? null;
@@ -65,14 +108,16 @@ export async function createHomeownerCheckoutSession(
     return { alreadyPaid: true as const, jobId: job.id };
   }
 
+  const config = await getPricingConfig();
+  const split = buildConnectSplit(quote.amount, config);
+
   if (!payment) {
-    const config = await getPricingConfig();
     payment = await prisma.marketplacePayment.create({
       data: {
         jobId: job.id,
         quoteId: quote.id,
         quoteAmount: quote.amount,
-        customerTotal: quote.amount,
+        customerTotal: split.charge,
         protectionOptedIn: false,
         protectionFee: 0,
         termsVersion: config.termsVersion,
@@ -86,6 +131,14 @@ export async function createHomeownerCheckoutSession(
         data: { status: MarketplaceJobStatus.AWAITING_PAYMENT },
       });
     }
+  }
+
+  // Keep fee ledger in sync with current commission rate
+  if (quote.feeLedger && quote.feeLedger.status === FeeLedgerStatus.PENDING) {
+    await prisma.feeLedger.update({
+      where: { id: quote.feeLedger.id },
+      data: { amount: split.applicationFee, rate: split.rate },
+    });
   }
 
   const stripe = getStripe();
@@ -119,7 +172,10 @@ export async function createHomeownerCheckoutSession(
             ? existing.payment_intent
             : existing.payment_intent?.id;
         if (piId) {
-          await markMarketplacePaymentSucceeded({ paymentIntentId: piId });
+          await markMarketplacePaymentSucceeded({
+            paymentIntentId: piId,
+            autoSplit: true,
+          });
         }
         return { alreadyPaid: true as const, jobId: job.id };
       }
@@ -129,6 +185,7 @@ export async function createHomeownerCheckoutSession(
           url: existing.url,
           sessionId: existing.id,
           amount: payment.customerTotal,
+          split,
         };
       }
     } catch {
@@ -137,6 +194,8 @@ export async function createHomeownerCheckoutSession(
   }
 
   const base = getAppUrl();
+  const feeLedgerId = quote.feeLedger?.id ?? "";
+
   const session = await stripe.checkout.sessions.create(
     {
       mode: "payment",
@@ -147,10 +206,10 @@ export async function createHomeownerCheckoutSession(
           quantity: 1,
           price_data: {
             currency: STRIPE_CURRENCY,
-            unit_amount: toStripeAmount(payment.customerTotal),
+            unit_amount: split.chargePence,
             product_data: {
               name: `Job: ${job.title}`,
-              description: `BuildPro secure checkout · ${formatMoney(payment.customerTotal)}`,
+              description: `Auto-split · ${split.label}`,
             },
           },
         },
@@ -159,27 +218,44 @@ export async function createHomeownerCheckoutSession(
       cancel_url: `${base}/customer/jobs/${job.id}/pay?cancelled=1`,
       metadata: {
         buildproKind: "homeowner_checkout",
+        buildproAutoSplit: "1",
         buildproPaymentId: payment.id,
         buildproJobId: job.id,
         buildproQuoteId: quote.id,
+        buildproFeeLedgerId: feeLedgerId,
+        buildproApplicationFee: String(split.applicationFee),
+        buildproTraderNet: String(split.traderNet),
+        buildproCommissionRate: String(split.rate),
       },
       payment_intent_data: {
+        application_fee_amount: split.applicationFeePence,
+        transfer_data: {
+          destination: trader.stripeAccountId,
+        },
         metadata: {
           buildproKind: "homeowner_checkout",
+          buildproAutoSplit: "1",
           buildproPaymentId: payment.id,
           buildproJobId: job.id,
           buildproQuoteId: quote.id,
+          buildproFeeLedgerId: feeLedgerId,
+          buildproApplicationFee: String(split.applicationFee),
+          buildproTraderNet: String(split.traderNet),
+          buildproCommissionRate: String(split.rate),
         },
-        description: `BuildPro job: ${job.title}`,
+        description: `BuildPro job: ${job.title} · ${split.label}`,
       },
     },
-    { idempotencyKey: `checkout_${payment.id}_${toStripeAmount(payment.customerTotal)}` }
+    {
+      idempotencyKey: `checkout_split_${payment.id}_${split.chargePence}_${split.applicationFeePence}_${trader.stripeAccountId}`,
+    }
   );
 
   await prisma.marketplacePayment.update({
     where: { id: payment.id },
     data: {
       stripeCheckoutSessionId: session.id,
+      customerTotal: split.charge,
       status: MarketplacePaymentStatus.REQUIRES_ACTION,
     },
   });
@@ -188,11 +264,15 @@ export async function createHomeownerCheckoutSession(
     data: {
       entity: "marketplace_payment",
       entityId: payment.id,
-      action: "checkout_session_created",
+      action: "checkout_session_created_autosplit",
       actorId: clientUserId,
       after: {
         sessionId: session.id,
-        amount: payment.customerTotal,
+        amount: split.charge,
+        applicationFee: split.applicationFee,
+        traderNet: split.traderNet,
+        rate: split.rate,
+        destination: trader.stripeAccountId,
       },
     },
   });
@@ -205,7 +285,8 @@ export async function createHomeownerCheckoutSession(
     alreadyPaid: false as const,
     url: session.url,
     sessionId: session.id,
-    amount: payment.customerTotal,
+    amount: split.charge,
+    split,
   };
 }
 
@@ -216,6 +297,7 @@ export async function fulfillCheckoutSession(session: {
   metadata?: Record<string, string> | null;
 }) {
   const paymentId = session.metadata?.buildproPaymentId;
+  const autoSplit = session.metadata?.buildproAutoSplit === "1";
   const piId =
     typeof session.payment_intent === "string"
       ? session.payment_intent
@@ -237,10 +319,19 @@ export async function fulfillCheckoutSession(session: {
   }
 
   if (piId) {
-    return markMarketplacePaymentSucceeded({ paymentIntentId: piId });
+    return markMarketplacePaymentSucceeded({
+      paymentIntentId: piId,
+      autoSplit,
+      feeLedgerId: session.metadata?.buildproFeeLedgerId,
+      applicationFee: session.metadata?.buildproApplicationFee
+        ? Number(session.metadata.buildproApplicationFee)
+        : undefined,
+      traderNet: session.metadata?.buildproTraderNet
+        ? Number(session.metadata.buildproTraderNet)
+        : undefined,
+    });
   }
 
-  // Fallback: mark by checkout session id if PI missing
   const payment = await prisma.marketplacePayment.findFirst({
     where: paymentId
       ? { id: paymentId }
@@ -251,7 +342,6 @@ export async function fulfillCheckoutSession(session: {
     return { ok: true as const, duplicate: true, jobId: payment.jobId };
   }
 
-  // Without PI id we still mark SUCCEEDED from Checkout completion
   await prisma.marketplacePayment.update({
     where: { id: payment.id },
     data: {
@@ -273,5 +363,29 @@ export async function fulfillCheckoutSession(session: {
     },
     data: { status: MarketplaceJobStatus.FUNDED },
   });
+
+  if (autoSplit && session.metadata?.buildproFeeLedgerId) {
+    await markCommissionPaid({ feeLedgerId: session.metadata.buildproFeeLedgerId });
+    const traderNet = Number(session.metadata.buildproTraderNet ?? 0);
+    const quote = await prisma.quote.findUnique({
+      where: { id: payment.quoteId },
+      select: { traderId: true },
+    });
+    if (quote && traderNet > 0) {
+      const existing = await prisma.payout.findFirst({ where: { jobId: payment.jobId } });
+      if (!existing) {
+        await prisma.payout.create({
+          data: {
+            traderId: quote.traderId,
+            jobId: payment.jobId,
+            netAmount: traderNet,
+            stripeTransferId: `dest_cs_${session.id}`,
+            status: PayoutTransferStatus.SUCCEEDED,
+          },
+        });
+      }
+    }
+  }
+
   return { ok: true as const, jobId: payment.jobId };
 }

@@ -239,12 +239,13 @@ One transaction:
 | Quote | trader’s amount | customer → trader (off-platform) |
 | Platform commission | ~8% of quote (clamped) | trader → BuildPro via Stripe |
 
-**6. Optional homeowner Checkout** — `startHomeownerCheckoutAction`
+**6. Homeowner Checkout (Connect auto-split)** — `startHomeownerCheckoutAction`
 
-- Customer may pay via Stripe Checkout Session (`/customer/jobs/[id]/pay`).
-- Secret key stays server-only; browser only gets the hosted Checkout URL.
-- Webhook `checkout.session.completed` → payment `SUCCEEDED`, job `FUNDED`.
-- Admin manages payments/refunds/transfers at `/transactions`; disputes at `/disputes`.
+- Customer pays via Stripe Checkout (`/customer/jobs/[id]/pay`).
+- Destination charge: `application_fee_amount` = platform commission % (default 8%), `transfer_data.destination` = trader Connect account.
+- Trader must have Connect onboarding + payouts enabled.
+- Webhook → payment `SUCCEEDED`, fee `COLLECTED`, payout row recorded, job `FUNDED`.
+- Admin: `/transactions`; disputes: `/disputes`.
 
 **7. Trader pays commission** — `createCommissionCheckoutAction`
 
