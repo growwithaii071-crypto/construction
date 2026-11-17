@@ -5,6 +5,8 @@ import {
   ProjectStatus,
   FeeLedgerStatus,
   CreditPurchaseStatus,
+  ServiceRequestStatus,
+  UserRole,
 } from "@/generated/prisma";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -49,7 +51,6 @@ export async function getMonthlyFinanceSeries(now = new Date()): Promise<MonthPo
     return {
       key: `${d.getFullYear()}-${d.getMonth()}`,
       month: MONTHS[d.getMonth()],
-      year: d.getFullYear(),
       revenue: 0,
       expenses: 0,
       marketplace: 0,
@@ -113,11 +114,44 @@ export async function getProjectStatusCounts() {
   };
 }
 
+/** Admin "Projects / Jobs" page uses ServiceRequest — this is the live job funnel. */
+export async function getServiceRequestStats() {
+  const [rows, total, services] = await Promise.all([
+    prisma.serviceRequest.groupBy({ by: ["status"], _count: true }),
+    prisma.serviceRequest.count(),
+    prisma.service.count({ where: { isActive: true } }),
+  ]);
+  const map = Object.fromEntries(rows.map((r) => [r.status, r._count])) as Record<
+    string,
+    number
+  >;
+  return {
+    total,
+    services,
+    pending: map[ServiceRequestStatus.PENDING] ?? 0,
+    accepted: map[ServiceRequestStatus.ACCEPTED] ?? 0,
+    inProgress: map[ServiceRequestStatus.IN_PROGRESS] ?? 0,
+    completed: map[ServiceRequestStatus.COMPLETED] ?? 0,
+    rejected: map[ServiceRequestStatus.REJECTED] ?? 0,
+  };
+}
+
+export async function getPortalUserStats() {
+  const [clients, contractors, activeUsers, allUsers] = await Promise.all([
+    prisma.user.count({ where: { role: UserRole.CLIENT } }),
+    prisma.user.count({ where: { role: UserRole.CONTRACTOR } }),
+    prisma.user.count({ where: { isActive: true } }),
+    prisma.user.count(),
+  ]);
+  return { clients, contractors, activeUsers, allUsers };
+}
+
 export async function getMarketplaceAdminStats() {
   const [
     jobsOpen,
     jobsAwarded,
     jobsFunded,
+    jobsTotal,
     paymentsSucceeded,
     paymentSum,
     commissionCollected,
@@ -131,6 +165,7 @@ export async function getMarketplaceAdminStats() {
     prisma.marketplaceJob.count({
       where: { status: { in: ["FUNDED", "IN_PROGRESS", "COMPLETED"] } },
     }),
+    prisma.marketplaceJob.count(),
     prisma.marketplacePayment.count({
       where: { status: MarketplacePaymentStatus.SUCCEEDED },
     }),
@@ -148,7 +183,7 @@ export async function getMarketplaceAdminStats() {
     }),
     prisma.user.count({
       where: {
-        role: "CONTRACTOR",
+        role: UserRole.CONTRACTOR,
         stripeAccountId: { not: null },
         stripeOnboardingDone: true,
       },
@@ -156,6 +191,7 @@ export async function getMarketplaceAdminStats() {
   ]);
 
   return {
+    jobsTotal,
     jobsOpen,
     jobsAwarded,
     jobsFunded,

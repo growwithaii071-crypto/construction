@@ -3,7 +3,11 @@ import prisma from "@/lib/prisma";
 import { requireAuth, ROLE_LABELS } from "@/lib/auth-utils";
 import { UserRole } from "@/generated/prisma";
 import { format } from "date-fns";
-import { getMarketplaceAdminStats } from "@/lib/dashboard-metrics";
+import {
+  getMarketplaceAdminStats,
+  getServiceRequestStats,
+  getPortalUserStats,
+} from "@/lib/dashboard-metrics";
 import { formatMoney } from "@/lib/money";
 import {
   Users,
@@ -62,24 +66,18 @@ async function getAdminData() {
       allUsers,
       activeUsers,
       verifiedUsers,
-      totalProjects,
-      portalClients,
-      portalContractors,
       openIssues,
-      servicesCount,
       staffRolesCount,
       recentUsers,
       roleCounts,
       market,
+      jobStats,
+      portalUsers,
     ] = await Promise.all([
       prisma.user.count(),
       prisma.user.count({ where: { isActive: true } }),
       prisma.user.count({ where: { emailVerified: { not: null } } }),
-      prisma.project.count(),
-      prisma.user.count({ where: { role: UserRole.CLIENT } }),
-      prisma.user.count({ where: { role: UserRole.CONTRACTOR } }),
       prisma.issue.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
-      prisma.service.count().catch(() => 0),
       prisma.staffRole.count().catch(() => 0),
       prisma.user.findMany({
         take: 8,
@@ -97,6 +95,8 @@ async function getAdminData() {
       }),
       prisma.user.groupBy({ by: ["role"], _count: true }),
       getMarketplaceAdminStats(),
+      getServiceRequestStats(),
+      getPortalUserStats(),
     ]);
 
     const sevenDaysAgo = new Date();
@@ -111,16 +111,19 @@ async function getAdminData() {
         activeUsers,
         verifiedUsers,
         newUsersThisWeek,
-        totalProjects,
-        portalClients,
-        portalContractors,
+        totalProjects: jobStats.total,
+        portalClients: portalUsers.clients,
+        portalContractors: portalUsers.contractors,
         openIssues,
-        servicesCount,
+        servicesCount: jobStats.services,
         staffRolesCount,
+        jobsPending: jobStats.pending,
+        jobsInProgress: jobStats.inProgress,
       },
       recentUsers,
       roleCounts,
       market,
+      jobStats,
     };
   } catch {
     return null;
@@ -151,7 +154,7 @@ export default async function AdminPage() {
     );
   }
 
-  const { totals, recentUsers, roleCounts, market } = data;
+  const { totals, recentUsers, roleCounts, market, jobStats } = data;
   const roleMap = Object.fromEntries(roleCounts.map((r) => [r.role, r._count]));
 
   const quickLinks = [
@@ -286,9 +289,9 @@ export default async function AdminPage() {
         />
         <StatCard
           icon={FolderKanban}
-          label="Projects"
+          label="Service jobs"
           value={totals.totalProjects}
-          sub="all time"
+          sub={`${totals.jobsPending} pending · ${totals.jobsInProgress} in progress`}
           href="/projects"
         />
         <StatCard
@@ -332,9 +335,9 @@ export default async function AdminPage() {
         />
         <StatCard
           icon={FolderKanban}
-          label="Live marketplace jobs"
-          value={market.jobsOpen + market.jobsAwarded + market.jobsFunded}
-          sub={`${market.jobsOpen} open · ${market.jobsFunded} in work`}
+          label="Jobs in funnel"
+          value={jobStats.pending + jobStats.accepted + jobStats.inProgress}
+          sub={`${jobStats.completed} completed · ${market.jobsTotal} marketplace`}
           href="/projects"
         />
         <StatCard

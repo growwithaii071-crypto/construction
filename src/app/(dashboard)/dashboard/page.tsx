@@ -8,13 +8,17 @@ import {
 } from "@/generated/prisma";
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { RecentProjects } from "@/components/dashboard/recent-projects";
+import { RecentServiceJobs } from "@/components/dashboard/recent-service-jobs";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { ProjectStatusChart } from "@/components/dashboard/project-status-chart";
+import { JobStatusChart } from "@/components/dashboard/job-status-chart";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import {
   getMonthlyFinanceSeries,
   getProjectStatusCounts,
   getMarketplaceAdminStats,
+  getServiceRequestStats,
+  getPortalUserStats,
 } from "@/lib/dashboard-metrics";
 import { formatMoney } from "@/lib/money";
 import {
@@ -26,6 +30,8 @@ import {
   Clock,
   Building2,
   CreditCard,
+  HardHat,
+  Wrench,
 } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -36,10 +42,11 @@ async function getDashboardData() {
   try {
     const [
       projectStatus,
-      totalClients,
-      totalUsers,
+      jobStats,
+      portalUsers,
       openIssues,
       recentProjects,
+      recentServiceJobs,
       recentSiteReports,
       taskStats,
       totalRevenue,
@@ -47,10 +54,11 @@ async function getDashboardData() {
       monthly,
       market,
       recentPayments,
+      clientRecords,
     ] = await Promise.all([
       getProjectStatusCounts(),
-      prisma.client.count(),
-      prisma.user.count({ where: { isActive: true } }),
+      getServiceRequestStats(),
+      getPortalUserStats(),
       prisma.issue.count({
         where: { status: { in: [IssueStatus.OPEN, IssueStatus.IN_PROGRESS] } },
       }),
@@ -60,6 +68,20 @@ async function getDashboardData() {
         include: {
           client: { select: { name: true } },
           manager: { select: { name: true } },
+        },
+      }),
+      prisma.serviceRequest.findMany({
+        take: 8,
+        orderBy: { createdAt: "desc" },
+        include: {
+          client: { select: { name: true, email: true } },
+          service: {
+            select: {
+              title: true,
+              category: true,
+              contractor: { select: { name: true } },
+            },
+          },
         },
       }),
       prisma.siteReport.findMany({
@@ -97,6 +119,7 @@ async function getDashboardData() {
           },
         },
       }),
+      prisma.client.count(),
     ]);
 
     return {
@@ -104,17 +127,16 @@ async function getDashboardData() {
         totalProjects: projectStatus.total,
         activeProjects: projectStatus.active,
         completedProjects: projectStatus.completed,
-        planningProjects: projectStatus.planning,
-        onHoldProjects: projectStatus.onHold,
-        cancelledProjects: projectStatus.cancelled,
-        totalClients,
-        totalUsers,
         openIssues,
         totalRevenue: totalRevenue._sum.paidAmount ?? 0,
         pendingRevenue: pendingRevenue._sum.totalAmount ?? 0,
+        clientRecords,
       },
       projectStatus,
+      jobStats,
+      portalUsers,
       recentProjects,
+      recentServiceJobs,
       recentSiteReports,
       taskStats,
       monthly,
@@ -148,7 +170,10 @@ export default async function DashboardPage() {
   const {
     stats,
     projectStatus,
+    jobStats,
+    portalUsers,
     recentProjects,
+    recentServiceJobs,
     recentSiteReports,
     taskStats,
     monthly,
@@ -161,6 +186,8 @@ export default async function DashboardPage() {
   const inProgressTasks =
     taskStats.find((t) => t.status === TaskStatus.IN_PROGRESS)?._count ?? 0;
 
+  const clientsShown = Math.max(portalUsers.clients, stats.clientRecords);
+
   return (
     <div className="space-y-6 p-4 lg:p-6">
       <div>
@@ -168,21 +195,48 @@ export default async function DashboardPage() {
           Good {getGreeting()}, {session.user.name?.split(" ")[0]}!
         </h1>
         <p className="mt-1 text-sm text-gray-500">
-          Live data from projects, invoices, marketplace payments, and expenses.
+          Live counts from service jobs, portal users, marketplace, invoices, and expenses.
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatsCard
-          title="Total Projects"
-          value={stats.totalProjects}
+          title="Service jobs"
+          value={jobStats.total}
           icon={FolderKanban}
           color="blue"
-          sub={`${stats.activeProjects} active`}
+          sub={`${jobStats.pending} pending · ${jobStats.inProgress} in progress`}
           href="/projects"
         />
         <StatsCard
-          title="Invoice Revenue"
+          title="Active services"
+          value={jobStats.services}
+          icon={Wrench}
+          color="orange"
+          sub="Contractor listings"
+          href="/admin/services"
+        />
+        <StatsCard
+          title="Clients"
+          value={clientsShown}
+          icon={Building2}
+          color="purple"
+          sub="Portal customers"
+          href="/clients"
+        />
+        <StatsCard
+          title="Contractors"
+          value={portalUsers.contractors}
+          icon={HardHat}
+          color="green"
+          sub={`${market.tradersConnected} Connect ready`}
+          href="/contractors"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatsCard
+          title="Invoice revenue"
           value={formatMoney(Number(stats.totalRevenue))}
           icon={TrendingUp}
           color="green"
@@ -194,11 +248,19 @@ export default async function DashboardPage() {
           value={formatMoney(market.paymentVolume)}
           icon={CreditCard}
           color="purple"
-          sub={`${market.paymentsSucceeded} succeeded payments`}
+          sub={`${market.paymentsSucceeded} payments · ${market.jobsTotal} jobs`}
           href="/transactions"
         />
         <StatsCard
-          title="Open Issues"
+          title="Commission collected"
+          value={formatMoney(market.commissionCollected)}
+          icon={TrendingUp}
+          color="blue"
+          sub="Platform fees"
+          href="/transactions?tab=commissions"
+        />
+        <StatsCard
+          title="Open issues"
           value={stats.openIssues}
           icon={AlertTriangle}
           color={stats.openIssues > 5 ? "red" : "orange"}
@@ -209,69 +271,34 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatsCard
-          title="Completed"
-          value={stats.completedProjects}
+          title="Jobs completed"
+          value={jobStats.completed}
           icon={CheckCircle2}
           color="green"
-          sub="Projects done"
-          href="/projects"
+          sub={`${jobStats.accepted} accepted`}
+          href="/projects?status=COMPLETED"
         />
         <StatsCard
-          title="Tasks Done"
+          title="Tasks done"
           value={completedTasks}
           icon={CheckCircle2}
           color="blue"
-          sub="Completed tasks"
+          sub="Internal tasks"
         />
         <StatsCard
-          title="In Progress"
+          title="Tasks in progress"
           value={inProgressTasks}
           icon={Clock}
           color="orange"
-          sub="Active tasks"
+          sub="Internal tasks"
         />
         <StatsCard
-          title="Team Members"
-          value={stats.totalUsers}
+          title="Team members"
+          value={portalUsers.activeUsers}
           icon={Users}
           color="purple"
-          sub={`${stats.totalClients} clients`}
+          sub={`${portalUsers.allUsers} total users`}
           href="/users"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatsCard
-          title="Open marketplace jobs"
-          value={market.jobsOpen}
-          icon={FolderKanban}
-          color="blue"
-          sub={`${market.jobsAwarded} awarded · ${market.jobsFunded} in work`}
-          href="/projects"
-        />
-        <StatsCard
-          title="Commission collected"
-          value={formatMoney(market.commissionCollected)}
-          icon={TrendingUp}
-          color="green"
-          sub="Platform fees"
-          href="/transactions?tab=commissions"
-        />
-        <StatsCard
-          title="Credit pack sales"
-          value={formatMoney(market.creditSales)}
-          icon={CreditCard}
-          color="orange"
-          sub={`${market.creditsSold} credits sold`}
-          href="/transactions?tab=credits"
-        />
-        <StatsCard
-          title="Connected traders"
-          value={market.tradersConnected}
-          icon={Building2}
-          color="purple"
-          sub="Stripe Connect onboarded"
-          href="/contractors"
         />
       </div>
 
@@ -280,20 +307,37 @@ export default async function DashboardPage() {
           <RevenueChart data={monthly} />
         </div>
         <div>
-          <ProjectStatusChart
-            total={projectStatus.total}
-            active={projectStatus.active}
-            completed={projectStatus.completed}
-            planning={projectStatus.planning}
-            onHold={projectStatus.onHold}
-            cancelled={projectStatus.cancelled}
+          <JobStatusChart
+            pending={jobStats.pending}
+            accepted={jobStats.accepted}
+            inProgress={jobStats.inProgress}
+            completed={jobStats.completed}
+            rejected={jobStats.rejected}
           />
         </div>
       </div>
 
+      {projectStatus.total > 0 && (
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <div className="xl:col-span-2">
+            <RecentProjects projects={recentProjects} />
+          </div>
+          <div>
+            <ProjectStatusChart
+              total={projectStatus.total}
+              active={projectStatus.active}
+              completed={projectStatus.completed}
+              planning={projectStatus.planning}
+              onHold={projectStatus.onHold}
+              cancelled={projectStatus.cancelled}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <div className="xl:col-span-2 space-y-6">
-          <RecentProjects projects={recentProjects} />
+          <RecentServiceJobs jobs={recentServiceJobs} />
           <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-semibold text-slate-900">
