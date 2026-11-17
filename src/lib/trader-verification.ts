@@ -35,3 +35,46 @@ export async function assertTraderVerified(userId: string) {
   }
   return status;
 }
+
+/** Eligibility for Connect transfers / payouts. */
+export async function getPayoutEligibility(userId: string) {
+  const status = await getTraderVerification(userId);
+  if (!status) {
+    return {
+      eligible: false as const,
+      reason: "Trader not found.",
+      stripeAccountId: null as string | null,
+      verified: false,
+    };
+  }
+  if (!status.stripeAccountId) {
+    return {
+      eligible: false as const,
+      reason: "No Stripe connected account. Complete onboarding first.",
+      stripeAccountId: null,
+      verified: false,
+    };
+  }
+  if (!status.stripeOnboardingDone) {
+    return {
+      eligible: false as const,
+      reason: "Connect onboarding incomplete.",
+      stripeAccountId: status.stripeAccountId,
+      verified: false,
+    };
+  }
+  if (!status.stripePayoutsEnabled) {
+    return {
+      eligible: false as const,
+      reason: "Payouts not enabled on the connected account yet.",
+      stripeAccountId: status.stripeAccountId,
+      verified: false,
+    };
+  }
+  return {
+    eligible: true as const,
+    reason: null as string | null,
+    stripeAccountId: status.stripeAccountId,
+    verified: status.verified,
+  };
+}

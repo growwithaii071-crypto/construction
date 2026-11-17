@@ -47,6 +47,7 @@ export async function markMarketplacePaymentSucceeded(opts: {
 
     if (
       payment.job.status === MarketplaceJobStatus.AWAITING_PAYMENT ||
+      payment.job.status === MarketplaceJobStatus.AWARDED ||
       payment.job.status === MarketplaceJobStatus.OPEN ||
       payment.job.status === MarketplaceJobStatus.QUOTES_RECEIVED
     ) {

@@ -12,6 +12,8 @@ import {
   fulfillSubscription,
   fulfillCommission,
 } from "@/actions/marketplace/billing";
+import { fulfillCheckoutSession } from "@/lib/marketplace-checkout";
+import { PayoutTransferStatus } from "@/generated/prisma";
 import {
   checkRateLimit,
   clientIpFromRequest,
@@ -70,6 +72,57 @@ async function handleAccountUpdated(account: Stripe.Account) {
           payoutsEnabled,
           feePaymentMethodId: user.feePaymentMethodId,
         }),
+      },
+    },
+  });
+}
+
+async function handleTransferEvent(
+  transfer: Stripe.Transfer,
+  status: "SUCCEEDED" | "FAILED"
+) {
+  const existing = await prisma.payout.findFirst({
+    where: { stripeTransferId: transfer.id },
+  });
+  if (!existing) {
+    await prisma.auditLog.create({
+      data: {
+        entity: "stripe_transfer",
+        entityId: transfer.id,
+        action: status === "FAILED" ? "transfer_failed_unmatched" : "transfer_seen",
+        after: {
+          amount: transfer.amount,
+          destination: String(transfer.destination),
+          jobId: transfer.metadata?.buildproJobId ?? null,
+        },
+      },
+    });
+    return;
+  }
+
+  await prisma.payout.update({
+    where: { id: existing.id },
+    data: {
+      status:
+        status === "FAILED"
+          ? PayoutTransferStatus.FAILED
+          : PayoutTransferStatus.SUCCEEDED,
+      failureMessage:
+        status === "FAILED"
+          ? transfer.metadata?.failure_message || "Stripe transfer failed"
+          : null,
+    },
+  });
+
+  await prisma.auditLog.create({
+    data: {
+      entity: "payout",
+      entityId: existing.id,
+      action: status === "FAILED" ? "transfer_failed" : "transfer_succeeded",
+      after: {
+        transferId: transfer.id,
+        amount: transfer.amount,
+        destination: String(transfer.destination),
       },
     },
   });
@@ -201,6 +254,42 @@ export async function POST(req: NextRequest) {
             eventId: event.id,
           });
         }
+        break;
+      }
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        if (session.metadata?.buildproKind === "homeowner_checkout") {
+          await fulfillCheckoutSession(session);
+        }
+        break;
+      }
+      case "transfer.created":
+      case "transfer.updated": {
+        const transfer = event.data.object as Stripe.Transfer;
+        await handleTransferEvent(transfer, "SUCCEEDED");
+        break;
+      }
+      case "transfer.reversed": {
+        const transfer = event.data.object as Stripe.Transfer;
+        await handleTransferEvent(transfer, "FAILED");
+        break;
+      }
+      case "payout.paid":
+      case "payout.failed": {
+        const payout = event.data.object as Stripe.Payout;
+        await prisma.auditLog.create({
+          data: {
+            entity: "stripe_payout",
+            entityId: payout.id,
+            action: event.type,
+            after: {
+              amount: payout.amount,
+              status: payout.status,
+              failure_code: payout.failure_code ?? null,
+              destination: String(payout.destination ?? ""),
+            },
+          },
+        });
         break;
       }
       default:

@@ -4,6 +4,7 @@ import {
   MarketplaceJobStatus,
   MarketplacePaymentStatus,
   ProtectionStatus,
+  PayoutTransferStatus,
   UnprotectedReleaseTiming,
 } from "@/generated/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
@@ -70,10 +71,22 @@ export async function releaseJobPayout(jobId: string, actorId?: string): Promise
 
   const trader = await prisma.user.findUnique({
     where: { id: quote.traderId },
-    select: { id: true, stripeAccountId: true, name: true },
+    select: {
+      id: true,
+      stripeAccountId: true,
+      name: true,
+      stripeOnboardingDone: true,
+      stripePayoutsEnabled: true,
+    },
   });
   if (!trader?.stripeAccountId) {
     return { ok: false, reason: "Trader has no Stripe Connect account." };
+  }
+  if (!trader.stripeOnboardingDone || !trader.stripePayoutsEnabled) {
+    return {
+      ok: false,
+      reason: "Trader Connect account is not payout-eligible yet.",
+    };
   }
 
   let transferId: string | null = null;
@@ -125,6 +138,9 @@ export async function releaseJobPayout(jobId: string, actorId?: string): Promise
         jobId,
         netAmount,
         stripeTransferId: transferId,
+        status: transferId
+          ? PayoutTransferStatus.SUCCEEDED
+          : PayoutTransferStatus.PENDING,
       },
     });
 

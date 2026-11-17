@@ -239,22 +239,32 @@ One transaction:
 | Quote | trader’s amount | customer → trader (off-platform) |
 | Platform commission | ~8% of quote (clamped) | trader → BuildPro via Stripe |
 
-**6. Trader pays commission** — `createCommissionCheckoutAction`
+**6. Optional homeowner Checkout** — `startHomeownerCheckoutAction`
+
+- Customer may pay via Stripe Checkout Session (`/customer/jobs/[id]/pay`).
+- Secret key stays server-only; browser only gets the hosted Checkout URL.
+- Webhook `checkout.session.completed` → payment `SUCCEEDED`, job `FUNDED`.
+- Admin manages payments/refunds/transfers at `/transactions`; disputes at `/disputes`.
+
+**7. Trader pays commission** — `createCommissionCheckoutAction`
 
 - Trader pays from job detail (`PayCommissionPanel`).
 - Webhook marks fee `COLLECTED` and invoice `PAID`.
 
-**7. Webhook** — `POST /api/stripe/webhook`
+**8. Webhook** — `POST /api/stripe/webhook`
 
 | Stripe event / metadata | Effect |
 |-------------------------|--------|
 | credits pack PI | Add credits |
 | subscription PI | Extend `subscriptionEndsAt` |
 | commission PI | Fee `COLLECTED`, invoice `PAID` |
-| `account.updated` | Connect onboarding flags |
+| `checkout.session.completed` | Homeowner job funded |
+| `account.updated` | Connect onboarding + `User.stripeAccountId` |
+| `transfer.created` / `reversed` | Payout transfer status |
+| `payout.paid` / `failed` | Audit connected-account payouts |
 | Legacy escrow PI | Still supported for old `AWAITING_PAYMENT` jobs |
 
-**8. Work** — `src/actions/marketplace/lifecycle.ts`
+**9. Work** — `src/actions/marketplace/lifecycle.ts`
 
 | Action | Who | From status | To status |
 |--------|-----|-------------|-----------|
@@ -264,7 +274,7 @@ One transaction:
 | `cancelJobAction` | Customer | `OPEN` or `QUOTES_RECEIVED` | `CANCELLED` |
 | `cancelFundedJobAction` | Customer | `AWARDED` / legacy funded, before start | void fee, `CANCELLED` |
 
-**9. Decline** — contractor `declineInvitationAction`, or `POST /api/jobs/[id]/invitations/[iid]/decline`. Frees a slot and invites the next match.
+**10. Decline** — contractor `declineInvitationAction`, or `POST /api/jobs/[id]/invitations/[iid]/decline`. Frees a slot and invites the next match.
 
 ### Job status
 

@@ -1111,24 +1111,26 @@ model Quote {
 }
 
 model MarketplacePayment {
-  id                    String                   @id @default(auto()) @map("_id") @db.ObjectId
-  jobId                 String                   @db.ObjectId
-  quoteId               String                   @db.ObjectId
-  customerTotal         Float
-  protectionOptedIn     Boolean                  @default(false)
-  protectionFee         Float                    @default(0)
-  quoteAmount           Float
-  termsVersion          String
-  stripePaymentIntentId String?
-  status                MarketplacePaymentStatus @default(PENDING)
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
+  id                       String                   @id @default(auto()) @map("_id") @db.ObjectId
+  jobId                    String                   @db.ObjectId
+  quoteId                  String                   @db.ObjectId
+  customerTotal            Float
+  protectionOptedIn        Boolean                  @default(false)
+  protectionFee            Float                    @default(0)
+  quoteAmount              Float
+  termsVersion             String
+  stripePaymentIntentId    String?
+  stripeCheckoutSessionId  String?
+  status                   MarketplacePaymentStatus @default(PENDING)
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
 
   job   MarketplaceJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
   quote Quote          @relation(fields: [quoteId], references: [id])
 
   @@index([jobId])
   @@index([stripePaymentIntentId])
+  @@index([stripeCheckoutSessionId])
   @@map("marketplace_payments")
 }
 
@@ -1212,20 +1214,30 @@ model PlatformInvoice {
   @@map("platform_invoices")
 }
 
+enum PayoutTransferStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
 model Payout {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  traderId        String   @db.ObjectId
-  jobId           String   @db.ObjectId
-  netAmount       Float
+  id               String               @id @default(auto()) @map("_id") @db.ObjectId
+  traderId         String               @db.ObjectId
+  jobId            String               @db.ObjectId
+  netAmount        Float
   stripeTransferId String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  status           PayoutTransferStatus @default(PENDING)
+  failureMessage   String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
 
   trader User           @relation("PayoutTrader", fields: [traderId], references: [id])
   job    MarketplaceJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   @@index([traderId])
   @@index([jobId])
+  @@index([stripeTransferId])
+  @@index([status])
   @@map("payouts")
 }
 

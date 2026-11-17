@@ -4,9 +4,51 @@ import prisma from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth-utils";
 import { UserRole, MarketplaceJobStatus, MarketplacePaymentStatus } from "@/generated/prisma";
 import { ensurePaymentIntent } from "@/lib/marketplace-payments";
+import { createHomeownerCheckoutSession } from "@/lib/marketplace-checkout";
 import { isStripeConfigured } from "@/lib/stripe";
 import { revalidatePath } from "next/cache";
 
+/** Preferred: Stripe Checkout Session (hosted). Secret key never leaves the server. */
+export async function startHomeownerCheckoutAction(jobId: string) {
+  const session = await requireAuth([UserRole.CLIENT]);
+  const clientId = session.user.id!;
+
+  if (!isStripeConfigured()) {
+    return {
+      success: false as const,
+      message: "Stripe is not configured. Add STRIPE_SECRET_KEY and publishable key.",
+    };
+  }
+
+  try {
+    const result = await createHomeownerCheckoutSession(jobId, clientId);
+    revalidatePath(`/customer/jobs/${jobId}`);
+    revalidatePath(`/customer/jobs/${jobId}/pay`);
+    if (result.alreadyPaid) {
+      return {
+        success: true as const,
+        alreadyPaid: true as const,
+        jobId: result.jobId,
+        message: "This job is already funded.",
+      };
+    }
+    return {
+      success: true as const,
+      alreadyPaid: false as const,
+      url: result.url,
+      sessionId: result.sessionId,
+      amount: result.amount,
+    };
+  } catch (err) {
+    console.error("[HOMEOWNER_CHECKOUT]", err);
+    return {
+      success: false as const,
+      message: err instanceof Error ? err.message : "Could not start checkout.",
+    };
+  }
+}
+
+/** Legacy Elements PaymentIntent bootstrap (kept for older clients). */
 export async function getCheckoutBootstrapAction(jobId: string) {
   const session = await requireAuth([UserRole.CLIENT]);
   const clientId = session.user.id!;

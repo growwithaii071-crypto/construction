@@ -111,6 +111,7 @@ const NAV: NavItem[] = [
     label: "Finance",
     icon: Wallet,
     children: [
+      { href: "/transactions", label: "Transactions", icon: CreditCard },
       { href: "/invoices", label: "Invoices", icon: Receipt },
       { href: "/expenses", label: "Expenses", icon: TrendingUp },
     ],
