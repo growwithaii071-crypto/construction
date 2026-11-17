@@ -44,7 +44,7 @@ export default async function PricingSettingsPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-6 p-4 pb-10 lg:p-6">
+    <div className="w-full space-y-6 p-4 pb-10 sm:p-5 lg:p-6">
       <div>
         <Link
           href="/settings"
