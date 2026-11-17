@@ -83,7 +83,7 @@ export function CustomerSidebar({ user, onClose }: CustomerSidebarProps) {
       {/* Logo */}
       <div className="flex items-center justify-between h-16 px-5 border-b border-gray-100 shrink-0">
         <Link href="/customer/dashboard" className="flex items-center">
-          <BrandLogo size="sm" caption="Customer Portal" />
+          <BrandLogo size="md" caption="Customer Portal" />
         </Link>
         {onClose && (
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 lg:hidden">

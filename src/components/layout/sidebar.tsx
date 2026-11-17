@@ -181,9 +181,9 @@ export function Sidebar({ onClose }: SidebarProps) {
   return (
     <div className="flex h-full min-h-0 w-64 flex-col bg-slate-900 text-slate-100">
       {/* Logo */}
-      <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-800 px-4">
-        <Link href="/dashboard" className="group flex items-center rounded-lg bg-white px-2 py-1">
-          <BrandLogo size="sm" caption="Admin" />
+      <div className="flex h-[4.5rem] shrink-0 items-center justify-between border-b border-slate-800 px-3">
+        <Link href="/dashboard" className="group flex items-center rounded-lg bg-white px-2 py-1.5">
+          <BrandLogo size="md" caption="Admin" />
         </Link>
         {onClose && (
           <button

@@ -25,7 +25,7 @@ export function Navbar({ isLoggedIn }: NavbarProps) {
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-white/95 backdrop-blur-md">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center">
-          <BrandLogo size="md" priority />
+          <BrandLogo size="lg" priority />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">

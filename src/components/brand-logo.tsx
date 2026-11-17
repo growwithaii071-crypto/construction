@@ -15,14 +15,13 @@ type BrandLogoProps = {
 };
 
 /**
- * Source file is 1024×512 (2:1) with white padding.
- * Boxes are a bit wider than 2:1 so object-contain scales by height and stays readable.
+ * Source is 1024×512 with padding — use generous width so wordmark stays readable.
  */
 const SIZE = {
-  sm: { height: 40, width: 120, className: "h-10 w-[7.5rem]" },
-  md: { height: 48, width: 150, className: "h-12 w-[9.5rem]" },
-  lg: { height: 56, width: 180, className: "h-14 w-[11rem]" },
-  xl: { height: 72, width: 220, className: "h-[4.5rem] w-[14rem]" },
+  sm: { height: 44, width: 140, className: "h-11 w-[8.75rem]" },
+  md: { height: 52, width: 170, className: "h-[3.25rem] w-[10.5rem]" },
+  lg: { height: 60, width: 200, className: "h-[3.75rem] w-[12.5rem]" },
+  xl: { height: 80, width: 260, className: "h-20 w-[16rem]" },
 } as const;
 
 /** HomeCreww wordmark — use in headers, sidebars, auth, and footers. */
