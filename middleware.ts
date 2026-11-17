@@ -63,5 +63,8 @@ export default auth(function middleware(req: NextAuthRequest) {
 });
 
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|public).*)"],
+  // Skip auth for Next internals + static public assets (logo, images, svg, etc.)
+  matcher: [
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|images/|.*\\..*).*)",
+  ],
 };

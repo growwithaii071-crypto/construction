@@ -14,11 +14,15 @@ type BrandLogoProps = {
   priority?: boolean;
 };
 
+/**
+ * Source file is 1024×512 (2:1) with white padding.
+ * Boxes are a bit wider than 2:1 so object-contain scales by height and stays readable.
+ */
 const SIZE = {
-  sm: { height: 28, width: 120, className: "h-7 w-auto" },
-  md: { height: 36, width: 154, className: "h-9 w-auto" },
-  lg: { height: 48, width: 206, className: "h-12 w-auto" },
-  xl: { height: 72, width: 308, className: "h-[4.5rem] w-auto" },
+  sm: { height: 40, width: 120, className: "h-10 w-[7.5rem]" },
+  md: { height: 48, width: 150, className: "h-12 w-[9.5rem]" },
+  lg: { height: 56, width: 180, className: "h-14 w-[11rem]" },
+  xl: { height: 72, width: 220, className: "h-[4.5rem] w-[14rem]" },
 } as const;
 
 /** HomeCreww wordmark — use in headers, sidebars, auth, and footers. */
@@ -38,7 +42,8 @@ export function BrandLogo({
         width={dims.width}
         height={dims.height}
         priority={priority}
-        className={cn(dims.className, "object-contain object-left")}
+        unoptimized
+        className={cn(dims.className, "max-w-none object-contain object-left")}
       />
       {caption ? (
         <span className="text-[10px] font-medium leading-none text-orange-500">

@@ -46,6 +46,14 @@ export const authConfig: NextAuthConfig = {
       const role = ((auth?.user as { role?: string } | undefined)?.role ?? "") as string;
       const pathname = nextUrl.pathname;
 
+      // Static files under /public (logos, images) must never hit login
+      if (
+        pathname.startsWith("/images/") ||
+        /\.(?:jpg|jpeg|png|gif|webp|svg|ico|txt|xml|json|woff2?)$/i.test(pathname)
+      ) {
+        return true;
+      }
+
       const isPublic = PUBLIC_ROUTES.some(
         (r) => pathname === r || pathname.startsWith(r + "/")
       );
