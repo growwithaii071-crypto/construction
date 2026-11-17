@@ -156,7 +156,21 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
           </table>
         </div>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <div className="mt-4 grid gap-4 sm:grid-cols-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="matchingInviteCountTop">Max traders per lead</Label>
+            <Input
+              id="matchingInviteCountTop"
+              name="matchingInviteCount"
+              type="number"
+              min={1}
+              max={10}
+              defaultValue={initial.matchingInviteCount}
+              className="h-11 rounded-xl font-semibold"
+              required
+            />
+            <p className="text-xs text-slate-400">How many traders get invited to each job.</p>
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="smallBudgetMax">Small job size under (budget £)</Label>
             <Input
@@ -169,7 +183,6 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
               className="h-11 rounded-xl"
               required
             />
-            <p className="text-xs text-slate-400">Used for matching labels only.</p>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="mediumBudgetMax">Medium job size under (budget £)</Label>
@@ -406,19 +419,6 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
               min={1}
               max={30}
               defaultValue={initial.autoConfirmDays}
-              className="h-11 rounded-xl"
-              required
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="matchingInviteCount">Max traders per lead</Label>
-            <Input
-              id="matchingInviteCount"
-              name="matchingInviteCount"
-              type="number"
-              min={1}
-              max={10}
-              defaultValue={initial.matchingInviteCount}
               className="h-11 rounded-xl"
               required
             />

@@ -6,6 +6,7 @@ import {
   getPricingConfig,
   buildPricePreview,
   listSuccessFeeTiers,
+  listLeadBands,
   formatSuccessFeeBand,
 } from "@/lib/pricing";
 import { MONEY_SYMBOL } from "@/lib/money";
@@ -19,7 +20,9 @@ export default async function PricingSettingsPage() {
 
   const config = await getPricingConfig();
   const tiers = listSuccessFeeTiers(config);
+  const bands = listLeadBands(config);
   const sym = MONEY_SYMBOL;
+  const maxTraders = config.matchingInviteCount;
   const sample = buildPricePreview(5000, config);
 
   const initial = {
@@ -76,6 +79,7 @@ export default async function PricingSettingsPage() {
             <tr>
               <th className="px-4 py-3">Job value</th>
               <th className="px-4 py-3">Success fee</th>
+              <th className="px-4 py-3">Max traders</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-orange-100/80 bg-white/70">
@@ -88,6 +92,36 @@ export default async function PricingSettingsPage() {
                   {sym}
                   {tier.fee.toLocaleString("en-GB")}
                 </td>
+                <td className="px-4 py-3 font-bold text-slate-900">{maxTraders}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+        <table className="min-w-full text-left text-sm">
+          <thead className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <tr>
+              <th className="px-4 py-3">Job size</th>
+              <th className="px-4 py-3">Examples</th>
+              <th className="px-4 py-3">Success fee</th>
+              <th className="px-4 py-3">Max traders</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {bands.map((b) => (
+              <tr key={b.size}>
+                <td className="px-4 py-3 font-semibold text-[#0B2A4A]">
+                  {b.label}
+                  <p className="text-xs font-normal text-slate-500">{b.budgetLabel}</p>
+                </td>
+                <td className="px-4 py-3 text-xs text-slate-600">{b.examples}</td>
+                <td className="px-4 py-3 font-bold text-slate-900">
+                  {sym}
+                  {b.leadDefault}
+                </td>
+                <td className="px-4 py-3 font-bold text-slate-900">{b.maxTraders}</td>
               </tr>
             ))}
           </tbody>
@@ -98,11 +132,16 @@ export default async function PricingSettingsPage() {
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
           Preview · {sym}5,000 quote
         </p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-3">
+        <div className="mt-3 grid gap-3 sm:grid-cols-4">
           <PreviewStat
             label="Trader success fee"
             value={`${sym}${sample.traderSuccessFee.toLocaleString("en-GB")}`}
             hint={sample.traderFeeLabel}
+          />
+          <PreviewStat
+            label="Max traders / lead"
+            value={String(maxTraders)}
+            hint="Invites sent per job"
           />
           <PreviewStat
             label="Customer (Protected)"
