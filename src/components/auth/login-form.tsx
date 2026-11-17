@@ -19,10 +19,15 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl");
   const urlError = searchParams.get("error");
+  const idle = searchParams.get("idle");
 
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(
-    urlError === "SessionExpired" ? "Your session has expired. Please log in again." : null
+    urlError === "SessionExpired"
+      ? "Your session has expired. Please log in again."
+      : idle === "1"
+        ? "You were signed out after 15 minutes of inactivity."
+        : null
   );
   const [isPending, startTransition] = useTransition();
 
