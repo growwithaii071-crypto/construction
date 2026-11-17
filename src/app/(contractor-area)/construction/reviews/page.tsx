@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { FlowBadge } from "@/components/marketplace/flow-badge";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Reviews — BuildPro Contractor" };
+export const metadata: Metadata = { title: "Reviews — HomeCreww Contractor" };
 
 export default async function ReviewsPage() {
   const session = await auth();

@@ -6,7 +6,7 @@ import { Plus, Briefcase, Clock, MapPin } from "lucide-react";
 import { FlowBadge } from "@/components/marketplace/flow-badge";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "My Jobs — BuildPro" };
+export const metadata: Metadata = { title: "My Jobs — HomeCreww" };
 
 const STATUS_STYLES: Record<string, string> = {
   OPEN: "bg-amber-50 text-amber-700",

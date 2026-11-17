@@ -10,7 +10,7 @@ import { SubmitQuoteForm } from "@/components/marketplace/submit-quote-form";
 import { getTraderQuoteAccess } from "@/lib/trader-billing";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Invitation — BuildPro" };
+export const metadata: Metadata = { title: "Invitation — HomeCreww" };
 
 export default async function InvitationDetailPage({
   params,

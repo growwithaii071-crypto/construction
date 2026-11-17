@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import type { SuccessFeeTier } from "@/lib/pricing";
+import { MONEY_SYMBOL } from "@/lib/money";
 
 export type PricingFormInitial = {
   traderFeeType: "PERCENTAGE" | "FIXED" | "LEAD_BY_SIZE";
@@ -25,15 +27,7 @@ export type PricingFormInitial = {
   termsVersion: string;
   smallBudgetMax: number;
   mediumBudgetMax: number;
-  smallLeadMin: number;
-  smallLeadMax: number;
-  smallLeadDefault: number;
-  mediumLeadMin: number;
-  mediumLeadMax: number;
-  mediumLeadDefault: number;
-  largeLeadMin: number;
-  largeLeadMax: number;
-  largeLeadDefault: number;
+  successFeeTiers: SuccessFeeTier[];
 };
 
 export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) {
@@ -41,15 +35,24 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
   const [feeType, setFeeType] = useState(initial.traderFeeType);
   const [protectionOn, setProtectionOn] = useState(initial.protectionFeeEnabled);
+  const [tiers, setTiers] = useState<SuccessFeeTier[]>(initial.successFeeTiers);
+  const sym = MONEY_SYMBOL;
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMessage(null);
     const fd = new FormData(e.currentTarget);
+    fd.set("successFeeTiers", JSON.stringify(tiers));
     startTransition(async () => {
       const res = await savePricingConfigAction(fd);
       setMessage({ ok: res.success, text: res.message });
     });
+  }
+
+  function updateTier(index: number, patch: Partial<SuccessFeeTier>) {
+    setTiers((prev) =>
+      prev.map((t, i) => (i === index ? { ...t, ...patch } : t))
+    );
   }
 
   return (
@@ -72,27 +75,90 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
         </div>
       )}
 
-      {/* Lead price bands */}
+      {/* Success fee by job value */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="mb-5 flex items-center gap-3">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
             <Table2 className="h-5 w-5" />
           </span>
           <div>
-            <h2 className="font-bold text-slate-900">Lead price by job size (+VAT)</h2>
+            <h2 className="font-bold text-slate-900">Success fee by job value</h2>
             <p className="text-sm text-slate-500">
-              Max traders per lead is set below (default 3). Charge uses each band&apos;s default
-              when fee type is Lead by size.
+              Fixed trader success fee charged when a quote is won. Currency locked to{" "}
+              <span className="font-semibold text-[#0B2A4A]">£ GBP</span>.
             </p>
           </div>
         </div>
 
-        <p className="mb-4 text-xs font-semibold text-slate-500">
-          Currency locked to <span className="text-[#0B2A4A]">£ GBP</span> for the whole platform.
-        </p>
-        <div className="mb-4 grid gap-4 sm:grid-cols-2">
+        <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <tr>
+                <th className="px-3 py-2.5">Job value (from £)</th>
+                <th className="px-3 py-2.5">Job value (to £)</th>
+                <th className="px-3 py-2.5">Success fee (£)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {tiers.map((tier, i) => (
+                <tr key={i}>
+                  <td className="px-3 py-2.5">
+                    <Input
+                      type="number"
+                      min={0}
+                      step="1"
+                      value={tier.min}
+                      onChange={(e) =>
+                        updateTier(i, { min: Number(e.target.value) || 0 })
+                      }
+                      className="h-10 rounded-lg"
+                      required
+                    />
+                  </td>
+                  <td className="px-3 py-2.5">
+                    {tier.max == null ? (
+                      <span className="text-sm font-medium text-slate-600">
+                        {sym}
+                        {tier.min.toLocaleString("en-GB")}+ (open)
+                      </span>
+                    ) : (
+                      <Input
+                        type="number"
+                        min={0}
+                        step="1"
+                        value={tier.max}
+                        onChange={(e) =>
+                          updateTier(i, {
+                            max: e.target.value === "" ? null : Number(e.target.value),
+                          })
+                        }
+                        className="h-10 rounded-lg"
+                        required
+                      />
+                    )}
+                  </td>
+                  <td className="px-3 py-2.5">
+                    <Input
+                      type="number"
+                      min={0}
+                      step="1"
+                      value={tier.fee}
+                      onChange={(e) =>
+                        updateTier(i, { fee: Number(e.target.value) || 0 })
+                      }
+                      className="h-10 rounded-lg font-semibold"
+                      required
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="smallBudgetMax">Small under (budget £)</Label>
+            <Label htmlFor="smallBudgetMax">Small job size under (budget £)</Label>
             <Input
               id="smallBudgetMax"
               name="smallBudgetMax"
@@ -103,9 +169,10 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
               className="h-11 rounded-xl"
               required
             />
+            <p className="text-xs text-slate-400">Used for matching labels only.</p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="mediumBudgetMax">Medium under (budget £)</Label>
+            <Label htmlFor="mediumBudgetMax">Medium job size under (budget £)</Label>
             <Input
               id="mediumBudgetMax"
               name="mediumBudgetMax"
@@ -118,56 +185,6 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
             />
           </div>
         </div>
-
-        <div className="overflow-x-auto rounded-xl border border-slate-200">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              <tr>
-                <th className="px-3 py-2.5">Job size</th>
-                <th className="px-3 py-2.5">Examples</th>
-                <th className="px-3 py-2.5">Lead min</th>
-                <th className="px-3 py-2.5">Lead max</th>
-                <th className="px-3 py-2.5">Charge (default)</th>
-                <th className="px-3 py-2.5">Max traders</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              <LeadRow
-                size="Small (under band)"
-                examples="Roof repair, gutters, small plastering"
-                minName="smallLeadMin"
-                maxName="smallLeadMax"
-                defName="smallLeadDefault"
-                min={initial.smallLeadMin}
-                max={initial.smallLeadMax}
-                def={initial.smallLeadDefault}
-                maxTraders={initial.matchingInviteCount}
-              />
-              <LeadRow
-                size="Medium"
-                examples="Bathroom, kitchen fitting, garage conversion, re-roof part"
-                minName="mediumLeadMin"
-                maxName="mediumLeadMax"
-                defName="mediumLeadDefault"
-                min={initial.mediumLeadMin}
-                max={initial.mediumLeadMax}
-                def={initial.mediumLeadDefault}
-                maxTraders={initial.matchingInviteCount}
-              />
-              <LeadRow
-                size="Large"
-                examples="Loft conversion, extension, full kitchen, full new roof"
-                minName="largeLeadMin"
-                maxName="largeLeadMax"
-                defName="largeLeadDefault"
-                min={initial.largeLeadMin}
-                max={initial.largeLeadMax}
-                def={initial.largeLeadDefault}
-                maxTraders={initial.matchingInviteCount}
-              />
-            </tbody>
-          </table>
-        </div>
       </section>
 
       {/* Trader success fee mode */}
@@ -179,7 +196,7 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
           <div>
             <h2 className="font-bold text-slate-900">Trader fee model</h2>
             <p className="text-sm text-slate-500">
-              Lead by size uses the table above. Deducted at payout when the quote is accepted.
+              &quot;By job value&quot; uses the success fee table above.
             </p>
           </div>
         </div>
@@ -190,7 +207,7 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
             <div className="flex flex-wrap gap-2">
               {(
                 [
-                  { value: "LEAD_BY_SIZE", label: "Lead by job size (new)" },
+                  { value: "LEAD_BY_SIZE", label: "By job value (recommended)" },
                   { value: "PERCENTAGE", label: "Percentage" },
                   { value: "FIXED", label: "Fixed amount" },
                 ] as const
@@ -274,7 +291,7 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
               <input type="hidden" name="traderFeeRate" value="0" />
               <input type="hidden" name="traderFeeCap" value="" />
               <p className="sm:col-span-2 text-sm text-slate-600">
-                Trader fee = lead default for the job&apos;s size band (Small / Medium / Large).
+                Trader fee = success fee for the quote&apos;s job value band.
               </p>
             </>
           )}
@@ -319,187 +336,135 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
               defaultValue={initial.protectionFeeRatePct}
               disabled={!protectionOn}
               className="h-11 rounded-xl"
+              required
             />
           </div>
-
           <div className="space-y-1.5">
-            <Label htmlFor="protectionFeeDefault">Default at checkout</Label>
+            <Label htmlFor="protectionFeeDefault">Default mode</Label>
             <select
               id="protectionFeeDefault"
               name="protectionFeeDefault"
               defaultValue={initial.protectionFeeDefault}
               disabled={!protectionOn}
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"
+              className="flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"
             >
-              <option value="OPT_IN">Unticked (opt-in) — recommended</option>
-              <option value="OPT_OUT">Ticked (opt-out)</option>
+              <option value="OPT_IN">Opt-in</option>
+              <option value="OPT_OUT">Opt-out (on by default)</option>
+            </select>
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="unprotectedReleaseAt">Unprotected release timing</Label>
+            <select
+              id="unprotectedReleaseAt"
+              name="unprotectedReleaseAt"
+              defaultValue={initial.unprotectedReleaseAt}
+              className="flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"
+            >
+              <option value="JOB_START">At job start</option>
+              <option value="COMPLETION">At completion</option>
             </select>
           </div>
         </div>
       </section>
 
-      {/* Matching & timing */}
+      {/* Ops */}
       <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <h2 className="mb-1 font-bold text-slate-900">Matching & release rules</h2>
-        <p className="mb-5 text-sm text-slate-500">
-          Max traders per lead applies to every job size (your table uses 3).
-        </p>
-
+        <h2 className="mb-4 font-bold text-slate-900">Marketplace timing</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field
-            id="matchingInviteCount"
-            label="Max traders per lead"
-            defaultValue={initial.matchingInviteCount}
-          />
-          <Field
-            id="maxReassignments"
-            label="Max reassignments"
-            defaultValue={initial.maxReassignments}
-          />
-          <Field
-            id="invitationExpiryHours"
-            label="Invite expiry (hours)"
-            defaultValue={initial.invitationExpiryHours}
-          />
-          <Field
-            id="quoteValidDays"
-            label="Quote valid (days)"
-            defaultValue={initial.quoteValidDays}
-          />
-          <Field
-            id="autoConfirmDays"
-            label="Auto-confirm (days)"
-            defaultValue={initial.autoConfirmDays}
-          />
-
           <div className="space-y-1.5">
-            <Label htmlFor="unprotectedReleaseAt">Unprotected release</Label>
-            <select
-              id="unprotectedReleaseAt"
-              name="unprotectedReleaseAt"
-              defaultValue={initial.unprotectedReleaseAt}
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"
-            >
-              <option value="JOB_START">At job start (recommended)</option>
-              <option value="COMPLETION">At completion</option>
-            </select>
+            <Label htmlFor="quoteValidDays">Quote valid (days)</Label>
+            <Input
+              id="quoteValidDays"
+              name="quoteValidDays"
+              type="number"
+              min={1}
+              max={90}
+              defaultValue={initial.quoteValidDays}
+              className="h-11 rounded-xl"
+              required
+            />
           </div>
-
-          <div className="space-y-1.5 sm:col-span-2 lg:col-span-3">
-            <Label htmlFor="termsVersion">Terms version (recorded on payment)</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="invitationExpiryHours">Invitation expiry (hours)</Label>
+            <Input
+              id="invitationExpiryHours"
+              name="invitationExpiryHours"
+              type="number"
+              min={1}
+              max={168}
+              defaultValue={initial.invitationExpiryHours}
+              className="h-11 rounded-xl"
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="autoConfirmDays">Auto-confirm (days)</Label>
+            <Input
+              id="autoConfirmDays"
+              name="autoConfirmDays"
+              type="number"
+              min={1}
+              max={30}
+              defaultValue={initial.autoConfirmDays}
+              className="h-11 rounded-xl"
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="matchingInviteCount">Max traders per lead</Label>
+            <Input
+              id="matchingInviteCount"
+              name="matchingInviteCount"
+              type="number"
+              min={1}
+              max={10}
+              defaultValue={initial.matchingInviteCount}
+              className="h-11 rounded-xl"
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="maxReassignments">Max reassignments</Label>
+            <Input
+              id="maxReassignments"
+              name="maxReassignments"
+              type="number"
+              min={0}
+              max={50}
+              defaultValue={initial.maxReassignments}
+              className="h-11 rounded-xl"
+              required
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="termsVersion">Terms version</Label>
             <Input
               id="termsVersion"
               name="termsVersion"
               defaultValue={initial.termsVersion}
-              className="h-11 max-w-xs rounded-xl"
+              className="h-11 rounded-xl"
               required
             />
           </div>
         </div>
       </section>
 
-      <Button
-        type="submit"
-        disabled={isPending}
-        className="h-11 rounded-xl bg-orange-500 px-6 font-bold text-white hover:bg-orange-600"
-      >
-        {isPending ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Saving…
-          </>
-        ) : (
-          "Save pricing config"
-        )}
-      </Button>
+      <div className="flex justify-end">
+        <Button
+          type="submit"
+          disabled={isPending}
+          className="h-11 rounded-xl bg-orange-500 px-6 font-semibold text-white hover:bg-orange-600"
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Saving…
+            </>
+          ) : (
+            "Save pricing"
+          )}
+        </Button>
+      </div>
     </form>
-  );
-}
-
-function LeadRow({
-  size,
-  examples,
-  minName,
-  maxName,
-  defName,
-  min,
-  max,
-  def,
-  maxTraders,
-}: {
-  size: string;
-  examples: string;
-  minName: string;
-  maxName: string;
-  defName: string;
-  min: number;
-  max: number;
-  def: number;
-  maxTraders: number;
-}) {
-  return (
-    <tr className="align-top">
-      <td className="px-3 py-3 font-semibold text-slate-900">{size}</td>
-      <td className="max-w-[220px] px-3 py-3 text-xs text-slate-500">{examples}</td>
-      <td className="px-3 py-3">
-        <Input
-          name={minName}
-          type="number"
-          min={0}
-          step="0.5"
-          defaultValue={min}
-          className="h-9 w-24 rounded-lg"
-          required
-        />
-      </td>
-      <td className="px-3 py-3">
-        <Input
-          name={maxName}
-          type="number"
-          min={0}
-          step="0.5"
-          defaultValue={max}
-          className="h-9 w-24 rounded-lg"
-          required
-        />
-      </td>
-      <td className="px-3 py-3">
-        <Input
-          name={defName}
-          type="number"
-          min={0}
-          step="0.5"
-          defaultValue={def}
-          className="h-9 w-24 rounded-lg"
-          required
-        />
-      </td>
-      <td className="px-3 py-3 text-slate-600">{maxTraders}</td>
-    </tr>
-  );
-}
-
-function Field({
-  id,
-  label,
-  defaultValue,
-}: {
-  id: string;
-  label: string;
-  defaultValue: number;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        name={id}
-        type="number"
-        min={0}
-        defaultValue={defaultValue}
-        className="h-11 rounded-xl"
-        required
-      />
-    </div>
   );
 }

@@ -22,7 +22,7 @@ export function WhatsAppTraderLink({
   if (!num) return null;
 
   const text = encodeURIComponent(
-    `Hi, I'm contacting you via BuildPro about: ${jobTitle}`
+    `Hi, I'm contacting you via HomeCreww about: ${jobTitle}`
   );
   const href = `https://wa.me/${num}?text=${text}`;
 

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { CustomerRegisterForm } from "@/components/auth/customer-register-form";
 
 export const metadata: Metadata = {
-  title: "Customer Sign Up — BuildPro",
+  title: "Customer Sign Up — HomeCreww",
 };
 
 export default function CustomerRegisterPage() {

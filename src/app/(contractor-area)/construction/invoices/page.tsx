@@ -5,7 +5,7 @@ import { FileText, Download, Printer, CheckCircle2, Clock, AlertCircle } from "l
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Invoices — BuildPro Contractor" };
+export const metadata: Metadata = { title: "Invoices — HomeCreww Contractor" };
 
 async function getInvoiceData(userId: string) {
   try {

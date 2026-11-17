@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { Building2, LogOut, User, ChevronDown, Bell, Menu, X } from "lucide-react";
+import { LogOut, User, ChevronDown, Bell, Menu, X } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 interface CustomerHeaderProps {
   user: {
@@ -36,14 +37,8 @@ export function CustomerHeader({ user }: CustomerHeaderProps) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/customer/dashboard" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-[#0B2A4A] rounded-xl flex items-center justify-center shadow-sm">
-              <Building2 className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="font-bold text-gray-900 text-sm leading-none">BuildPro</p>
-              <p className="text-orange-500 text-[10px] font-medium leading-none mt-0.5">Customer Portal</p>
-            </div>
+          <Link href="/customer/dashboard" className="flex items-center">
+            <BrandLogo size="md" caption="Customer Portal" />
           </Link>
 
           {/* Desktop nav */}

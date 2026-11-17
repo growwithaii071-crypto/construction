@@ -98,7 +98,7 @@ function SetupForm({ onSaved }: { onSaved: () => void }) {
         )}
       </button>
       <p className="text-xs text-slate-400">
-        Nothing is charged now. This authorizes BuildPro to deduct the trader success fee at payout.
+        Nothing is charged now. This authorizes HomeCreww to deduct the trader success fee at payout.
       </p>
     </form>
   );

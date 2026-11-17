@@ -11,7 +11,7 @@ import { getTraderVerification } from "@/lib/trader-verification";
 import { ContractorOnboardingChecklist } from "@/components/contractor/onboarding-checklist";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Contractor Dashboard — BuildPro" };
+export const metadata: Metadata = { title: "Contractor Dashboard — HomeCreww" };
 
 async function getContractorData(userId: string) {
   try {

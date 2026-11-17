@@ -63,7 +63,7 @@ export function HomeownerCheckoutButton({
           : "Pay & auto-split with Stripe"}
       </button>
       <p className="text-center text-[11px] text-slate-400">
-        Commission stays with BuildPro · remainder goes to the trader Connect account
+        Commission stays with HomeCreww · remainder goes to the trader Connect account
       </p>
     </div>
   );

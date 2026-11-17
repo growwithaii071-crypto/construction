@@ -10,7 +10,11 @@ import {
 } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { getPricingConfig } from "@/lib/pricing";
+import {
+  getPricingConfig,
+  parseSuccessFeeTiers,
+  type SuccessFeeTier,
+} from "@/lib/pricing";
 import { MONEY_CODE } from "@/lib/money";
 
 async function requireAdmin() {
@@ -33,23 +37,33 @@ const PricingSchema = z.object({
   termsVersion: z.string().min(1).max(40),
   smallBudgetMax: z.coerce.number().min(0),
   mediumBudgetMax: z.coerce.number().min(0),
-  smallLeadMin: z.coerce.number().min(0),
-  smallLeadMax: z.coerce.number().min(0),
-  smallLeadDefault: z.coerce.number().min(0),
-  mediumLeadMin: z.coerce.number().min(0),
-  mediumLeadMax: z.coerce.number().min(0),
-  mediumLeadDefault: z.coerce.number().min(0),
-  largeLeadMin: z.coerce.number().min(0),
-  largeLeadMax: z.coerce.number().min(0),
-  largeLeadDefault: z.coerce.number().min(0),
 });
+
+function syncLegacyLeadDefaults(tiers: SuccessFeeTier[]) {
+  const feeAt = (value: number) => {
+    for (const t of [...tiers].sort((a, b) => a.min - b.min)) {
+      if (value >= t.min && (t.max == null || value <= t.max)) return t.fee;
+    }
+    return tiers[tiers.length - 1]?.fee ?? 0;
+  };
+  return {
+    smallLeadMin: feeAt(500),
+    smallLeadMax: feeAt(500),
+    smallLeadDefault: feeAt(500),
+    mediumLeadMin: feeAt(5000),
+    mediumLeadMax: feeAt(5000),
+    mediumLeadDefault: feeAt(5000),
+    largeLeadMin: feeAt(15000),
+    largeLeadMax: feeAt(15000),
+    largeLeadDefault: feeAt(15000),
+  };
+}
 
 export async function savePricingConfigAction(formData: FormData) {
   const session = await requireAdmin();
 
   const feeType = String(formData.get("traderFeeType") || "LEAD_BY_SIZE");
   const rawRate = Number(formData.get("traderFeeRate"));
-  // UI shows percentage as 10 for 10%; store as 0.10 when PERCENTAGE
   const traderFeeRate =
     feeType === "PERCENTAGE" ? (Number.isFinite(rawRate) ? rawRate / 100 : 0) : rawRate;
 
@@ -57,6 +71,28 @@ export async function savePricingConfigAction(formData: FormData) {
   const protectionFeeRate = Number.isFinite(protectionPct) ? protectionPct / 100 : 0.03;
 
   const capRaw = String(formData.get("traderFeeCap") ?? "").trim();
+
+  let tiers: SuccessFeeTier[];
+  try {
+    tiers = parseSuccessFeeTiers(JSON.parse(String(formData.get("successFeeTiers") || "[]")));
+  } catch {
+    return { success: false as const, message: "Invalid success fee table." };
+  }
+
+  if (tiers.length < 1) {
+    return { success: false as const, message: "Add at least one success fee band." };
+  }
+
+  for (let i = 1; i < tiers.length; i++) {
+    const prev = tiers[i - 1];
+    const cur = tiers[i];
+    if (prev.max != null && cur.min <= prev.max) {
+      return {
+        success: false as const,
+        message: `Band ${i + 1} overlaps the previous band. Check job value ranges.`,
+      };
+    }
+  }
 
   const parsed = PricingSchema.safeParse({
     traderFeeType: feeType,
@@ -74,15 +110,6 @@ export async function savePricingConfigAction(formData: FormData) {
     termsVersion: formData.get("termsVersion") || "v1.0",
     smallBudgetMax: formData.get("smallBudgetMax"),
     mediumBudgetMax: formData.get("mediumBudgetMax"),
-    smallLeadMin: formData.get("smallLeadMin"),
-    smallLeadMax: formData.get("smallLeadMax"),
-    smallLeadDefault: formData.get("smallLeadDefault"),
-    mediumLeadMin: formData.get("mediumLeadMin"),
-    mediumLeadMax: formData.get("mediumLeadMax"),
-    mediumLeadDefault: formData.get("mediumLeadDefault"),
-    largeLeadMin: formData.get("largeLeadMin"),
-    largeLeadMax: formData.get("largeLeadMax"),
-    largeLeadDefault: formData.get("largeLeadDefault"),
   });
 
   if (!parsed.success) {
@@ -101,6 +128,8 @@ export async function savePricingConfigAction(formData: FormData) {
     data.traderFeeCap === "" || data.traderFeeCap === undefined
       ? null
       : Number(data.traderFeeCap);
+
+  const legacy = syncLegacyLeadDefaults(tiers);
 
   try {
     const existing = await getPricingConfig();
@@ -125,15 +154,8 @@ export async function savePricingConfigAction(formData: FormData) {
         leadCurrency: MONEY_CODE,
         smallBudgetMax: data.smallBudgetMax,
         mediumBudgetMax: data.mediumBudgetMax,
-        smallLeadMin: data.smallLeadMin,
-        smallLeadMax: data.smallLeadMax,
-        smallLeadDefault: data.smallLeadDefault,
-        mediumLeadMin: data.mediumLeadMin,
-        mediumLeadMax: data.mediumLeadMax,
-        mediumLeadDefault: data.mediumLeadDefault,
-        largeLeadMin: data.largeLeadMin,
-        largeLeadMax: data.largeLeadMax,
-        largeLeadDefault: data.largeLeadDefault,
+        successFeeTiers: tiers,
+        ...legacy,
         updatedById: session.user.id,
       },
     });
@@ -146,19 +168,11 @@ export async function savePricingConfigAction(formData: FormData) {
         actorId: session.user.id,
         before: {
           traderFeeType: before.traderFeeType,
-          traderFeeRate: before.traderFeeRate,
-          smallLeadDefault: before.smallLeadDefault,
-          mediumLeadDefault: before.mediumLeadDefault,
-          largeLeadDefault: before.largeLeadDefault,
-          matchingInviteCount: before.matchingInviteCount,
+          successFeeTiers: before.successFeeTiers,
         },
         after: {
           traderFeeType: updated.traderFeeType,
-          traderFeeRate: updated.traderFeeRate,
-          smallLeadDefault: updated.smallLeadDefault,
-          mediumLeadDefault: updated.mediumLeadDefault,
-          largeLeadDefault: updated.largeLeadDefault,
-          matchingInviteCount: updated.matchingInviteCount,
+          successFeeTiers: updated.successFeeTiers,
         },
       },
     });

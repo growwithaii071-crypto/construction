@@ -6,7 +6,7 @@ import { Briefcase, MapPin } from "lucide-react";
 import { processAutoConfirms } from "@/lib/marketplace-payouts";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "My Jobs — BuildPro Contractor" };
+export const metadata: Metadata = { title: "My Jobs — HomeCreww Contractor" };
 
 export default async function ContractorJobsPage() {
   const session = await requireAuth([UserRole.CONTRACTOR]);

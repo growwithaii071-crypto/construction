@@ -11,7 +11,7 @@ import { getPricingConfig } from "@/lib/pricing";
 import { buildConnectSplit } from "@/lib/connect-split";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Pay for job — BuildPro" };
+export const metadata: Metadata = { title: "Pay for job — HomeCreww" };
 
 export default async function JobPayPage({
   params,
@@ -120,7 +120,7 @@ export default async function JobPayPage({
             </div>
             <div className="flex justify-between">
               <span className="text-slate-500">
-                BuildPro commission ({(split.rate * 100).toFixed(0)}%)
+                HomeCreww commission ({(split.rate * 100).toFixed(0)}%)
               </span>
               <span className="font-semibold text-[#0B2A4A]">
                 {formatMoney(split.applicationFee)}

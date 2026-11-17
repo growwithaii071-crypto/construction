@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, AlertCircle, Building2, ArrowRight } from "lucide-react";
+import { Eye, EyeOff, Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 import { signIn, getSession } from "next-auth/react";
 import { LoginSchema, type LoginInput } from "@/schemas/auth";
 import { cn } from "@/lib/utils";
@@ -50,8 +51,8 @@ export function CustomerLoginForm() {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center">
-        <div className="w-14 h-14 bg-violet-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-violet-600/30">
-          <Building2 className="w-7 h-7 text-white" />
+        <div className="mx-auto mb-4 flex justify-center">
+          <BrandLogo size="lg" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
         <p className="mt-1.5 text-sm text-gray-500">Sign in to your customer account</p>
@@ -130,7 +131,7 @@ export function CustomerLoginForm() {
           <div className="w-full border-t border-gray-100" />
         </div>
         <div className="relative flex justify-center">
-          <span className="bg-white px-3 text-xs text-gray-400">New to BuildPro?</span>
+          <span className="bg-white px-3 text-xs text-gray-400">New to HomeCreww?</span>
         </div>
       </div>
 

@@ -6,7 +6,8 @@ import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
-import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, HardHat, Check, ChevronDown, X } from "lucide-react";
+import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, Check, ChevronDown, X } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -135,12 +136,12 @@ export function ContractorRegisterForm() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <div className="w-12 h-12 bg-orange-50 border border-orange-100 rounded-2xl flex items-center justify-center mb-4">
-          <HardHat className="w-6 h-6 text-orange-500" />
+        <div className="mb-4">
+          <BrandLogo size="lg" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900">Register Your Company</h2>
         <p className="mt-1.5 text-sm text-gray-500">
-          Join BuildPro as a contractor and grow your construction business
+          Join HomeCreww as a contractor and grow your construction business
         </p>
       </div>
 

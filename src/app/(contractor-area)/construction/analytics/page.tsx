@@ -4,7 +4,7 @@ import { BarChart3, TrendingUp, Award, Target, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Analytics — BuildPro Contractor" };
+export const metadata: Metadata = { title: "Analytics — HomeCreww Contractor" };
 
 async function getAnalyticsData(userId: string) {
   try {

@@ -248,8 +248,8 @@ export function SmtpSettingsForm({
                 </label>
                 <input
                   name="fromName"
-                  defaultValue={initial?.fromName ?? "BuildPro"}
-                  placeholder="BuildPro"
+                  defaultValue={initial?.fromName ?? "HomeCreww"}
+                  placeholder="HomeCreww"
                   className={inputClass}
                 />
               </div>

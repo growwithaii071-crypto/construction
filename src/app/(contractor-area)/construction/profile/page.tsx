@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "My Profile — BuildPro Contractor" };
+export const metadata: Metadata = { title: "My Profile — HomeCreww Contractor" };
 
 export default async function ContractorProfilePage() {
   const session = await auth();

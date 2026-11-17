@@ -20,7 +20,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Dashboard — BuildPro Customer" };
+export const metadata: Metadata = { title: "Dashboard — HomeCreww Customer" };
 
 const STATUS_STYLES: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-700 border-amber-200",

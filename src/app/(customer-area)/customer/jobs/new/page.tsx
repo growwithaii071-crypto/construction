@@ -6,7 +6,7 @@ import { getJobCategories } from "@/actions/marketplace/jobs";
 import { PostJobForm } from "@/components/marketplace/post-job-form";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Post a Job — BuildPro" };
+export const metadata: Metadata = { title: "Post a Job — HomeCreww" };
 
 export default async function NewCustomerJobPage() {
   await requireAuth([UserRole.CLIENT]);

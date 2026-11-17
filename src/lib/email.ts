@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { ensureDefaultEmailTemplates } from "@/lib/email-templates";
 import { getAppUrl } from "@/lib/app-url";
 
-const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "BuildPro";
+const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "HomeCreww";
 
 type SendOptions = {
   to: string;
@@ -16,6 +16,7 @@ function renderVars(template: string, vars: Record<string, string>) {
 }
 
 function wrapBase(content: string) {
+  const logoUrl = `${getAppUrl()}/images/homecreww-logo.jpg`;
   return `
 <!DOCTYPE html>
 <html>
@@ -25,8 +26,8 @@ function wrapBase(content: string) {
     <tr><td align="center">
       <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
         <tr>
-          <td style="background:#1e3a5f;padding:28px 40px;text-align:center;">
-            <h1 style="color:#ffffff;margin:0;font-size:22px;">${appName}</h1>
+          <td style="background:#ffffff;padding:24px 40px;text-align:center;border-bottom:1px solid #eef2f7;">
+            <img src="${logoUrl}" alt="${appName}" width="180" height="auto" style="display:inline-block;max-width:180px;height:auto;" />
           </td>
         </tr>
         <tr><td style="padding:36px 40px;">${content}</td></tr>

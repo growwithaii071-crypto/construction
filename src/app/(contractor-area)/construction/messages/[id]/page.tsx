@@ -6,7 +6,7 @@ import { ChatThread } from "@/components/messages/chat-thread";
 import { redirect, notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Chat — BuildPro" };
+export const metadata: Metadata = { title: "Chat — HomeCreww" };
 
 const CHAT_OK = new Set(["PENDING", "ACCEPTED", "IN_PROGRESS", "COMPLETED"]);
 

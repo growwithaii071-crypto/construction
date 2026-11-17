@@ -5,7 +5,7 @@ import { Plus, Wrench, ToggleLeft, ToggleRight } from "lucide-react";
 import { toggleServiceAction } from "@/actions/services/create-service";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "My Services — BuildPro" };
+export const metadata: Metadata = { title: "My Services — HomeCreww" };
 
 const CATEGORY_COLORS: Record<string, string> = {
   "Residential Construction": "bg-blue-100 text-blue-700",

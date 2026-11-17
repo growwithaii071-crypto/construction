@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "My Profile — BuildPro" };
+export const metadata: Metadata = { title: "My Profile — HomeCreww" };
 
 export default async function CustomerProfilePage() {
   const session = await auth();

@@ -12,7 +12,7 @@ import { processAutoConfirms } from "@/lib/marketplace-payouts";
 import { getStripePublishableKey } from "@/lib/stripe";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Job — BuildPro Contractor" };
+export const metadata: Metadata = { title: "Job — HomeCreww Contractor" };
 
 export default async function ContractorJobDetailPage({
   params,

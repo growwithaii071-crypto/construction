@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import { HardHat, LogOut, ChevronDown, Bell, Menu, X, LayoutDashboard, Wrench, ClipboardList } from "lucide-react";
+import { LogOut, ChevronDown, Bell, Menu, X, LayoutDashboard, Wrench, ClipboardList } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 import { cn } from "@/lib/utils";
 
 interface ContractorHeaderProps {
@@ -41,14 +42,8 @@ export function ContractorHeader({ user }: ContractorHeaderProps) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/construction/dashboard" className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shadow-sm">
-              <HardHat className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="font-bold text-gray-900 text-sm leading-none">BuildPro</p>
-              <p className="text-orange-500 text-[10px] font-medium leading-none mt-0.5">Contractor Portal</p>
-            </div>
+          <Link href="/construction/dashboard" className="flex items-center">
+            <BrandLogo size="md" caption="Contractor Portal" />
           </Link>
 
           {/* Desktop nav */}

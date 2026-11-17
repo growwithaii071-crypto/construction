@@ -6,7 +6,7 @@ import { ConnectOnboarding } from "@/components/contractor/connect-onboarding";
 import { BadgeCheck, Landmark } from "lucide-react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Payouts & Verification — BuildPro" };
+export const metadata: Metadata = { title: "Payouts & Verification — HomeCreww" };
 
 export default async function ContractorPayoutsPage({
   searchParams,

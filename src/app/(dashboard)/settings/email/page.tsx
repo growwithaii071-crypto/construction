@@ -20,7 +20,7 @@ function envSmtpFallback() {
     username: process.env.EMAIL_SERVER_USER?.trim() || "",
     password: process.env.EMAIL_SERVER_PASSWORD || "",
     fromEmail: fromEmail.includes("@") ? fromEmail : "",
-    fromName: "BuildPro",
+    fromName: "HomeCreww",
     isActive: true,
   };
 }

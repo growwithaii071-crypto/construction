@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { ResolveDisputeForm } from "@/components/admin/resolve-dispute-form";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Dispute detail — BuildPro" };
+export const metadata: Metadata = { title: "Dispute detail — HomeCreww" };
 
 export default async function DisputeDetailPage({
   params,

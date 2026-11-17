@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Home, BadgeCheck, Star, Shield, Zap } from "lucide-react";
+import { BadgeCheck, Star, Shield, Zap } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 export const metadata: Metadata = {
-  title: "Sign In — BuildPro",
-  description: "Sign in as Admin, Client, or Contractor on BuildPro",
+  title: "Sign In — HomeCreww",
+  description: "Sign in as Admin, Client, or Contractor on HomeCreww",
 };
 
 const HIGHLIGHTS = [
@@ -31,13 +32,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="absolute inset-0 bg-linear-to-t from-[#071A30] via-[#0B2A4A]/85 to-[#0B2A4A]/60" />
 
         <div className="relative z-10 flex h-full flex-col px-10 py-10 xl:px-14">
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 shadow-lg shadow-orange-900/30">
-              <Home className="h-5 w-5 text-white" />
-            </div>
-            <span className="text-2xl font-extrabold tracking-tight text-white">
-              Build<span className="text-orange-400">Pro</span>
-            </span>
+          <Link href="/" className="inline-flex items-center rounded-xl bg-white px-3 py-2 shadow-lg">
+            <BrandLogo size="lg" priority />
           </Link>
 
           <div className="my-auto max-w-md py-12">
@@ -71,7 +67,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </div>
 
           <p className="text-xs text-white/40">
-            © {new Date().getFullYear()} BuildPro · Trusted by customers & contractors
+            © {new Date().getFullYear()} HomeCreww · Trusted by customers & contractors
           </p>
         </div>
       </aside>
@@ -81,14 +77,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,#fdba7425_0%,transparent_45%),radial-gradient(ellipse_at_bottom_left,#93c5fd30_0%,transparent_50%)]" />
 
         <header className="relative z-10 flex items-center justify-between px-5 py-5 sm:px-8">
-          <Link href="/" className="flex items-center gap-2 lg:invisible">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-[#0B2A4A]">
-              <Home className="h-4 w-4 text-white" />
-              <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-orange-500 ring-2 ring-[#F3F6FA]" />
-            </div>
-            <span className="text-lg font-extrabold text-[#0B2A4A]">
-              Build<span className="text-orange-500">Pro</span>
-            </span>
+          <Link href="/" className="flex items-center lg:invisible">
+            <BrandLogo size="md" />
           </Link>
           <Link
             href="/"

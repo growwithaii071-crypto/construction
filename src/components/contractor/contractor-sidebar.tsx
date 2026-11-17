@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
 import { useTransition } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   LayoutDashboard,
   Wrench,
   ClipboardList,
   Plus,
   LogOut,
-  HardHat,
   Home,
   User,
   ChevronRight,
@@ -112,14 +112,8 @@ export function ContractorSidebar({ user, onClose }: ContractorSidebarProps) {
     <div className="flex h-full min-h-0 w-64 flex-col bg-white border-r border-gray-100">
       {/* Logo */}
       <div className="flex items-center justify-between h-16 px-5 border-b border-gray-100 shrink-0">
-        <Link href="/construction/dashboard" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center shadow-sm">
-            <HardHat className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <p className="font-bold text-gray-900 text-sm leading-none">BuildPro</p>
-            <p className="text-orange-500 text-[10px] font-medium leading-none mt-0.5">Contractor Portal</p>
-          </div>
+        <Link href="/construction/dashboard" className="flex items-center">
+          <BrandLogo size="sm" caption="Contractor Portal" />
         </Link>
         {onClose && (
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 lg:hidden">

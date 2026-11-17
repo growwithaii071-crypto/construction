@@ -141,7 +141,7 @@ export async function markMarketplacePaymentSucceeded(opts: {
   const amount = formatMoney(payment.customerTotal);
   const traderMsg = autoSplit
     ? `Payment received for “${payment.job.title}”. ${formatMoney(traderNet ?? 0)} is on your Connect account (platform kept ${formatMoney(applicationFee ?? 0)}).`
-    : `Payment received for “${payment.job.title}”. Funds are held on BuildPro until release rules apply.`;
+    : `Payment received for “${payment.job.title}”. Funds are held on HomeCreww until release rules apply.`;
 
   void notifyUserWithEmail({
     userId: payment.quote.traderId,
@@ -345,7 +345,7 @@ export async function ensurePaymentIntent(paymentId: string, clientUserId: strin
         protectionOptedIn: String(payment.protectionOptedIn),
         termsVersion: payment.termsVersion,
       },
-      description: `BuildPro job: ${payment.job.title} · ${split.label}`,
+      description: `HomeCreww job: ${payment.job.title} · ${split.label}`,
     },
     {
       idempotencyKey: `mpay_split_${payment.id}_${split.chargePence}_${split.applicationFeePence}`,

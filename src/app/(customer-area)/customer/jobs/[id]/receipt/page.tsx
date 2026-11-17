@@ -5,9 +5,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { ReceiptPrintButton } from "@/components/marketplace/receipt-print-button";
+import { BrandLogo } from "@/components/brand-logo";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Payment receipt — BuildPro" };
+export const metadata: Metadata = { title: "Payment receipt — HomeCreww" };
 
 export default async function CustomerJobReceiptPage({
   params,
@@ -94,9 +95,7 @@ export default async function CustomerJobReceiptPage({
       >
         <header className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
-            <p className="text-lg font-extrabold tracking-tight text-[#0B2A4A]">
-              Build<span className="text-orange-500">Pro</span>
-            </p>
+            <BrandLogo size="md" />
             <p className="mt-0.5 text-xs text-slate-500">Marketplace payment receipt</p>
           </div>
           <div className="text-right text-xs text-slate-500">
@@ -203,7 +202,7 @@ export default async function CustomerJobReceiptPage({
             <p className="mt-0.5">Payment reference: {payment.stripePaymentIntentId}</p>
           )}
           <p className="mt-2">
-            This is a computer-generated receipt from BuildPro. For support, contact your platform
+            This is a computer-generated receipt from HomeCreww. For support, contact your platform
             admin.
           </p>
         </footer>

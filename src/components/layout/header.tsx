@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Menu, ChevronDown, User, Settings, LogOut, Zap } from "lucide-react";
+import { Menu, ChevronDown, User, Settings, LogOut } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -57,7 +58,7 @@ function getPageTitle(pathname: string): string {
   for (const [key, title] of Object.entries(PAGE_TITLES)) {
     if (pathname === key || pathname.startsWith(key + "/")) return title;
   }
-  return "BuildPro";
+  return "HomeCreww";
 }
 
 export function Header() {
@@ -99,11 +100,8 @@ export function Header() {
         </Button>
 
         {/* Logo — mobile only */}
-        <Link href="/dashboard" className="lg:hidden flex items-center gap-2">
-          <div className="w-7 h-7 bg-linear-to-br from-orange-400 to-orange-600 rounded-md flex items-center justify-center">
-            <Zap className="w-3.5 h-3.5 text-white" />
-          </div>
-          <span className="font-bold text-sm text-slate-900">BuildPro</span>
+        <Link href="/dashboard" className="lg:hidden flex items-center">
+          <BrandLogo size="sm" />
         </Link>
 
         {/* Page title — desktop */}

@@ -7,7 +7,7 @@ import { FlowBadge } from "@/components/marketplace/flow-badge";
 import { formatMoney } from "@/lib/money";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Credits & plans — BuildPro" };
+export const metadata: Metadata = { title: "Credits & plans — HomeCreww" };
 
 export default async function ContractorBillingPage() {
   await requireAuth([UserRole.CONTRACTOR]);

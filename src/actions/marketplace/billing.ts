@@ -118,7 +118,7 @@ export async function buyCreditPackAction() {
         buildproTraderId: traderId,
         credits: String(credits),
       },
-      description: `BuildPro quote credits ×${credits}`,
+      description: `HomeCreww quote credits ×${credits}`,
     },
     { idempotencyKey: `credits_${purchase.id}` }
   );
@@ -191,7 +191,7 @@ export async function buySubscriptionAction() {
         buildproTraderId: traderId,
         days: String(days),
       },
-      description: `BuildPro trader subscription (${days} days)`,
+      description: `HomeCreww trader subscription (${days} days)`,
     },
     { idempotencyKey: `sub_${sub.id}` }
   );
@@ -275,7 +275,7 @@ export async function payCommissionAction(jobId: string) {
         buildproQuoteId: quote.id,
         buildproTraderId: traderId,
       },
-      description: `BuildPro commission — ${job.title}`,
+      description: `HomeCreww commission — ${job.title}`,
     },
     { idempotencyKey: `commission_${fee.id}` }
   );

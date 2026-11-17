@@ -5,7 +5,7 @@ import { DollarSign, TrendingUp, CheckCircle2, Clock, ArrowRight, PoundSterling 
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Earnings — BuildPro Contractor" };
+export const metadata: Metadata = { title: "Earnings — HomeCreww Contractor" };
 
 async function getEarningsData(userId: string) {
   try {

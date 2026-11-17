@@ -11,8 +11,8 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
-  Building2,
 } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -74,12 +74,12 @@ export function CustomerRegisterForm() {
     <div className="space-y-7">
       {/* Header */}
       <div>
-        <div className="w-12 h-12 bg-blue-50 border border-blue-100 rounded-2xl flex items-center justify-center mb-4">
-          <Building2 className="w-6 h-6 text-blue-500" />
+        <div className="mb-4">
+          <BrandLogo size="lg" />
         </div>
         <h2 className="text-2xl font-bold text-gray-900">Create Customer Account</h2>
         <p className="mt-1.5 text-sm text-gray-500">
-          Join BuildPro and start managing your construction projects
+          Join HomeCreww and start managing your construction projects
         </p>
       </div>
 

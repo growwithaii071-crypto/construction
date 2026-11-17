@@ -20,6 +20,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/brand-logo";
 import { ServiceMCQModal } from "@/components/services/service-mcq-modal";
 import { FlowBadge } from "@/components/marketplace/flow-badge";
 
@@ -389,17 +390,8 @@ export function ServicesClient({
       {/* Top marketplace bar */}
       <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6">
-          <Link href="/" className="hidden shrink-0 items-center gap-2 sm:flex">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-[#0B2A4A] shadow-sm">
-              <HardHat className="h-4 w-4 text-white" />
-              <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white" />
-            </div>
-            <div className="leading-tight">
-              <p className="text-base font-extrabold tracking-tight text-[#0B2A4A]">
-                Build<span className="text-orange-500">Pro</span>
-              </p>
-              <p className="text-[10px] font-medium text-slate-400">Find · Hire · Get It Done</p>
-            </div>
+          <Link href="/" className="hidden shrink-0 items-center sm:flex">
+            <BrandLogo size="md" caption="Find · Hire · Get It Done" />
           </Link>
 
           <form onSubmit={applyFilters} className="flex min-w-0 flex-1 items-center gap-2">

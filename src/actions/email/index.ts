@@ -81,7 +81,7 @@ export async function saveSmtpSettingsAction(formData: FormData) {
           username: parsed.data.username,
           password,
           fromEmail: parsed.data.fromEmail,
-          fromName: parsed.data.fromName ?? "BuildPro",
+          fromName: parsed.data.fromName ?? "HomeCreww",
           isActive: true,
         },
       });

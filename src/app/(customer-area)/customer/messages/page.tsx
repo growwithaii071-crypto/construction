@@ -5,7 +5,7 @@ import { MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Messages — BuildPro" };
+export const metadata: Metadata = { title: "Messages — HomeCreww" };
 
 const CHAT_OK = ["PENDING", "ACCEPTED", "IN_PROGRESS", "COMPLETED"] as const;
 

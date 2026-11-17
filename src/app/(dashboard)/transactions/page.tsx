@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Transactions — BuildPro Admin" };
+export const metadata: Metadata = { title: "Transactions — HomeCreww Admin" };
 
 const userSelect = {
   id: true,

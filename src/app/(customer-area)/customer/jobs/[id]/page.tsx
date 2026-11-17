@@ -21,7 +21,7 @@ import { getPricingConfig, buildPricePreview } from "@/lib/pricing";
 import { processAutoConfirms } from "@/lib/marketplace-payouts";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Job detail — BuildPro" };
+export const metadata: Metadata = { title: "Job detail — HomeCreww" };
 
 export default async function CustomerJobDetailPage({
   params,
@@ -328,7 +328,7 @@ export default async function CustomerJobDetailPage({
             <div>
               <p className="font-bold">Pay via Stripe — auto-split commission</p>
               <p className="mt-0.5 text-xs text-[#0B2A4A]/80">
-                One payment: BuildPro keeps platform % · remainder goes to the trader.
+                One payment: HomeCreww keeps platform % · remainder goes to the trader.
               </p>
             </div>
             <Link

@@ -997,6 +997,8 @@ model PricingConfig {
   largeLeadMin           Float                    @default(25)
   largeLeadMax           Float                    @default(100)
   largeLeadDefault       Float                    @default(37.5)
+  /// Success fee by job value: [{ min, max|null, fee }, ...] (GBP)
+  successFeeTiers        Json?
   /// Platform commission on accepted quote (trader pays), e.g. 0.08 = 8%
   commissionRate         Float                    @default(0.08)
   commissionMin          Float                    @default(0)

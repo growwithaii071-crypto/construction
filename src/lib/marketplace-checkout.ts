@@ -17,7 +17,7 @@ import { markCommissionPaid } from "@/lib/trader-billing";
 /**
  * Create (or reuse) a Stripe Checkout Session for the homeowner to pay a job.
  * Auto-splits via Connect destination charge:
- *   application_fee_amount → BuildPro
+ *   application_fee_amount → HomeCreww
  *   transfer_data.destination → trader Connect account
  */
 export async function createHomeownerCheckoutSession(
@@ -243,7 +243,7 @@ export async function createHomeownerCheckoutSession(
           buildproTraderNet: String(split.traderNet),
           buildproCommissionRate: String(split.rate),
         },
-        description: `BuildPro job: ${job.title} · ${split.label}`,
+        description: `HomeCreww job: ${job.title} · ${split.label}`,
       },
     },
     {

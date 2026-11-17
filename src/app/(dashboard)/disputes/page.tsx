@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Scale, AlertTriangle } from "lucide-react";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Disputes — BuildPro Admin" };
+export const metadata: Metadata = { title: "Disputes — HomeCreww Admin" };
 
 export default async function DisputesPage({
   searchParams,

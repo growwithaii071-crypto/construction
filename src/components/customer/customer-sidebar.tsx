@@ -5,13 +5,13 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { signOut } from "next-auth/react";
 import { useTransition } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   LayoutDashboard,
   Wrench,
   ClipboardList,
   User,
   LogOut,
-  Building2,
   Star,
   Home,
   ChevronRight,
@@ -82,18 +82,8 @@ export function CustomerSidebar({ user, onClose }: CustomerSidebarProps) {
     <div className="flex h-full min-h-0 w-64 flex-col bg-white border-r border-gray-100">
       {/* Logo */}
       <div className="flex items-center justify-between h-16 px-5 border-b border-gray-100 shrink-0">
-        <Link href="/customer/dashboard" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B2A4A] shadow-sm">
-            <Building2 className="h-4 w-4 text-white" />
-          </div>
-          <div>
-            <p className="text-sm font-bold leading-none text-gray-900">
-              Build<span className="text-orange-500">Pro</span>
-            </p>
-            <p className="mt-0.5 text-[10px] font-medium leading-none text-orange-500">
-              Customer Portal
-            </p>
-          </div>
+        <Link href="/customer/dashboard" className="flex items-center">
+          <BrandLogo size="sm" caption="Customer Portal" />
         </Link>
         {onClose && (
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 lg:hidden">

@@ -8,14 +8,13 @@ import { maintainLiveInvitations } from "@/lib/matching";
 import {
   getPricingConfig,
   getLeadBand,
-  formatLeadPriceRange,
   resolveJobSize,
 } from "@/lib/pricing";
 import { MONEY_SYMBOL } from "@/lib/money";
 import { JobSize } from "@/generated/prisma";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Job Invitations — BuildPro" };
+export const metadata: Metadata = { title: "Job Invitations — HomeCreww" };
 
 export default async function ContractorInvitationsPage() {
   const session = await requireAuth([UserRole.CONTRACTOR]);
@@ -122,10 +121,10 @@ export default async function ContractorInvitationsPage() {
                     <p className="mt-0.5 text-sm text-slate-500">{inv.job.category}</p>
                     <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-400">
                       <span className="rounded-full bg-orange-50 px-2 py-0.5 font-bold text-orange-800">
-                        {band.label} · lead {formatLeadPriceRange(band, pricing)} (+VAT)
+                        {band.label}
                       </span>
                       <span className="rounded-full bg-slate-100 px-2 py-0.5 font-bold text-slate-600">
-                        Fee {sym}
+                        Success fee {sym}
                         {band.leadDefault}
                       </span>
                       {inv.job.location && (

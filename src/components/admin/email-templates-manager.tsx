@@ -345,15 +345,20 @@ export function EmailTemplatesManager({ templates }: { templates: Template[] }) 
               </div>
               <div className="p-4 sm:p-6">
                 <div className="mx-auto max-w-xl overflow-hidden rounded-lg bg-white shadow-sm">
-                  <div className="bg-[#1e3a5f] px-6 py-5 text-center">
-                    <p className="text-lg font-bold text-white">BuildPro</p>
+                  <div className="bg-white px-6 py-5 text-center">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/images/homecreww-logo.jpg"
+                      alt="HomeCreww"
+                      className="mx-auto h-12 w-auto object-contain"
+                    />
                   </div>
                   <div
                     className="px-6 py-8 text-sm leading-relaxed text-slate-700 [&_a]:inline-block [&_a]:rounded-lg [&_a]:px-4 [&_a]:py-2 [&_a]:font-semibold [&_h2]:mb-3 [&_h2]:text-lg [&_h2]:font-bold"
                     dangerouslySetInnerHTML={{ __html: draft.bodyHtml }}
                   />
                   <div className="border-t border-slate-100 bg-slate-50 px-6 py-3 text-center text-[11px] text-slate-400">
-                    © {new Date().getFullYear()} BuildPro
+                    © {new Date().getFullYear()} HomeCreww
                   </div>
                 </div>
               </div>

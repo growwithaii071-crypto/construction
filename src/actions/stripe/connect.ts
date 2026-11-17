@@ -175,7 +175,7 @@ export async function startConnectOnboardingAction() {
         },
         business_profile: {
           name: user.name?.split(" — ")[0] ?? user.name ?? undefined,
-          product_description: "Home improvement and construction services via BuildPro",
+          product_description: "Home improvement and construction services via HomeCreww",
         },
       });
       accountId = account.id;

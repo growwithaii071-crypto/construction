@@ -13,7 +13,7 @@ function getEnvVar(key: string, fallback?: string): string {
 
 export const env = {
   app: {
-    name: getEnvVar("NEXT_PUBLIC_APP_NAME", "Construction Co."),
+    name: getEnvVar("NEXT_PUBLIC_APP_NAME", "HomeCreww"),
     url: getEnvVar("NEXT_PUBLIC_APP_URL", "http://localhost:3000"),
     env: getEnvVar("NEXT_PUBLIC_APP_ENV", "development"),
     isDev: process.env.NEXT_PUBLIC_APP_ENV !== "production",

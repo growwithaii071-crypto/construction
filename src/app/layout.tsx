@@ -11,11 +11,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    template: "%s — BuildPro",
-    default: "BuildPro | Construction Management System",
+    template: "%s — HomeCreww",
+    default: "HomeCreww | Your Home. Our Crew.",
   },
   description:
-    "Construction project management system for managing projects, teams, and resources.",
+    "Find, hire and manage trusted tradespeople for every home and construction job.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

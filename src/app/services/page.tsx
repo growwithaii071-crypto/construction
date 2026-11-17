@@ -5,7 +5,7 @@ import { ServicesClient } from "./services-client";
 import { computeVerified } from "@/lib/stripe";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Find Tradesmen — BuildPro" };
+export const metadata: Metadata = { title: "Find Tradesmen — HomeCreww" };
 
 export default async function PublicServicesPage({
   searchParams,

@@ -6,7 +6,7 @@ import { Wrench, Search, X, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Browse Services — BuildPro" };
+export const metadata: Metadata = { title: "Browse Services — HomeCreww" };
 
 const CATEGORY_COLORS: Record<string, string> = {
   "Residential Construction": "bg-blue-100 text-blue-700",

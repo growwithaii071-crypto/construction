@@ -5,7 +5,7 @@ import { ClipboardList, Clock, CheckCircle2, XCircle, TrendingUp, Wrench, Phone,
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "My Requests — BuildPro" };
+export const metadata: Metadata = { title: "My Requests — HomeCreww" };
 
 const STATUS_STYLES: Record<string, string> = {
   PENDING: "bg-amber-50 text-amber-700 border-amber-200",

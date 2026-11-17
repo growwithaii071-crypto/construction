@@ -23,6 +23,7 @@ import prisma from "@/lib/prisma";
 import { Navbar } from "@/components/landing/navbar";
 import { HeroSearch } from "@/components/landing/hero-search";
 import { PopularTradesSlider } from "@/components/landing/popular-trades-slider";
+import { BrandLogo } from "@/components/brand-logo";
 
 const HERO_FEATURES = [
   { icon: BadgeCheck, label: "Verified Tradespeople" },
@@ -107,7 +108,7 @@ export default async function LandingPage() {
               <div className="relative aspect-4/5 overflow-hidden rounded-4xl bg-slate-200 shadow-2xl shadow-slate-300/40 sm:aspect-5/6 lg:ml-auto lg:aspect-auto lg:h-120 lg:w-full lg:max-w-[440px]">
                 <Image
                   src="/images/hero-tradie.jpg"
-                  alt="Verified BuildPro tradesperson ready for your project"
+                  alt="Verified HomeCreww tradesperson ready for your project"
                   fill
                   priority
                   className="object-cover object-center"
@@ -238,7 +239,7 @@ export default async function LandingPage() {
             <div className="absolute inset-0">
               <Image
                 src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=900&q=80"
-                alt="Happy customer using BuildPro"
+                alt="Happy customer using HomeCreww"
                 fill
                 className="object-cover opacity-35"
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -246,7 +247,7 @@ export default async function LandingPage() {
               <div className="absolute inset-0 bg-linear-to-t from-[#0B2A4A] via-[#0B2A4A]/85 to-[#0B2A4A]/55" />
             </div>
             <div className="relative flex h-full max-w-md flex-col justify-end">
-              <p className="text-sm font-semibold text-orange-400">Why Choose BuildPro?</p>
+              <p className="text-sm font-semibold text-orange-400">Why Choose HomeCreww?</p>
               <h2 className="mt-2 text-3xl font-extrabold leading-tight sm:text-4xl">
                 Simple. Safe.{" "}
                 <span className="text-orange-400">Stress-Free.</span>
@@ -326,13 +327,8 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-7xl">
           <div className="mb-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <div>
-              <div className="mb-4 flex items-center gap-2.5">
-                <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500">
-                  <HardHat className="h-4 w-4 text-white" />
-                </div>
-                <span className="text-lg font-bold text-white">
-                  Build<span className="text-orange-400">Pro</span>
-                </span>
+              <div className="mb-4 inline-flex rounded-lg bg-white px-2 py-1.5">
+                <BrandLogo size="md" />
               </div>
               <p className="mb-5 text-sm leading-relaxed">
                 Find, hire and manage trusted tradespeople for every home and construction job.
@@ -390,7 +386,7 @@ export default async function LandingPage() {
           </div>
 
           <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-8 text-xs text-white/30 sm:flex-row">
-            <p>© {new Date().getFullYear()} BuildPro. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} HomeCreww. All rights reserved.</p>
             <div className="flex gap-5">
               {["Privacy Policy", "Terms of Service"].map((l) => (
                 <span key={l}>{l}</span>

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { HardHat, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 export function SiteFooter() {
   return (
@@ -7,14 +8,8 @@ export function SiteFooter() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-12 grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <div className="mb-4 flex items-center gap-2.5">
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-[#0B2A4A] ring-1 ring-white/10">
-                <HardHat className="h-4 w-4 text-white" />
-                <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-orange-500 ring-2 ring-[#0a0818]" />
-              </div>
-              <span className="text-lg font-bold text-white">
-                Build<span className="text-orange-500">Pro</span>
-              </span>
+            <div className="mb-4 inline-flex rounded-lg bg-white px-2 py-1.5">
+              <BrandLogo size="md" />
             </div>
             <p className="mb-5 text-sm leading-relaxed text-white/40">
               India&apos;s leading platform connecting customers with trusted construction professionals.
@@ -94,7 +89,7 @@ export function SiteFooter() {
         </div>
 
         <div className="flex flex-col items-center justify-between gap-3 border-t border-white/10 pt-8 text-xs text-white/25 sm:flex-row">
-          <p>© {new Date().getFullYear()} BuildPro Technologies Pvt Ltd. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} HomeCreww. All rights reserved.</p>
           <div className="flex gap-4">
             <Link href="#" className="hover:text-white/50">Privacy Policy</Link>
             <Link href="#" className="hover:text-white/50">Terms of Service</Link>

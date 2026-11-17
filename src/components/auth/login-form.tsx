@@ -80,7 +80,7 @@ export function LoginForm() {
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight text-[#0B2A4A]">Welcome back</h1>
         <p className="mt-1.5 text-sm text-slate-500">
-          Sign in to continue to your BuildPro account
+          Sign in to continue to your HomeCreww account
         </p>
       </div>
 
@@ -174,7 +174,7 @@ export function LoginForm() {
       <div className="relative text-center">
         <div className="absolute inset-x-0 top-1/2 h-px bg-slate-100" />
         <span className="relative bg-white px-3 text-xs font-medium text-slate-400">
-          New to BuildPro?
+          New to HomeCreww?
         </span>
       </div>
 

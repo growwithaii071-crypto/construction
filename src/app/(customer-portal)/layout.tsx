@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { HardHat, Building2, Phone, Mail, MapPin, Star, ShieldCheck, Clock } from "lucide-react";
+import { BrandLogo } from "@/components/brand-logo";
 
 export const metadata: Metadata = {
-  title: "Customer Portal — BuildPro",
-  description: "Sign in or create a customer account on BuildPro",
+  title: "Customer Portal — HomeCreww",
+  description: "Sign in or create a customer account on HomeCreww",
 };
 
 export default function CustomerPortalLayout({ children }: { children: React.ReactNode }) {
@@ -15,13 +16,8 @@ export default function CustomerPortalLayout({ children }: { children: React.Rea
       <header className="relative z-50 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-violet-600 rounded-lg flex items-center justify-center shadow-sm">
-              <HardHat className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-white text-base">
-              Build<span className="text-violet-400">Pro</span>
-            </span>
+          <Link href="/" className="flex items-center rounded-lg bg-white px-2 py-1">
+            <BrandLogo size="sm" priority />
           </Link>
 
           <div className="flex items-center gap-2">
@@ -86,7 +82,7 @@ export default function CustomerPortalLayout({ children }: { children: React.Rea
                   {[...Array(5)].map((_, i) => <Star key={i} className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />)}
                 </div>
                 <p className="text-white/70 text-sm leading-relaxed italic">
-                  &ldquo;BuildPro made finding trusted contractors so easy. Got 5 quotes in 24 hours — project finished on time and on budget!&rdquo;
+                  &ldquo;HomeCreww made finding trusted contractors so easy. Got 5 quotes in 24 hours — project finished on time and on budget!&rdquo;
                 </p>
                 <div className="flex items-center gap-2.5 mt-4">
                   <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center text-white text-xs font-bold">RS</div>
@@ -144,11 +140,8 @@ export default function CustomerPortalLayout({ children }: { children: React.Rea
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-6">
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-6 h-6 bg-violet-600 rounded flex items-center justify-center">
-                  <HardHat className="w-3 h-3 text-white" />
-                </div>
-                <span className="text-white font-bold text-sm">Build<span className="text-violet-400">Pro</span></span>
+              <div className="mb-2 inline-flex rounded bg-white px-1.5 py-1">
+                <BrandLogo size="sm" />
               </div>
               <p className="text-xs text-white/30 leading-relaxed">
                 India&apos;s leading construction platform connecting customers with verified professionals.
@@ -182,7 +175,7 @@ export default function CustomerPortalLayout({ children }: { children: React.Rea
             </div>
           </div>
           <div className="border-t border-white/10 pt-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-white/20">
-            <p>© {new Date().getFullYear()} BuildPro Technologies Pvt Ltd. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} HomeCreww Technologies Pvt Ltd. All rights reserved.</p>
             <div className="flex gap-4">
               <span className="hover:text-white/40 cursor-pointer">Privacy Policy</span>
               <span className="hover:text-white/40 cursor-pointer">Terms of Service</span>

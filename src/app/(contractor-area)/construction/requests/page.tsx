@@ -7,7 +7,7 @@ import { ServiceRequestStatus } from "@/generated/prisma";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Service Requests — BuildPro" };
+export const metadata: Metadata = { title: "Service Requests — HomeCreww" };
 
 const STATUS_STYLES: Record<string, string> = {
   PENDING: "bg-amber-100 text-amber-700",

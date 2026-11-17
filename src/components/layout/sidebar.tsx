@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/brand-logo";
 import {
   LayoutDashboard,
   FolderKanban,
@@ -19,7 +20,6 @@ import {
   AlertTriangle,
   Settings,
   X,
-  Zap,
   ShieldCheck,
   Wrench,
   Mail,
@@ -181,15 +181,9 @@ export function Sidebar({ onClose }: SidebarProps) {
   return (
     <div className="flex h-full min-h-0 w-64 flex-col bg-slate-900 text-slate-100">
       {/* Logo */}
-      <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-800 px-5">
-        <Link href="/dashboard" className="group flex items-center gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-orange-400 to-orange-600 shadow-lg shadow-orange-500/30 transition-shadow group-hover:shadow-orange-500/50">
-            <Zap className="h-4 w-4 text-white" />
-          </div>
-          <div>
-            <p className="text-sm font-bold tracking-tight text-white">BuildPro</p>
-            <p className="text-[10px] leading-none text-slate-400">Construction CMS</p>
-          </div>
+      <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-800 px-4">
+        <Link href="/dashboard" className="group flex items-center rounded-lg bg-white px-2 py-1">
+          <BrandLogo size="sm" caption="Admin" />
         </Link>
         {onClose && (
           <button
