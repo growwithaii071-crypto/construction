@@ -7,11 +7,12 @@ import { FlowBadge } from "@/components/marketplace/flow-badge";
 import { maintainLiveInvitations } from "@/lib/matching";
 import {
   getPricingConfig,
-  getLeadBand,
-  resolveJobSize,
+  listSuccessFeeTiers,
+  calcSuccessFeeFromTiers,
+  formatSuccessFeeBand,
+  findSuccessFeeTier,
 } from "@/lib/pricing";
 import { MONEY_SYMBOL } from "@/lib/money";
-import { JobSize } from "@/generated/prisma";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Job Invitations — HomeCreww" };
@@ -103,10 +104,10 @@ export default async function ContractorInvitationsPage() {
             const isLive = [InvitationStatus.SENT, InvitationStatus.VIEWED].includes(
               inv.status as typeof InvitationStatus.SENT
             );
-            const size =
-              inv.job.jobSize ??
-              resolveJobSize(inv.job.budgetMin, inv.job.budgetMax, pricing);
-            const band = getLeadBand(size as JobSize, pricing);
+            const jobValue = inv.job.budgetMax ?? inv.job.budgetMin ?? 0;
+            const tiers = listSuccessFeeTiers(pricing);
+            const tier = findSuccessFeeTier(jobValue, tiers);
+            const successFee = calcSuccessFeeFromTiers(jobValue, tiers);
             return (
               <Link
                 key={inv.id}
@@ -120,12 +121,14 @@ export default async function ContractorInvitationsPage() {
                     <h2 className="font-bold text-slate-900">{inv.job.title}</h2>
                     <p className="mt-0.5 text-sm text-slate-500">{inv.job.category}</p>
                     <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-400">
-                      <span className="rounded-full bg-orange-50 px-2 py-0.5 font-bold text-orange-800">
-                        {band.label}
-                      </span>
+                      {tier && (
+                        <span className="rounded-full bg-orange-50 px-2 py-0.5 font-bold text-orange-800">
+                          Job {formatSuccessFeeBand(tier)}
+                        </span>
+                      )}
                       <span className="rounded-full bg-slate-100 px-2 py-0.5 font-bold text-slate-600">
                         Success fee {sym}
-                        {band.leadDefault}
+                        {successFee}
                       </span>
                       {inv.job.location && (
                         <span className="inline-flex items-center gap-1">

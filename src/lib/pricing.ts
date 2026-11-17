@@ -262,9 +262,12 @@ export async function getPricingConfig(): Promise<PricingConfig> {
   }
   if (existing.successFeeTiers == null) {
     patch.successFeeTiers = DEFAULT_SUCCESS_FEE_TIERS;
-    patch.traderFeeType = TraderFeeType.LEAD_BY_SIZE;
     patch.mediumLeadDefault = 25;
     patch.largeLeadDefault = 100;
+  }
+  // Always charge success fee from the job-value table (not % / fixed)
+  if (existing.traderFeeType !== TraderFeeType.LEAD_BY_SIZE) {
+    patch.traderFeeType = TraderFeeType.LEAD_BY_SIZE;
   }
 
   if (Object.keys(patch).length > 0) {

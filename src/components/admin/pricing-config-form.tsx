@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2, CheckCircle2, AlertCircle, Percent, Shield, Table2 } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, Shield, Table2 } from "lucide-react";
 import { savePricingConfigAction } from "@/actions/pricing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +33,6 @@ export type PricingFormInitial = {
 export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
-  const [feeType, setFeeType] = useState(initial.traderFeeType);
   const [protectionOn, setProtectionOn] = useState(initial.protectionFeeEnabled);
   const [tiers, setTiers] = useState<SuccessFeeTier[]>(initial.successFeeTiers);
   const sym = MONEY_SYMBOL;
@@ -156,159 +155,28 @@ export function PricingConfigForm({ initial }: { initial: PricingFormInitial }) 
           </table>
         </div>
 
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <div className="space-y-1.5">
-            <Label htmlFor="matchingInviteCountTop">Max traders per lead</Label>
-            <Input
-              id="matchingInviteCountTop"
-              name="matchingInviteCount"
-              type="number"
-              min={1}
-              max={10}
-              defaultValue={initial.matchingInviteCount}
-              className="h-11 rounded-xl font-semibold"
-              required
-            />
-            <p className="text-xs text-slate-400">How many traders get invited to each job.</p>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="smallBudgetMax">Small job size under (budget £)</Label>
-            <Input
-              id="smallBudgetMax"
-              name="smallBudgetMax"
-              type="number"
-              min={0}
-              step="1"
-              defaultValue={initial.smallBudgetMax}
-              className="h-11 rounded-xl"
-              required
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="mediumBudgetMax">Medium job size under (budget £)</Label>
-            <Input
-              id="mediumBudgetMax"
-              name="mediumBudgetMax"
-              type="number"
-              min={0}
-              step="1"
-              defaultValue={initial.mediumBudgetMax}
-              className="h-11 rounded-xl"
-              required
-            />
-          </div>
+        <div className="mt-4 max-w-xs space-y-1.5">
+          <Label htmlFor="matchingInviteCountTop">Max traders per lead</Label>
+          <Input
+            id="matchingInviteCountTop"
+            name="matchingInviteCount"
+            type="number"
+            min={1}
+            max={10}
+            defaultValue={initial.matchingInviteCount}
+            className="h-11 rounded-xl font-semibold"
+            required
+          />
+          <p className="text-xs text-slate-400">
+            How many traders get invited to each job (shown on every band above).
+          </p>
         </div>
-      </section>
-
-      {/* Trader success fee mode */}
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-        <div className="mb-5 flex items-center gap-3">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
-            <Percent className="h-5 w-5" />
-          </span>
-          <div>
-            <h2 className="font-bold text-slate-900">Trader fee model</h2>
-            <p className="text-sm text-slate-500">
-              &quot;By job value&quot; uses the success fee table above.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5 sm:col-span-2">
-            <Label>Fee type</Label>
-            <div className="flex flex-wrap gap-2">
-              {(
-                [
-                  { value: "LEAD_BY_SIZE", label: "By job value (recommended)" },
-                  { value: "PERCENTAGE", label: "Percentage" },
-                  { value: "FIXED", label: "Fixed amount" },
-                ] as const
-              ).map((opt) => (
-                <label
-                  key={opt.value}
-                  className={cn(
-                    "cursor-pointer rounded-xl border px-4 py-2.5 text-sm font-semibold transition",
-                    feeType === opt.value
-                      ? "border-orange-500 bg-orange-50 text-orange-800"
-                      : "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300"
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name="traderFeeType"
-                    value={opt.value}
-                    checked={feeType === opt.value}
-                    onChange={() => setFeeType(opt.value)}
-                    className="sr-only"
-                  />
-                  {opt.label}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {feeType === "PERCENTAGE" && (
-            <>
-              <div className="space-y-1.5">
-                <Label htmlFor="traderFeeRate">Rate (%)</Label>
-                <Input
-                  id="traderFeeRate"
-                  name="traderFeeRate"
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="100"
-                  defaultValue={initial.traderFeeRatePct}
-                  className="h-11 rounded-xl"
-                  required
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="traderFeeCap">
-                  Cap <span className="font-normal text-slate-400">optional</span>
-                </Label>
-                <Input
-                  id="traderFeeCap"
-                  name="traderFeeCap"
-                  type="number"
-                  step="1"
-                  min="0"
-                  defaultValue={initial.traderFeeCap ?? ""}
-                  placeholder="No cap"
-                  className="h-11 rounded-xl"
-                />
-              </div>
-            </>
-          )}
-
-          {feeType === "FIXED" && (
-            <div className="space-y-1.5">
-              <Label htmlFor="traderFeeRate">Fixed fee</Label>
-              <Input
-                id="traderFeeRate"
-                name="traderFeeRate"
-                type="number"
-                step="1"
-                min="0"
-                defaultValue={initial.traderFeeFixed}
-                className="h-11 rounded-xl"
-                required
-              />
-              <input type="hidden" name="traderFeeCap" value="" />
-            </div>
-          )}
-
-          {feeType === "LEAD_BY_SIZE" && (
-            <>
-              <input type="hidden" name="traderFeeRate" value="0" />
-              <input type="hidden" name="traderFeeCap" value="" />
-              <p className="sm:col-span-2 text-sm text-slate-600">
-                Trader fee = success fee for the quote&apos;s job value band.
-              </p>
-            </>
-          )}
-        </div>
+        {/* Always charge by job-value success fee table */}
+        <input type="hidden" name="traderFeeType" value="LEAD_BY_SIZE" />
+        <input type="hidden" name="traderFeeRate" value="0" />
+        <input type="hidden" name="traderFeeCap" value="" />
+        <input type="hidden" name="smallBudgetMax" value={initial.smallBudgetMax} />
+        <input type="hidden" name="mediumBudgetMax" value={initial.mediumBudgetMax} />
       </section>
 
       {/* Protection fee */}
