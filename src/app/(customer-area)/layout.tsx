@@ -12,16 +12,16 @@ export default async function CustomerAreaLayout({ children }: { children: React
   const user = { name: session.user.name, email: session.user.email };
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
-      {/* Desktop Sidebar */}
-      <aside className="hidden h-screen shrink-0 overflow-hidden lg:flex">
+    <div className="flex h-dvh max-h-dvh overflow-hidden bg-gray-50">
+      <aside className="hidden h-full min-h-0 w-64 shrink-0 overflow-hidden lg:flex">
         <CustomerSidebar user={user} />
       </aside>
 
-      {/* Main */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <CustomerTopbar user={user} title="Customer Portal" />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          {children}
+        </main>
       </div>
     </div>
   );

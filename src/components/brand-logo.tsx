@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 export const BRAND_NAME = "HomeCreww";
@@ -14,17 +13,14 @@ type BrandLogoProps = {
   priority?: boolean;
 };
 
-/**
- * Source is 1024×512 with padding — use generous width so wordmark stays readable.
- */
 const SIZE = {
-  sm: { height: 44, width: 140, className: "h-11 w-[8.75rem]" },
-  md: { height: 52, width: 170, className: "h-[3.25rem] w-[10.5rem]" },
-  lg: { height: 60, width: 200, className: "h-[3.75rem] w-[12.5rem]" },
-  xl: { height: 80, width: 260, className: "h-20 w-[16rem]" },
+  sm: { height: 36, width: 120 },
+  md: { height: 44, width: 148 },
+  lg: { height: 52, width: 176 },
+  xl: { height: 64, width: 220 },
 } as const;
 
-/** HomeCreww wordmark — use in headers, sidebars, auth, and footers. */
+/** HomeCreww wordmark — constrained box so the JPG never blows layout. */
 export function BrandLogo({
   size = "md",
   className,
@@ -35,15 +31,22 @@ export function BrandLogo({
 
   return (
     <span className={cn("inline-flex flex-col items-start gap-0.5", className)}>
-      <Image
-        src={BRAND_LOGO_SRC}
-        alt={BRAND_NAME}
-        width={dims.width}
-        height={dims.height}
-        priority={priority}
-        unoptimized
-        className={cn(dims.className, "max-w-none object-contain object-left")}
-      />
+      <span
+        className="relative block overflow-hidden"
+        style={{ width: dims.width, height: dims.height }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={BRAND_LOGO_SRC}
+          alt={BRAND_NAME}
+          width={dims.width}
+          height={dims.height}
+          decoding="async"
+          {...(priority ? { fetchPriority: "high" as const } : { loading: "lazy" as const })}
+          className="block h-full w-full object-contain object-left"
+          style={{ maxWidth: "100%", maxHeight: "100%" }}
+        />
+      </span>
       {caption ? (
         <span className="text-[10px] font-medium leading-none text-orange-500">
           {caption}

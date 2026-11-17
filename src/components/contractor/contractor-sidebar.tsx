@@ -112,8 +112,8 @@ export function ContractorSidebar({ user, onClose }: ContractorSidebarProps) {
     <div className="flex h-full min-h-0 w-64 flex-col bg-white border-r border-gray-100">
       {/* Logo */}
       <div className="flex items-center justify-between h-16 px-5 border-b border-gray-100 shrink-0">
-        <Link href="/construction/dashboard" className="flex items-center">
-          <BrandLogo size="md" caption="Contractor Portal" />
+        <Link href="/construction/dashboard" className="flex max-w-[13rem] items-center">
+          <BrandLogo size="sm" caption="Contractor Portal" />
         </Link>
         {onClose && (
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 lg:hidden">
