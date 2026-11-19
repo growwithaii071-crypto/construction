@@ -46,7 +46,7 @@ export function JobReviewForm({ jobId }: { jobId: string }) {
     >
       <div>
         <h3 className="font-bold text-[#0B2A4A]">Rate this trader</h3>
-        <p className="text-xs text-slate-500">जॉब पूरा होने के बाद रिव्यू दें · Helps other customers</p>
+        <p className="text-xs text-slate-500">Leave a review after the job is done — helps other customers.</p>
       </div>
       <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map((n) => (

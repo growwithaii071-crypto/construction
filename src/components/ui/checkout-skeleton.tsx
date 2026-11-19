@@ -10,7 +10,7 @@ export function CheckoutSkeleton() {
       <div className="h-28 rounded-xl bg-slate-100" />
       <div className="h-12 rounded-xl bg-orange-100" />
       <p className="text-center text-xs text-slate-400">
-        Preparing secure checkout… · सुरक्षित भुगतान तैयार हो रहा है…
+        Preparing secure checkout…
       </p>
     </div>
   );
@@ -28,7 +28,7 @@ export function ConnectSkeleton() {
       </div>
       <div className="h-24 rounded-xl bg-slate-100" />
       <p className="text-center text-xs text-slate-400">
-        Loading Stripe Connect… · कनेक्ट लोड हो रहा है…
+        Loading Stripe Connect…
       </p>
     </div>
   );

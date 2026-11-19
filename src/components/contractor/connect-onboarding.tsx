@@ -88,17 +88,10 @@ export function ConnectOnboarding({
         <BilingualAlert
           tone="warning"
           en="Stripe keys are not set. Add STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY, then redeploy."
-          hi="Stripe keys सेट नहीं हैं। Keys जोड़कर redeploy करें।"
         />
       )}
 
-      {error && (
-        <BilingualAlert
-          tone="error"
-          en={error}
-          hi="Connect सेटअप असफल। दोबारा कोशिश करें या Stripe Dashboard जाँचें।"
-        />
-      )}
+      {error && <BilingualAlert tone="error" en={error} />}
 
       {/* Status banner */}
       <div

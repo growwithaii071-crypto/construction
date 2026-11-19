@@ -53,8 +53,7 @@ function CheckoutForm({
       <BilingualAlert
         tone="info"
         en="Payment submitted. Waiting for Stripe webhook to mark the job FUNDED…"
-        hi="भुगतान भेज दिया गया। Stripe webhook से जॉब FUNDED होने तक प्रतीक्षा करें…"
-      />
+ />
     );
   }
 
@@ -65,8 +64,7 @@ function CheckoutForm({
         <BilingualAlert
           tone="error"
           en={error}
-          hi="भुगतान असफल। कार्ड जाँचें या दोबारा कोशिश करें।"
-        />
+ />
       )}
       <button
         type="submit"
@@ -76,7 +74,7 @@ function CheckoutForm({
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />
-            Processing… · प्रोसेस हो रहा है…
+            Processing…
           </>
         ) : (
           <>
@@ -87,8 +85,6 @@ function CheckoutForm({
       </button>
       <p className="text-center text-[11px] text-slate-400">
         Final status comes from Stripe webhook, not this screen alone.
-        <br />
-        अंतिम स्थिति webhook से अपडेट होती है।
       </p>
     </form>
   );
@@ -131,8 +127,7 @@ export function JobCheckout({
       <BilingualAlert
         tone="warning"
         en="Checkout unavailable — STRIPE_PUBLISHABLE_KEY is not configured."
-        hi="भुगतान उपलब्ध नहीं — Stripe publishable key सेट नहीं है।"
-      />
+ />
     );
   }
 
@@ -145,8 +140,7 @@ export function JobCheckout({
       <BilingualAlert
         tone="error"
         en={boot.message}
-        hi="चेकआउट शुरू नहीं हो सका। जॉब स्टेटस या Stripe सेटिंग जाँचें।"
-      />
+ />
     );
   }
 
@@ -164,8 +158,7 @@ export function JobCheckout({
       <BilingualAlert
         tone="warning"
         en="Webhook pending or payment intent missing. Refresh in a moment."
-        hi="Webhook लंबित है या पेमेंट इंटेंट नहीं मिला। थोड़ी देर बाद रिफ्रेश करें।"
-      />
+ />
     );
   }
 

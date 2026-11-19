@@ -77,8 +77,7 @@ function SetupForm({ onSaved }: { onSaved: () => void }) {
         <BilingualAlert
           tone="error"
           en={error}
-          hi="कार्ड सेव नहीं हो सका। दोबारा कोशिश करें।"
-        />
+ />
       )}
       <button
         type="submit"
@@ -153,8 +152,7 @@ export function FeeCardSetup({
       <BilingualAlert
         tone="warning"
         en="Add STRIPE_PUBLISHABLE_KEY to enable fee card setup."
-        hi="फी कार्ड सेटअप के लिए STRIPE_PUBLISHABLE_KEY जोड़ें।"
-      />
+ />
     );
   }
 
@@ -167,8 +165,7 @@ export function FeeCardSetup({
       <BilingualAlert
         tone="error"
         en={error}
-        hi="कार्ड फॉर्म लोड नहीं हुआ। Stripe / webhook सेटिंग जाँचें।"
-      />
+ />
     );
   }
 

@@ -142,8 +142,7 @@ export default async function CustomerJobDetailPage({
         <BilingualAlert
           tone="info"
           en="Webhook pending… Payment sent. Job becomes FUNDED when Stripe confirms."
-          hi="Webhook लंबित… भुगतान भेज दिया। Stripe कन्फर्म होते ही जॉब FUNDED होगा।"
-        />
+ />
       )}
 
       <JobStatusTimeline status={job.status} />
@@ -222,7 +221,7 @@ export default async function CustomerJobDetailPage({
               Verified traders in this category get invited automatically.
             </p>
             <p className="mt-1 text-xs text-slate-400">
-              अभी कोई निमंत्रण नहीं · इस कैटेगरी में verified traders जुड़ने पर आमंत्रित होंगे।
+              No invitations yet — verified traders in this category will be invited when available.
             </p>
             <div className="mt-4 flex flex-wrap justify-center gap-2">
               <Link

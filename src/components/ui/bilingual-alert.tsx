@@ -1,10 +1,11 @@
 import { AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** English-only alert (hi prop kept for call-site compat, never rendered). */
 export function BilingualAlert({
   tone = "error",
   en,
-  hi,
+  hi: _hi,
   className,
 }: {
   tone?: "error" | "warning" | "info" | "success";
@@ -12,6 +13,7 @@ export function BilingualAlert({
   hi?: string;
   className?: string;
 }) {
+  void _hi;
   const Icon =
     tone === "success" ? CheckCircle2 : tone === "info" ? Info : AlertCircle;
   const styles = {
@@ -31,10 +33,7 @@ export function BilingualAlert({
       role="alert"
     >
       <Icon className="mt-0.5 h-4 w-4 shrink-0" />
-      <div className="min-w-0 space-y-0.5">
-        <p className="font-semibold leading-snug">{en}</p>
-        {hi ? <p className="text-xs opacity-90 leading-snug">{hi}</p> : null}
-      </div>
+      <p className="min-w-0 font-semibold leading-snug">{en}</p>
     </div>
   );
 }

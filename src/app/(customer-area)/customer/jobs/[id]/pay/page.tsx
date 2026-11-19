@@ -91,23 +91,20 @@ export default async function JobPayPage({
         <BilingualAlert
           tone="info"
           en="Payment submitted. Job becomes FUNDED when Stripe confirms via webhook."
-          hi="भुगतान भेज दिया। Stripe webhook कन्फर्म होते ही जॉब FUNDED होगा।"
-        />
+ />
       )}
       {sp.cancelled === "1" && (
         <BilingualAlert
           tone="warning"
           en="Checkout cancelled. You can try again when ready."
-          hi="चेकआउट रद्द। जब तैयार हों फिर कोशिश करें।"
-        />
+ />
       )}
 
       {!traderReady && (
         <BilingualAlert
           tone="warning"
           en="This trader still needs to finish Stripe Connect before you can pay."
-          hi="ट्रेडर को पेमेंट से पहले Stripe Connect पूरा करना होगा।"
-        />
+ />
       )}
 
       {split && (

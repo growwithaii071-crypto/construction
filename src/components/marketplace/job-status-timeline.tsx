@@ -44,7 +44,7 @@ export function JobStatusTimeline({
           className
         )}
       >
-        Job {status.toLowerCase()} · जॉब {status === "CANCELLED" ? "रद्द" : "समय समाप्त"}
+        Job {status === "CANCELLED" ? "cancelled" : "expired"}
       </div>
     );
   }
@@ -66,7 +66,7 @@ export function JobStatusTimeline({
         </p>
         {disputed && (
           <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-bold text-amber-800">
-            Dispute hold · विवाद लंबित
+            Dispute hold
           </span>
         )}
       </div>

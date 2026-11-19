@@ -205,9 +205,22 @@ export async function startConnectOnboardingAction() {
     return { success: true as const, url: link.url };
   } catch (err) {
     console.error("[STRIPE_CONNECT_START]", err);
+    const raw = err instanceof Error ? err.message : "Could not start Stripe onboarding.";
+    const lower = raw.toLowerCase();
+    if (
+      lower.includes("platform profile") ||
+      lower.includes("questionnaire") ||
+      lower.includes("complete your platform")
+    ) {
+      return {
+        success: false as const,
+        message:
+          "Complete your Stripe Connect platform profile first: https://dashboard.stripe.com/connect/accounts/overview — then try again.",
+      };
+    }
     return {
       success: false as const,
-      message: err instanceof Error ? err.message : "Could not start Stripe onboarding.",
+      message: raw,
     };
   }
 }

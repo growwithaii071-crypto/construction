@@ -76,7 +76,7 @@ export default async function ContractorInvitationsPage() {
             Get matched faster: verify payouts, then add an active service in the right category.
           </p>
           <p className="mt-1 text-xs text-slate-400">
-            अभी निमंत्रण नहीं · वेरिफाई करें और सर्विस कैटेगरी जोड़ें।
+            No invitations yet — verify your account and add service categories.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             <Link
