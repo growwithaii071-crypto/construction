@@ -234,9 +234,9 @@ const AcceptSchema = z.object({
 });
 
 /**
- * Accept quote (new flow):
- * Customer accepts → job AWARDED → trader pays platform commission → invoice recorded.
- * Customer pays the trader off-platform.
+ * Accept quote:
+ * Client accepts → job AWARDED → client pays via Stripe Checkout → FUNDED → trader starts work.
+ * Platform commission is taken as application_fee on the client payment (Connect auto-split).
  */
 export async function acceptQuoteAction(formData: FormData) {
   const session = await requireAuth([UserRole.CLIENT]);
@@ -385,7 +385,7 @@ export async function acceptQuoteAction(formData: FormData) {
     void createNotification({
       userId: result.traderId,
       title: "Your quote was accepted!",
-      message: `“${result.jobTitle}” — pay platform commission ${formatMoney(result.commission)} to continue.`,
+      message: `“${result.jobTitle}” — waiting for the client to pay. You can start work after payment.`,
       type: "SUCCESS",
       link: `/construction/jobs/${result.jobId}`,
     });
@@ -401,7 +401,7 @@ export async function acceptQuoteAction(formData: FormData) {
       jobId: result.jobId,
       quoteId: result.quoteId,
       commission: result.commission,
-      message: "Quote accepted. The trader will pay platform commission next.",
+      message: "Quote accepted. Pay now to fund the job — then the trader can start work.",
     };
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Could not accept quote.";

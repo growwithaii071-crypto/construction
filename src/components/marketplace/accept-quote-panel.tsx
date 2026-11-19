@@ -41,7 +41,8 @@ export function AcceptQuotePanel({ quoteId, traderName, preview, expired }: Prop
         return;
       }
       setSuccess(res.message);
-      router.push(`/customer/jobs/${res.jobId}`);
+      // Accept → pay immediately (client funds job before trader starts)
+      router.push(`/customer/jobs/${res.jobId}/pay`);
       router.refresh();
     });
   }
@@ -51,8 +52,8 @@ export function AcceptQuotePanel({ quoteId, traderName, preview, expired }: Prop
       <div>
         <h3 className="font-bold text-slate-900">Accept quote from {traderName}</h3>
         <p className="mt-1 text-sm text-slate-500">
-          You hire this trader at the quoted price. Next you pay via Stripe Checkout — HomeCreww
-          keeps platform commission % and the rest goes to the trader automatically.
+          Accept this quote, then pay via Stripe. After payment the trader can start work.
+          HomeCreww keeps platform commission %; the rest goes to the trader automatically.
         </p>
       </div>
 

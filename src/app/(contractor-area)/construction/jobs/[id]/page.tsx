@@ -7,9 +7,7 @@ import { ArrowLeft, MapPin, BadgeCheck, FileText } from "lucide-react";
 import { TraderJobActions } from "@/components/marketplace/job-lifecycle-actions";
 import { JobStatusTimeline } from "@/components/marketplace/job-status-timeline";
 import { FlowBadge } from "@/components/marketplace/flow-badge";
-import { PayCommissionPanel } from "@/components/contractor/pay-commission-panel";
 import { processAutoConfirms } from "@/lib/marketplace-payouts";
-import { getStripePublishableKey } from "@/lib/stripe";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Job — HomeCreww Contractor" };
@@ -42,9 +40,7 @@ export default async function ContractorJobDetailPage({
   });
 
   const job = quote.job;
-  const publishableKey = getStripePublishableKey();
-  const commissionPending =
-    job.status === "AWARDED" && quote.feeLedger?.status === "PENDING";
+  const waitingForClientPay = job.status === "AWARDED";
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 p-4 lg:p-6">
@@ -138,13 +134,13 @@ export default async function ContractorJobDetailPage({
           </div>
         )}
 
-        {commissionPending && quote.feeLedger && (
-          <div className="mt-5">
-            <PayCommissionPanel
-              jobId={job.id}
-              amount={quote.feeLedger.amount}
-              publishableKey={publishableKey}
-            />
+        {waitingForClientPay && (
+          <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+            <p className="font-bold">Waiting for client payment</p>
+            <p className="mt-1 text-amber-800/90">
+              The client accepted your quote. Once they pay via Stripe Checkout, the job becomes
+              funded and you can start work. Platform commission is taken automatically at payment.
+            </p>
           </div>
         )}
 
@@ -158,16 +154,10 @@ export default async function ContractorJobDetailPage({
           </Link>
         </div>
 
-        {job.status === "FUNDED" && quote.feeLedger?.status === "COLLECTED" && (
+        {job.status === "FUNDED" && (
           <p className="mt-3 text-xs text-slate-400">
-            Customer paid via Stripe auto-split — your net share is on your Connect account.
-            Platform commission was taken at checkout.
-          </p>
-        )}
-        {commissionPending && (
-          <p className="mt-3 text-xs text-slate-400">
-            If the customer has not paid via Checkout yet, settle platform commission here
-            before starting (or wait for auto-split checkout).
+            Client paid via Stripe — your net share is on your Connect account. You can mark work
+            started.
           </p>
         )}
       </div>

@@ -30,7 +30,7 @@ export function TraderJobActions({
 
   return (
     <div className="flex flex-wrap gap-2">
-      {(status === "FUNDED" || status === "AWARDED") && (
+      {status === "FUNDED" && (
         <button
           type="button"
           disabled={pending}
@@ -40,6 +40,11 @@ export function TraderJobActions({
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
           Mark started
         </button>
+      )}
+      {status === "AWARDED" && (
+        <p className="text-sm text-slate-500">
+          Waiting for the client to pay — then you can start work.
+        </p>
       )}
       {(status === "IN_PROGRESS" || status === "FUNDED") && (
         <button

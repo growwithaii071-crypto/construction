@@ -8,7 +8,6 @@ import {
   MarketplacePaymentStatus,
   ProtectionStatus,
   QuoteStatus,
-  FeeLedgerStatus,
 } from "@/generated/prisma";
 import { revalidatePath } from "next/cache";
 import { notifyUserWithEmail } from "@/lib/marketplace-notify";
@@ -41,26 +40,18 @@ export async function startJobAction(jobId: string) {
   const job = await loadJobForTrader(jobId, traderId);
   if (!job) return { success: false as const, message: "Job not found." };
 
-  const canStartFromEscrow = job.status === MarketplaceJobStatus.FUNDED;
-  const canStartFromAward =
-    job.status === MarketplaceJobStatus.AWARDED &&
-    (await prisma.feeLedger.findFirst({
-      where: {
-        quoteId: job.acceptedQuoteId ?? undefined,
-        traderId,
-        status: FeeLedgerStatus.COLLECTED,
-      },
-    }));
-
-  if (!canStartFromEscrow && !canStartFromAward) {
+  // Client must approve quote AND pay first → FUNDED, then trader can start.
+  if (job.status !== MarketplaceJobStatus.FUNDED) {
     return {
       success: false as const,
       message:
         job.status === MarketplaceJobStatus.AWARDED
-          ? "Pay platform commission before starting work."
-          : "Job is not ready to start yet.",
+          ? "Wait for the client to pay via Stripe Checkout before starting work."
+          : "Job is not ready to start yet. The client must pay first.",
     };
   }
+
+  const canStartFromEscrow = true;
 
   await prisma.marketplaceJob.update({
     where: { id: jobId },
