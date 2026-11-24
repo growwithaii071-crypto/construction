@@ -171,10 +171,10 @@ export default async function StripeSettingsPage() {
             hint="Signing secret from Stripe webhook endpoint (whsec_…)"
           />
           <EnvRow
-            label="NEXT_PUBLIC_APP_URL"
+            label="APP_URL"
             ok={Boolean(env.appUrl) && !/localhost|127\.0\.0\.1/i.test(env.appUrl)}
             masked={env.appUrl}
-            hint="Set to https://construction-nine-red.vercel.app on Vercel (no trailing slash). Localhost here breaks live webhooks/Connect."
+            hint="Prefer APP_URL (no NEXT_PUBLIC_) = https://construction-nine-red.vercel.app — Vercel Config or Sensitive. Localhost breaks live Connect returns."
           />
         </ul>
 

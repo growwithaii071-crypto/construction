@@ -1,13 +1,16 @@
 /**
  * Canonical public site URL (no trailing slash).
  * Order:
- * 1. NEXT_PUBLIC_APP_URL (unless left as localhost on a Vercel deploy)
- * 2. VERCEL_PROJECT_PRODUCTION_URL (stable production host — preferred over ephemeral VERCEL_URL)
- * 3. VERCEL_URL (deployment-specific)
- * 4. localhost
+ * 1. APP_URL (server-only — preferred on Vercel; no NEXT_PUBLIC_ prefix)
+ * 2. NEXT_PUBLIC_APP_URL (legacy; unless left as localhost on a Vercel deploy)
+ * 3. VERCEL_PROJECT_PRODUCTION_URL (stable production host)
+ * 4. VERCEL_URL (deployment-specific)
+ * 5. localhost
  */
 export function getAppUrl(): string {
-  const explicit = process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "") ?? "";
+  const appUrl = process.env.APP_URL?.trim().replace(/\/$/, "") ?? "";
+  const publicAppUrl =
+    process.env.NEXT_PUBLIC_APP_URL?.trim().replace(/\/$/, "") ?? "";
   const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
   const vercelHost = process.env.VERCEL_URL?.trim();
 
@@ -19,10 +22,16 @@ export function getAppUrl(): string {
     : "";
 
   const onVercel = Boolean(productionUrl || vercelUrl);
+  const isLocalhost = (u: string) => /localhost|127\.0\.0\.1/i.test(u);
 
-  // Misconfigured deploy: APP_URL left as localhost while running on Vercel
-  if (explicit && !(onVercel && /localhost|127\.0\.0\.1/i.test(explicit))) {
-    return explicit;
+  // Prefer server-only APP_URL (safe as Vercel Config or Sensitive — no public prefix)
+  if (appUrl && !(onVercel && isLocalhost(appUrl))) {
+    return appUrl;
+  }
+
+  // Legacy NEXT_PUBLIC_APP_URL
+  if (publicAppUrl && !(onVercel && isLocalhost(publicAppUrl))) {
+    return publicAppUrl;
   }
 
   // Prefer the stable production domain over a per-deployment *.vercel.app URL
@@ -30,7 +39,7 @@ export function getAppUrl(): string {
   if (productionUrl) return productionUrl;
   if (vercelUrl) return vercelUrl;
 
-  return explicit || "http://localhost:3000";
+  return appUrl || publicAppUrl || "http://localhost:3000";
 }
 
 /**
