@@ -13,7 +13,9 @@ const RequestServiceSchema = z.object({
   serviceId: z.string().min(1),
   message: z.string().optional(),
   location: z.string().optional(),
-  budget: z.coerce.number().min(0).optional(),
+  budget: z.coerce
+    .number({ message: "Budget is required." })
+    .min(1, "Enter your budget in £ (minimum £1)."),
 });
 
 export async function requestServiceAction(formData: unknown) {

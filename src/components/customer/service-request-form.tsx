@@ -23,7 +23,7 @@ export function ServiceRequestForm({ serviceId, serviceTitle }: ServiceRequestFo
       serviceId,
       message: fd.get("message") as string,
       location: fd.get("location") as string,
-      budget: fd.get("budget") ? Number(fd.get("budget")) : undefined,
+      budget: Number(fd.get("budget")),
     };
 
     startTransition(async () => {
@@ -82,8 +82,10 @@ export function ServiceRequestForm({ serviceId, serviceTitle }: ServiceRequestFo
           <input
             name="budget"
             type="number"
-            min="0"
-            placeholder="Your budget in £ (optional)"
+            min="1"
+            step="0.01"
+            required
+            placeholder="Your budget in £ *"
             className="w-full h-9 px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <button
