@@ -781,19 +781,23 @@ model Service {
 }
 
 model ServiceRequest {
-  id        String               @id @default(auto()) @map("_id") @db.ObjectId
-  message   String?
-  location  String?
-  budget    Float?
-  status    ServiceRequestStatus @default(PENDING)
-  serviceId String               @db.ObjectId
-  clientId  String               @db.ObjectId
-  createdAt DateTime             @default(now())
-  updatedAt DateTime             @updatedAt
+  id               String               @id @default(auto()) @map("_id") @db.ObjectId
+  message          String?
+  location         String?
+  /// Customer proposed / agreed job value for this service
+  budget           Float?
+  status           ServiceRequestStatus @default(PENDING)
+  serviceId        String               @db.ObjectId
+  clientId         String               @db.ObjectId
+  /// Payable marketplace job created when contractor accepts
+  marketplaceJobId String?              @unique @db.ObjectId
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
 
-  service  Service   @relation(fields: [serviceId], references: [id])
-  client   User      @relation("ClientRequests", fields: [clientId], references: [id])
-  messages Message[]
+  service        Service         @relation(fields: [serviceId], references: [id])
+  client         User            @relation("ClientRequests", fields: [clientId], references: [id])
+  messages       Message[]
+  marketplaceJob MarketplaceJob? @relation(fields: [marketplaceJobId], references: [id])
 
   @@map("service_requests")
 }
@@ -1037,16 +1041,21 @@ model MarketplaceJob {
   confirmedAt      DateTime?
   clientId         String               @db.ObjectId
   acceptedQuoteId  String?              @db.ObjectId
+  /// Optional link back to a service listing / request deal
+  serviceId        String?              @db.ObjectId
+  /// Total paid so far (supports full or installment payments)
+  amountPaid       Float                @default(0)
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
 
-  client      User            @relation("JobClient", fields: [clientId], references: [id])
-  invitations JobInvitation[]
-  quotes      Quote[]
-  payments    MarketplacePayment[]
-  payouts     Payout[]
-  disputes    Dispute[]
-  review      JobReview?
+  client         User             @relation("JobClient", fields: [clientId], references: [id])
+  invitations    JobInvitation[]
+  quotes         Quote[]
+  payments       MarketplacePayment[]
+  payouts        Payout[]
+  disputes       Dispute[]
+  review         JobReview?
+  serviceRequest ServiceRequest?
 
   @@index([clientId, status])
   @@index([category, status])
@@ -1116,14 +1125,19 @@ model MarketplacePayment {
   id                       String                   @id @default(auto()) @map("_id") @db.ObjectId
   jobId                    String                   @db.ObjectId
   quoteId                  String                   @db.ObjectId
+  /// Amount charged in this payment (installment or full)
   customerTotal            Float
   protectionOptedIn        Boolean                  @default(false)
   protectionFee            Float                    @default(0)
+  /// Agreed quote / job total at time of charge
   quoteAmount              Float
   termsVersion             String
   stripePaymentIntentId    String?
   stripeCheckoutSessionId  String?
   status                   MarketplacePaymentStatus @default(PENDING)
+  /// 1 = first payment (platform commission taken here)
+  sequence                 Int                      @default(1)
+  takesCommission          Boolean                  @default(false)
   createdAt                DateTime                 @default(now())
   updatedAt                DateTime                 @updatedAt
 

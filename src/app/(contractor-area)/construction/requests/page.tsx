@@ -35,6 +35,7 @@ export default async function ContractorRequestsPage() {
       include: {
         service: { select: { title: true, category: true } },
         client: { select: { name: true, email: true, phone: true } },
+        marketplaceJob: { select: { id: true, status: true, amountPaid: true } },
       },
     })
     .catch(() => []);
@@ -100,22 +101,78 @@ export default async function ContractorRequestsPage() {
                 <div className="flex sm:flex-col gap-2 shrink-0">
                   {req.status === "PENDING" && (
                     <>
-                      <form action={updateRequestStatusAction.bind(null, req.id, ServiceRequestStatus.ACCEPTED)}>
-                        <button type="submit" className="flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors w-full justify-center">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Accept
+                      <form
+                        action={updateRequestStatusAction.bind(
+                          null,
+                          req.id,
+                          ServiceRequestStatus.ACCEPTED
+                        )}
+                        className="space-y-2"
+                      >
+                        <input
+                          name="agreedAmount"
+                          type="number"
+                          min={1}
+                          step="0.01"
+                          defaultValue={req.budget ?? ""}
+                          placeholder="Agreed £"
+                          className="h-9 w-full rounded-lg border border-slate-200 px-2 text-xs"
+                          required
+                        />
+                        <button
+                          type="submit"
+                          className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-blue-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-600"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" /> Accept
                         </button>
                       </form>
-                      <form action={updateRequestStatusAction.bind(null, req.id, ServiceRequestStatus.REJECTED)}>
-                        <button type="submit" className="flex items-center gap-1.5 border border-red-200 text-red-500 hover:bg-red-50 text-xs font-semibold px-3 py-2 rounded-lg transition-colors w-full justify-center">
-                          <XCircle className="w-3.5 h-3.5" /> Reject
+                      <form
+                        action={updateRequestStatusAction.bind(
+                          null,
+                          req.id,
+                          ServiceRequestStatus.REJECTED
+                        )}
+                      >
+                        <button
+                          type="submit"
+                          className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-500 transition-colors hover:bg-red-50"
+                        >
+                          <XCircle className="h-3.5 w-3.5" /> Reject
                         </button>
                       </form>
                     </>
                   )}
-                  {req.status === "ACCEPTED" && (
-                    <form action={updateRequestStatusAction.bind(null, req.id, ServiceRequestStatus.IN_PROGRESS)}>
-                      <button type="submit" className="flex items-center gap-1.5 bg-purple-500 hover:bg-purple-600 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-colors w-full justify-center">
-                        <PlayCircle className="w-3.5 h-3.5" /> Start Work
+                  {req.status === "ACCEPTED" &&
+                    req.marketplaceJobId &&
+                    req.marketplaceJob &&
+                    !["FUNDED", "IN_PROGRESS", "COMPLETED", "PAID_OUT"].includes(
+                      req.marketplaceJob.status
+                    ) && (
+                    <Link
+                      href={`/construction/jobs/${req.marketplaceJobId}`}
+                      className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-xs font-semibold text-white hover:bg-orange-600"
+                    >
+                      Waiting for client pay →
+                    </Link>
+                  )}
+                  {req.status === "ACCEPTED" &&
+                    (!req.marketplaceJobId ||
+                      (req.marketplaceJob &&
+                        ["FUNDED", "IN_PROGRESS", "COMPLETED", "PAID_OUT"].includes(
+                          req.marketplaceJob.status
+                        ))) && (
+                    <form
+                      action={updateRequestStatusAction.bind(
+                        null,
+                        req.id,
+                        ServiceRequestStatus.IN_PROGRESS
+                      )}
+                    >
+                      <button
+                        type="submit"
+                        className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-purple-500 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-purple-600"
+                      >
+                        <PlayCircle className="h-3.5 w-3.5" /> Start Work
                       </button>
                     </form>
                   )}

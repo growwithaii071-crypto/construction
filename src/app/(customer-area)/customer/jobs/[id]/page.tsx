@@ -71,6 +71,16 @@ export default async function CustomerJobDetailPage({
   const canAccept =
     job.status === "OPEN" || job.status === "QUOTES_RECEIVED";
 
+  const acceptedQuote =
+    job.quotes.find((q) => q.status === QuoteStatus.ACCEPTED) ??
+    (job.acceptedQuoteId
+      ? job.quotes.find((q) => q.id === job.acceptedQuoteId)
+      : undefined);
+  const dealTotal = acceptedQuote?.amount ?? 0;
+  const amountPaid = job.amountPaid ?? 0;
+  const remaining = Math.round(Math.max(0, dealTotal - amountPaid) * 100) / 100;
+  const needsMorePayment = remaining > 0.009;
+
   const disputeEligible = ["FUNDED", "IN_PROGRESS", "COMPLETED"].includes(
     job.status
   );
@@ -325,9 +335,10 @@ export default async function CustomerJobDetailPage({
         {(job.status === "AWARDED" || job.status === "AWAITING_PAYMENT") && (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-100 bg-orange-50 px-4 py-3 text-sm text-[#0B2A4A]">
             <div>
-              <p className="font-bold">Pay via Stripe — auto-split commission</p>
+              <p className="font-bold">Pay via Stripe — full or in parts</p>
               <p className="mt-0.5 text-xs text-[#0B2A4A]/80">
-                One payment: HomeCreww keeps platform % · remainder goes to the trader.
+                Platform commission is taken on the first payment only. Remaining balance: £
+                {remaining.toLocaleString("en-GB", { minimumFractionDigits: 2 })}
               </p>
             </div>
             <Link
@@ -339,13 +350,47 @@ export default async function CustomerJobDetailPage({
           </div>
         )}
 
-        {job.status === "FUNDED" && (
+        {job.status === "FUNDED" && needsMorePayment && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-orange-100 bg-orange-50 px-4 py-3 text-sm text-[#0B2A4A]">
+            <div>
+              <p className="font-bold">Balance remaining</p>
+              <p className="mt-0.5 text-xs text-[#0B2A4A]/80">
+                Paid £{amountPaid.toLocaleString("en-GB", { minimumFractionDigits: 2 })} of £
+                {dealTotal.toLocaleString("en-GB", { minimumFractionDigits: 2 })}. Pay the rest
+                anytime (no further platform commission).
+              </p>
+            </div>
+            <Link
+              href={`/customer/jobs/${job.id}/pay`}
+              className="inline-flex h-10 items-center rounded-xl bg-orange-500 px-4 text-sm font-bold text-white hover:bg-orange-600"
+            >
+              Pay remaining →
+            </Link>
+          </div>
+        )}
+
+        {job.status === "FUNDED" && !needsMorePayment && (
           <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-            Payment confirmed. Job is funded — the trader can start work.
+            Fully paid. Job is funded — the trader can start work.
             {job.protectionStatus === "PROTECTED"
               ? " Funds are held until you confirm completion."
               : " Unprotected: funds release at job start."}
           </p>
+        )}
+
+        {job.status === "IN_PROGRESS" && needsMorePayment && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700">
+            <p>
+              Still owing £
+              {remaining.toLocaleString("en-GB", { minimumFractionDigits: 2 })} of the agreed total.
+            </p>
+            <Link
+              href={`/customer/jobs/${job.id}/pay`}
+              className="inline-flex h-9 items-center rounded-xl bg-orange-500 px-3 text-xs font-bold text-white hover:bg-orange-600"
+            >
+              Pay remaining →
+            </Link>
+          </div>
         )}
       </div>
 

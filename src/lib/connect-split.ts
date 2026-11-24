@@ -14,18 +14,39 @@ export type ConnectSplit = {
   traderNet: number;
   rate: number;
   label: string;
+  takesCommission: boolean;
 };
 
-/** Build Connect destination-charge split from quote + PricingConfig.commissionRate. */
+type SplitConfig = Pick<PricingConfig, "commissionRate" | "commissionMin" | "commissionMax">;
+
+/**
+ * Build Connect destination-charge split for a charge amount.
+ * When takeCommission=false (later installments), application_fee is 0.
+ * When takeCommission=true, fee is min(fullDealCommission, charge - 0.01).
+ */
 export function buildConnectSplit(
-  quoteAmount: number,
-  config: Pick<PricingConfig, "commissionRate" | "commissionMin" | "commissionMax">
+  chargeAmount: number,
+  config: SplitConfig,
+  opts?: {
+    takeCommission?: boolean;
+    /** Full agreed quote — used to size platform commission (first payment only) */
+    dealTotal?: number;
+  }
 ): ConnectSplit {
-  const charge = Math.max(0, Number(quoteAmount) || 0);
+  const charge = Math.max(0, Number(chargeAmount) || 0);
   const rate = config.commissionRate ?? 0.08;
-  const applicationFee = calcCommission(charge, config);
-  // Stripe requires application_fee < charge
-  const fee = Math.min(applicationFee, Math.max(0, charge - 0.01));
+  const takeCommission = opts?.takeCommission !== false;
+  const dealTotal =
+    opts?.dealTotal != null && opts.dealTotal > 0 ? opts.dealTotal : charge;
+
+  let applicationFee = 0;
+  if (takeCommission && charge > 0) {
+    const fullFee = calcCommission(dealTotal, config);
+    // Stripe requires application_fee < charge
+    applicationFee = Math.min(fullFee, Math.max(0, charge - 0.01));
+  }
+
+  const fee = Math.round((applicationFee + Number.EPSILON) * 100) / 100;
   const traderNet = Math.max(0, Math.round((charge - fee) * 100) / 100);
 
   return {
@@ -36,7 +57,11 @@ export function buildConnectSplit(
     applicationFee: fee,
     traderNet,
     rate,
-    label: `${formatMoney(fee)} platform (${(rate * 100).toFixed(0)}%) · ${formatMoney(traderNet)} to trader`,
+    takesCommission: fee > 0,
+    label:
+      fee > 0
+        ? `${formatMoney(fee)} platform (${(rate * 100).toFixed(0)}%) · ${formatMoney(traderNet)} to trader`
+        : `${formatMoney(charge)} to trader (no platform fee on this installment)`,
   };
 }
 

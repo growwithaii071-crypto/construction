@@ -35,7 +35,16 @@ export async function markMarketplacePaymentSucceeded(opts: {
   const payment = await prisma.marketplacePayment.findFirst({
     where: { stripePaymentIntentId: opts.paymentIntentId },
     include: {
-      job: { select: { id: true, title: true, clientId: true, status: true, acceptedQuoteId: true } },
+      job: {
+        select: {
+          id: true,
+          title: true,
+          clientId: true,
+          status: true,
+          acceptedQuoteId: true,
+          amountPaid: true,
+        },
+      },
       quote: { select: { id: true, traderId: true, amount: true, feeLedger: true } },
     },
   });
@@ -53,6 +62,7 @@ export async function markMarketplacePaymentSucceeded(opts: {
   let applicationFee = opts.applicationFee;
   let traderNet = opts.traderNet;
   let feeLedgerId = opts.feeLedgerId ?? payment.quote.feeLedger?.id;
+  let takesCommission = payment.takesCommission;
 
   // Detect auto-split from PaymentIntent metadata if webhook didn't pass it
   if (!autoSplit && isStripeConfigured()) {
@@ -64,6 +74,8 @@ export async function markMarketplacePaymentSucceeded(opts: {
         feeLedgerId = feeLedgerId ?? pi.metadata.buildproFeeLedgerId;
         applicationFee = applicationFee ?? Number(pi.metadata.buildproApplicationFee || 0);
         traderNet = traderNet ?? Number(pi.metadata.buildproTraderNet || 0);
+        if (pi.metadata.buildproTakesCommission === "1") takesCommission = true;
+        if (pi.metadata.buildproTakesCommission === "0") takesCommission = false;
       }
     } catch (err) {
       console.warn("[PAY_SUCCEEDED] PI retrieve failed", err);
@@ -72,16 +84,29 @@ export async function markMarketplacePaymentSucceeded(opts: {
 
   if (autoSplit && (applicationFee == null || traderNet == null)) {
     const config = await getPricingConfig();
-    const split = buildConnectSplit(payment.quote.amount, config);
+    const split = buildConnectSplit(payment.customerTotal, config, {
+      takeCommission: takesCommission,
+      dealTotal: payment.quote.amount,
+    });
     applicationFee = applicationFee ?? split.applicationFee;
     traderNet = traderNet ?? split.traderNet;
   }
 
+  const nextPaid = Math.round(((payment.job.amountPaid ?? 0) + payment.customerTotal) * 100) / 100;
+
   await prisma.$transaction(async (tx) => {
     await tx.marketplacePayment.update({
       where: { id: payment.id },
-      data: { status: MarketplacePaymentStatus.SUCCEEDED },
+      data: {
+        status: MarketplacePaymentStatus.SUCCEEDED,
+        takesCommission,
+      },
     });
+
+    const jobUpdate: {
+      amountPaid: number;
+      status?: typeof MarketplaceJobStatus.FUNDED;
+    } = { amountPaid: nextPaid };
 
     if (
       payment.job.status === MarketplaceJobStatus.AWAITING_PAYMENT ||
@@ -89,15 +114,17 @@ export async function markMarketplacePaymentSucceeded(opts: {
       payment.job.status === MarketplaceJobStatus.OPEN ||
       payment.job.status === MarketplaceJobStatus.QUOTES_RECEIVED
     ) {
-      await tx.marketplaceJob.update({
-        where: { id: payment.jobId },
-        data: { status: MarketplaceJobStatus.FUNDED },
-      });
+      jobUpdate.status = MarketplaceJobStatus.FUNDED;
     }
+
+    await tx.marketplaceJob.update({
+      where: { id: payment.jobId },
+      data: jobUpdate,
+    });
 
     if (autoSplit && traderNet != null && traderNet > 0) {
       const existingPayout = await tx.payout.findFirst({
-        where: { jobId: payment.jobId },
+        where: { stripeTransferId: `dest_${opts.paymentIntentId}` },
       });
       if (!existingPayout) {
         await tx.payout.create({
@@ -121,6 +148,9 @@ export async function markMarketplacePaymentSucceeded(opts: {
           paymentIntentId: opts.paymentIntentId,
           jobId: payment.jobId,
           customerTotal: payment.customerTotal,
+          amountPaid: nextPaid,
+          dealTotal: payment.quote.amount,
+          takesCommission,
           protectionOptedIn: payment.protectionOptedIn,
           autoSplit,
           applicationFee: applicationFee ?? null,
@@ -131,7 +161,7 @@ export async function markMarketplacePaymentSucceeded(opts: {
     });
   });
 
-  if (autoSplit && feeLedgerId) {
+  if (autoSplit && takesCommission && feeLedgerId) {
     await markCommissionPaid({
       feeLedgerId,
       paymentIntentId: opts.paymentIntentId,
@@ -139,13 +169,20 @@ export async function markMarketplacePaymentSucceeded(opts: {
   }
 
   const amount = formatMoney(payment.customerTotal);
+  const dealTotal = payment.quote.amount;
+  const remainingAfter = Math.round(Math.max(0, dealTotal - nextPaid) * 100) / 100;
+  const fullyPaid = remainingAfter <= 0.009;
   const traderMsg = autoSplit
-    ? `Payment received for “${payment.job.title}”. ${formatMoney(traderNet ?? 0)} is on your Connect account (platform kept ${formatMoney(applicationFee ?? 0)}).`
+    ? `Payment received for “${payment.job.title}”. ${formatMoney(traderNet ?? 0)} is on your Connect account${
+        takesCommission
+          ? ` (platform kept ${formatMoney(applicationFee ?? 0)})`
+          : " (no platform fee on this installment)"
+      }.${fullyPaid ? "" : ` Client still owes ${formatMoney(remainingAfter)}.`} You can start once funded.`
     : `Payment received for “${payment.job.title}”. Funds are held on HomeCreww until release rules apply.`;
 
   void notifyUserWithEmail({
     userId: payment.quote.traderId,
-    title: "Job funded — you can start",
+    title: fullyPaid ? "Fully paid — you can start" : "Payment received — you can start",
     message: traderMsg,
     type: "SUCCESS",
     link: `/construction/jobs/${payment.jobId}`,
@@ -155,10 +192,14 @@ export async function markMarketplacePaymentSucceeded(opts: {
 
   void notifyUserWithEmail({
     userId: payment.job.clientId,
-    title: "Payment successful",
-    message: `Your payment for “${payment.job.title}” is confirmed. The trader has been notified.`,
+    title: fullyPaid ? "Fully paid" : "Payment successful",
+    message: fullyPaid
+      ? `Your payment for “${payment.job.title}” is confirmed. The trader has been notified.`
+      : `Paid ${amount} toward “${payment.job.title}”. Remaining balance: ${formatMoney(remainingAfter)}.`,
     type: "SUCCESS",
-    link: `/customer/jobs/${payment.jobId}`,
+    link: fullyPaid
+      ? `/customer/jobs/${payment.jobId}`
+      : `/customer/jobs/${payment.jobId}/pay`,
     emailKey: "marketplace_payment_success",
     emailVars: { jobTitle: payment.job.title, amount },
   });

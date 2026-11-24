@@ -4,25 +4,27 @@ import {
   MarketplacePaymentStatus,
   QuoteStatus,
   FeeLedgerStatus,
-  PayoutTransferStatus,
 } from "@/generated/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
 import { getAppUrl } from "@/lib/app-url";
 import { getPricingConfig } from "@/lib/pricing";
-import { toStripeAmount, STRIPE_CURRENCY, formatMoney } from "@/lib/money";
+import { STRIPE_CURRENCY, formatMoney } from "@/lib/money";
 import { markMarketplacePaymentSucceeded } from "@/lib/marketplace-payments";
 import { buildConnectSplit } from "@/lib/connect-split";
-import { markCommissionPaid } from "@/lib/trader-billing";
+
+function round2(n: number) {
+  return Math.round((n + Number.EPSILON) * 100) / 100;
+}
 
 /**
- * Create (or reuse) a Stripe Checkout Session for the homeowner to pay a job.
- * Auto-splits via Connect destination charge:
- *   application_fee_amount → HomeCreww
- *   transfer_data.destination → trader Connect account
+ * Create a Stripe Checkout Session for the homeowner.
+ * Supports full or partial (installment) payments.
+ * Platform commission is taken only on the first successful payment for the deal.
  */
 export async function createHomeownerCheckoutSession(
   jobId: string,
-  clientUserId: string
+  clientUserId: string,
+  payAmount?: number | null
 ) {
   if (!isStripeConfigured()) {
     throw new Error("Stripe is not configured.");
@@ -31,7 +33,10 @@ export async function createHomeownerCheckoutSession(
   const job = await prisma.marketplaceJob.findUnique({
     where: { id: jobId },
     include: {
-      payments: { orderBy: { createdAt: "desc" }, take: 1 },
+      payments: {
+        where: { status: MarketplacePaymentStatus.SUCCEEDED },
+        orderBy: { createdAt: "asc" },
+      },
       quotes: {
         where: { status: QuoteStatus.ACCEPTED },
         take: 1,
@@ -53,18 +58,6 @@ export async function createHomeownerCheckoutSession(
 
   if (!job || job.clientId !== clientUserId) {
     throw new Error("Job not found.");
-  }
-
-  if (job.status === MarketplaceJobStatus.FUNDED) {
-    return { alreadyPaid: true as const, jobId: job.id };
-  }
-
-  const allowed = [
-    MarketplaceJobStatus.AWAITING_PAYMENT,
-    MarketplaceJobStatus.AWARDED,
-  ];
-  if (!allowed.includes(job.status as (typeof allowed)[number])) {
-    throw new Error("This job is not ready for checkout.");
   }
 
   const quote =
@@ -90,6 +83,24 @@ export async function createHomeownerCheckoutSession(
     throw new Error("No accepted quote for this job.");
   }
 
+  const dealTotal = quote.amount;
+  const amountPaid = job.amountPaid ?? 0;
+  const remaining = round2(Math.max(0, dealTotal - amountPaid));
+
+  if (remaining <= 0) {
+    return { alreadyPaid: true as const, jobId: job.id };
+  }
+
+  const allowed = [
+    MarketplaceJobStatus.AWAITING_PAYMENT,
+    MarketplaceJobStatus.AWARDED,
+    MarketplaceJobStatus.FUNDED,
+    MarketplaceJobStatus.IN_PROGRESS,
+  ];
+  if (!allowed.includes(job.status as (typeof allowed)[number])) {
+    throw new Error("This job is not ready for checkout.");
+  }
+
   const trader = quote.trader;
   if (!trader.stripeAccountId) {
     throw new Error(
@@ -102,39 +113,64 @@ export async function createHomeownerCheckoutSession(
     );
   }
 
-  let payment = job.payments[0] ?? null;
-
-  if (payment?.status === MarketplacePaymentStatus.SUCCEEDED) {
-    return { alreadyPaid: true as const, jobId: job.id };
-  }
-
-  const config = await getPricingConfig();
-  const split = buildConnectSplit(quote.amount, config);
-
-  if (!payment) {
-    payment = await prisma.marketplacePayment.create({
-      data: {
-        jobId: job.id,
-        quoteId: quote.id,
-        quoteAmount: quote.amount,
-        customerTotal: split.charge,
-        protectionOptedIn: false,
-        protectionFee: 0,
-        termsVersion: config.termsVersion,
-        status: MarketplacePaymentStatus.PENDING,
-      },
-    });
-
-    if (job.status === MarketplaceJobStatus.AWARDED) {
-      await prisma.marketplaceJob.update({
-        where: { id: job.id },
-        data: { status: MarketplaceJobStatus.AWAITING_PAYMENT },
-      });
+  let charge = remaining;
+  if (payAmount != null && Number.isFinite(payAmount)) {
+    charge = round2(payAmount);
+    if (charge < 1) {
+      throw new Error("Minimum payment is £1.");
+    }
+    if (charge > remaining + 0.001) {
+      throw new Error(`You can pay at most ${formatMoney(remaining)} remaining.`);
     }
   }
 
-  // Keep fee ledger in sync with current commission rate
-  if (quote.feeLedger && quote.feeLedger.status === FeeLedgerStatus.PENDING) {
+  const succeededCount = job.payments.length;
+  const commissionAlreadyTaken =
+    quote.feeLedger?.status === FeeLedgerStatus.COLLECTED ||
+    job.payments.some((p) => p.takesCommission);
+  const takeCommission = !commissionAlreadyTaken;
+
+  const config = await getPricingConfig();
+  const split = buildConnectSplit(charge, config, {
+    takeCommission,
+    dealTotal,
+  });
+
+  if (takeCommission && split.applicationFee > 0 && charge <= split.applicationFee) {
+    throw new Error(
+      `First payment must be greater than the platform commission (${formatMoney(split.applicationFee)}). Pay at least ${formatMoney(round2(split.applicationFee + 1))}.`
+    );
+  }
+
+  const sequence = succeededCount + 1;
+
+  const payment = await prisma.marketplacePayment.create({
+    data: {
+      jobId: job.id,
+      quoteId: quote.id,
+      quoteAmount: dealTotal,
+      customerTotal: split.charge,
+      protectionOptedIn: false,
+      protectionFee: 0,
+      termsVersion: config.termsVersion,
+      status: MarketplacePaymentStatus.PENDING,
+      sequence,
+      takesCommission: split.takesCommission,
+    },
+  });
+
+  if (job.status === MarketplaceJobStatus.AWARDED) {
+    await prisma.marketplaceJob.update({
+      where: { id: job.id },
+      data: { status: MarketplaceJobStatus.AWAITING_PAYMENT },
+    });
+  }
+
+  if (
+    takeCommission &&
+    quote.feeLedger &&
+    quote.feeLedger.status === FeeLedgerStatus.PENDING
+  ) {
     await prisma.feeLedger.update({
       where: { id: quote.feeLedger.id },
       data: { amount: split.applicationFee, rate: split.rate },
@@ -161,40 +197,12 @@ export async function createHomeownerCheckoutSession(
     });
   }
 
-  if (payment.stripeCheckoutSessionId) {
-    try {
-      const existing = await stripe.checkout.sessions.retrieve(
-        payment.stripeCheckoutSessionId
-      );
-      if (existing.status === "complete") {
-        const piId =
-          typeof existing.payment_intent === "string"
-            ? existing.payment_intent
-            : existing.payment_intent?.id;
-        if (piId) {
-          await markMarketplacePaymentSucceeded({
-            paymentIntentId: piId,
-            autoSplit: true,
-          });
-        }
-        return { alreadyPaid: true as const, jobId: job.id };
-      }
-      if (existing.status === "open" && existing.url) {
-        return {
-          alreadyPaid: false as const,
-          url: existing.url,
-          sessionId: existing.id,
-          amount: payment.customerTotal,
-          split,
-        };
-      }
-    } catch {
-      // create a fresh session below
-    }
-  }
-
   const base = getAppUrl();
   const feeLedgerId = quote.feeLedger?.id ?? "";
+  const installmentLabel =
+    charge < remaining || amountPaid > 0
+      ? `Payment ${sequence} · ${formatMoney(charge)} of ${formatMoney(dealTotal)}`
+      : `Full payment · ${formatMoney(charge)}`;
 
   const session = await stripe.checkout.sessions.create(
     {
@@ -209,7 +217,7 @@ export async function createHomeownerCheckoutSession(
             unit_amount: split.chargePence,
             product_data: {
               name: `Job: ${job.title}`,
-              description: `Auto-split · ${split.label}`,
+              description: `${installmentLabel} · ${split.label}`,
             },
           },
         },
@@ -226,9 +234,11 @@ export async function createHomeownerCheckoutSession(
         buildproApplicationFee: String(split.applicationFee),
         buildproTraderNet: String(split.traderNet),
         buildproCommissionRate: String(split.rate),
+        buildproTakesCommission: split.takesCommission ? "1" : "0",
+        buildproSequence: String(sequence),
       },
       payment_intent_data: {
-        application_fee_amount: split.applicationFeePence,
+        application_fee_amount: split.applicationFeePence > 0 ? split.applicationFeePence : undefined,
         transfer_data: {
           destination: trader.stripeAccountId,
         },
@@ -242,6 +252,8 @@ export async function createHomeownerCheckoutSession(
           buildproApplicationFee: String(split.applicationFee),
           buildproTraderNet: String(split.traderNet),
           buildproCommissionRate: String(split.rate),
+          buildproTakesCommission: split.takesCommission ? "1" : "0",
+          buildproSequence: String(sequence),
         },
         description: `HomeCreww job: ${job.title} · ${split.label}`,
       },
@@ -272,6 +284,8 @@ export async function createHomeownerCheckoutSession(
         applicationFee: split.applicationFee,
         traderNet: split.traderNet,
         rate: split.rate,
+        sequence,
+        takesCommission: split.takesCommission,
         destination: trader.stripeAccountId,
       },
     },
@@ -286,6 +300,7 @@ export async function createHomeownerCheckoutSession(
     url: session.url,
     sessionId: session.id,
     amount: split.charge,
+    remaining: round2(remaining - split.charge),
     split,
   };
 }
@@ -297,95 +312,41 @@ export async function fulfillCheckoutSession(session: {
   metadata?: Record<string, string> | null;
 }) {
   const paymentId = session.metadata?.buildproPaymentId;
-  const autoSplit = session.metadata?.buildproAutoSplit === "1";
-  const piId =
-    typeof session.payment_intent === "string"
-      ? session.payment_intent
-      : session.payment_intent?.id;
+  const jobId = session.metadata?.buildproJobId;
+  const piRaw = session.payment_intent;
+  const paymentIntentId =
+    typeof piRaw === "string" ? piRaw : piRaw && typeof piRaw === "object" ? piRaw.id : null;
+
+  if (!paymentIntentId) {
+    console.warn("[CHECKOUT_FULFILL] No payment_intent on session", session.id);
+    return { ok: false as const, reason: "no_pi" };
+  }
 
   if (paymentId) {
     await prisma.marketplacePayment.updateMany({
-      where: { id: paymentId },
-      data: {
-        stripeCheckoutSessionId: session.id,
-        ...(piId ? { stripePaymentIntentId: piId } : {}),
-      },
+      where: { id: paymentId, stripePaymentIntentId: null },
+      data: { stripePaymentIntentId: paymentIntentId },
     });
-  } else {
+  } else if (jobId) {
     await prisma.marketplacePayment.updateMany({
-      where: { stripeCheckoutSessionId: session.id },
-      data: piId ? { stripePaymentIntentId: piId } : {},
-    });
-  }
-
-  if (piId) {
-    return markMarketplacePaymentSucceeded({
-      paymentIntentId: piId,
-      autoSplit,
-      feeLedgerId: session.metadata?.buildproFeeLedgerId,
-      applicationFee: session.metadata?.buildproApplicationFee
-        ? Number(session.metadata.buildproApplicationFee)
-        : undefined,
-      traderNet: session.metadata?.buildproTraderNet
-        ? Number(session.metadata.buildproTraderNet)
-        : undefined,
-    });
-  }
-
-  const payment = await prisma.marketplacePayment.findFirst({
-    where: paymentId
-      ? { id: paymentId }
-      : { stripeCheckoutSessionId: session.id },
-  });
-  if (!payment) return { ok: false as const, reason: "not_found" };
-  if (payment.status === MarketplacePaymentStatus.SUCCEEDED) {
-    return { ok: true as const, duplicate: true, jobId: payment.jobId };
-  }
-
-  await prisma.marketplacePayment.update({
-    where: { id: payment.id },
-    data: {
-      status: MarketplacePaymentStatus.SUCCEEDED,
-      stripeCheckoutSessionId: session.id,
-    },
-  });
-  await prisma.marketplaceJob.updateMany({
-    where: {
-      id: payment.jobId,
-      status: {
-        in: [
-          MarketplaceJobStatus.AWAITING_PAYMENT,
-          MarketplaceJobStatus.AWARDED,
-          MarketplaceJobStatus.OPEN,
-          MarketplaceJobStatus.QUOTES_RECEIVED,
-        ],
+      where: {
+        jobId,
+        stripeCheckoutSessionId: session.id,
+        stripePaymentIntentId: null,
       },
-    },
-    data: { status: MarketplaceJobStatus.FUNDED },
-  });
-
-  if (autoSplit && session.metadata?.buildproFeeLedgerId) {
-    await markCommissionPaid({ feeLedgerId: session.metadata.buildproFeeLedgerId });
-    const traderNet = Number(session.metadata.buildproTraderNet ?? 0);
-    const quote = await prisma.quote.findUnique({
-      where: { id: payment.quoteId },
-      select: { traderId: true },
+      data: { stripePaymentIntentId: paymentIntentId },
     });
-    if (quote && traderNet > 0) {
-      const existing = await prisma.payout.findFirst({ where: { jobId: payment.jobId } });
-      if (!existing) {
-        await prisma.payout.create({
-          data: {
-            traderId: quote.traderId,
-            jobId: payment.jobId,
-            netAmount: traderNet,
-            stripeTransferId: `dest_cs_${session.id}`,
-            status: PayoutTransferStatus.SUCCEEDED,
-          },
-        });
-      }
-    }
   }
 
-  return { ok: true as const, jobId: payment.jobId };
+  return markMarketplacePaymentSucceeded({
+    paymentIntentId,
+    autoSplit: session.metadata?.buildproAutoSplit === "1",
+    feeLedgerId: session.metadata?.buildproFeeLedgerId || undefined,
+    applicationFee: session.metadata?.buildproApplicationFee
+      ? Number(session.metadata.buildproApplicationFee)
+      : undefined,
+    traderNet: session.metadata?.buildproTraderNet
+      ? Number(session.metadata.buildproTraderNet)
+      : undefined,
+  });
 }

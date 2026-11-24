@@ -9,7 +9,10 @@ import { isStripeConfigured } from "@/lib/stripe";
 import { revalidatePath } from "next/cache";
 
 /** Preferred: Stripe Checkout Session (hosted). Secret key never leaves the server. */
-export async function startHomeownerCheckoutAction(jobId: string) {
+export async function startHomeownerCheckoutAction(
+  jobId: string,
+  payAmount?: number | null
+) {
   const session = await requireAuth([UserRole.CLIENT]);
   const clientId = session.user.id!;
 
@@ -21,7 +24,7 @@ export async function startHomeownerCheckoutAction(jobId: string) {
   }
 
   try {
-    const result = await createHomeownerCheckoutSession(jobId, clientId);
+    const result = await createHomeownerCheckoutSession(jobId, clientId, payAmount);
     revalidatePath(`/customer/jobs/${jobId}`);
     revalidatePath(`/customer/jobs/${jobId}/pay`);
     if (result.alreadyPaid) {
@@ -29,7 +32,7 @@ export async function startHomeownerCheckoutAction(jobId: string) {
         success: true as const,
         alreadyPaid: true as const,
         jobId: result.jobId,
-        message: "This job is already funded.",
+        message: "This job is already fully paid.",
       };
     }
     return {
@@ -38,6 +41,7 @@ export async function startHomeownerCheckoutAction(jobId: string) {
       url: result.url,
       sessionId: result.sessionId,
       amount: result.amount,
+      remaining: "remaining" in result ? result.remaining : undefined,
     };
   } catch (err) {
     console.error("[HOMEOWNER_CHECKOUT]", err);

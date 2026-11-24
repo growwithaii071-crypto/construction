@@ -165,7 +165,7 @@ export default async function CustomerRequestsPage() {
                   </div>
                 </div>
 
-                {/* Status + Message */}
+                {/* Status + Pay / Message */}
                 <div className="shrink-0 flex flex-col items-center gap-2">
                   <div className={cn(
                     "flex flex-col items-center justify-center w-20 h-20 rounded-2xl border",
@@ -180,13 +180,22 @@ export default async function CustomerRequestsPage() {
                       {STATUS_LABELS[req.status]}
                     </p>
                   </div>
+                  {req.marketplaceJobId &&
+                    (req.status === "ACCEPTED" || req.status === "IN_PROGRESS") && (
+                    <Link
+                      href={`/customer/jobs/${req.marketplaceJobId}/pay`}
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-xs font-semibold text-white hover:bg-orange-600"
+                    >
+                      Pay now →
+                    </Link>
+                  )}
                   {(req.status === "PENDING" ||
                     req.status === "ACCEPTED" ||
                     req.status === "IN_PROGRESS" ||
                     req.status === "COMPLETED") && (
                     <Link
                       href={`/customer/messages/${req.id}`}
-                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-xs font-semibold text-white hover:bg-orange-600"
+                      className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
                     >
                       <MessageCircle className="h-3.5 w-3.5" />
                       Message
