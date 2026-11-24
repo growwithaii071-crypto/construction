@@ -12,6 +12,8 @@ export function HomeownerCheckoutButton({
   dealTotal,
   firstPayment,
   disabled,
+  returnPath,
+  alreadyPaidPath,
 }: {
   jobId: string;
   /** Amount still owed */
@@ -20,6 +22,9 @@ export function HomeownerCheckoutButton({
   /** True when platform commission will be taken on this payment */
   firstPayment: boolean;
   disabled?: boolean;
+  /** Stripe success/cancel base path (defaults to job pay page) */
+  returnPath?: string;
+  alreadyPaidPath?: string;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -38,13 +43,13 @@ export function HomeownerCheckoutButton({
       return;
     }
     startTransition(async () => {
-      const res = await startHomeownerCheckoutAction(jobId, amount);
+      const res = await startHomeownerCheckoutAction(jobId, amount, returnPath);
       if (!res.success) {
         setError(res.message);
         return;
       }
       if (res.alreadyPaid) {
-        router.push(`/customer/jobs/${jobId}?paid=1`);
+        router.push(alreadyPaidPath ?? `/customer/jobs/${jobId}?paid=1`);
         router.refresh();
         return;
       }

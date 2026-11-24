@@ -129,7 +129,9 @@ export async function updateRequestStatusAction(
       messagesUrl: `${getAppUrl()}/customer/messages/${requestId}`,
       requestsUrl: `${getAppUrl()}/customer/requests`,
       servicesUrl: `${getAppUrl()}/services`,
-      payUrl: dealJobId ? `${getAppUrl()}/customer/jobs/${dealJobId}/pay` : "",
+      payUrl: dealJobId
+        ? `${getAppUrl()}/customer/requests/${requestId}/pay`
+        : "",
     }).catch(() => {});
   }
 
@@ -137,7 +139,7 @@ export async function updateRequestStatusAction(
   if (copy) {
     const link =
       status === "ACCEPTED" && dealJobId
-        ? `/customer/jobs/${dealJobId}/pay`
+        ? `/customer/requests/${requestId}/pay`
         : status === "ACCEPTED" || status === "IN_PROGRESS"
           ? `/customer/messages/${requestId}`
           : "/customer/requests";
@@ -170,6 +172,7 @@ export async function updateRequestStatusAction(
   revalidatePath("/customer/notifications");
   revalidatePath("/notifications");
   revalidatePath("/customer/jobs");
+  revalidatePath(`/customer/requests/${requestId}/pay`);
   if (dealJobId) {
     revalidatePath(`/customer/jobs/${dealJobId}`);
     revalidatePath(`/customer/jobs/${dealJobId}/pay`);

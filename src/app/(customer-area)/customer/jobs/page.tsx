@@ -27,7 +27,11 @@ export default async function CustomerJobsPage() {
   const session = await requireAuth([UserRole.CLIENT]);
 
   const jobs = await prisma.marketplaceJob.findMany({
-    where: { clientId: session.user.id },
+    where: {
+      clientId: session.user.id,
+      // Service-request deals stay under My Requests, not marketplace Jobs
+      serviceRequest: null,
+    },
     orderBy: { createdAt: "desc" },
     include: {
       _count: { select: { invitations: true, quotes: true } },

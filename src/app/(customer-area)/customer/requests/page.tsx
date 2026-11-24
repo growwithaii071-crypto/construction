@@ -183,7 +183,7 @@ export default async function CustomerRequestsPage() {
                   {req.marketplaceJobId &&
                     (req.status === "ACCEPTED" || req.status === "IN_PROGRESS") && (
                     <Link
-                      href={`/customer/jobs/${req.marketplaceJobId}/pay`}
+                      href={`/customer/requests/${req.id}/pay`}
                       className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-xs font-semibold text-white hover:bg-orange-600"
                     >
                       Pay now →

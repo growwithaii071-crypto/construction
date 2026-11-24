@@ -43,6 +43,7 @@ export async function markMarketplacePaymentSucceeded(opts: {
           status: true,
           acceptedQuoteId: true,
           amountPaid: true,
+          serviceRequest: { select: { id: true } },
         },
       },
       quote: { select: { id: true, traderId: true, amount: true, feeLedger: true } },
@@ -190,6 +191,14 @@ export async function markMarketplacePaymentSucceeded(opts: {
     emailVars: { jobTitle: payment.job.title, amount },
   });
 
+  const serviceRequestId = payment.job.serviceRequest?.id;
+  const clientPayLink = serviceRequestId
+    ? `/customer/requests/${serviceRequestId}/pay`
+    : `/customer/jobs/${payment.jobId}/pay`;
+  const clientDoneLink = serviceRequestId
+    ? "/customer/requests"
+    : `/customer/jobs/${payment.jobId}`;
+
   void notifyUserWithEmail({
     userId: payment.job.clientId,
     title: fullyPaid ? "Fully paid" : "Payment successful",
@@ -197,9 +206,7 @@ export async function markMarketplacePaymentSucceeded(opts: {
       ? `Your payment for “${payment.job.title}” is confirmed. The trader has been notified.`
       : `Paid ${amount} toward “${payment.job.title}”. Remaining balance: ${formatMoney(remainingAfter)}.`,
     type: "SUCCESS",
-    link: fullyPaid
-      ? `/customer/jobs/${payment.jobId}`
-      : `/customer/jobs/${payment.jobId}/pay`,
+    link: fullyPaid ? clientDoneLink : clientPayLink,
     emailKey: "marketplace_payment_success",
     emailVars: { jobTitle: payment.job.title, amount },
   });

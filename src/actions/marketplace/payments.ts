@@ -11,7 +11,8 @@ import { revalidatePath } from "next/cache";
 /** Preferred: Stripe Checkout Session (hosted). Secret key never leaves the server. */
 export async function startHomeownerCheckoutAction(
   jobId: string,
-  payAmount?: number | null
+  payAmount?: number | null,
+  returnPath?: string | null
 ) {
   const session = await requireAuth([UserRole.CLIENT]);
   const clientId = session.user.id!;
@@ -24,7 +25,7 @@ export async function startHomeownerCheckoutAction(
   }
 
   try {
-    const result = await createHomeownerCheckoutSession(jobId, clientId, payAmount);
+    const result = await createHomeownerCheckoutSession(jobId, clientId, payAmount, returnPath);
     revalidatePath(`/customer/jobs/${jobId}`);
     revalidatePath(`/customer/jobs/${jobId}/pay`);
     if (result.alreadyPaid) {

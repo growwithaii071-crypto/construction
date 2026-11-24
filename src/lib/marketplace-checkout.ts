@@ -6,7 +6,7 @@ import {
   FeeLedgerStatus,
 } from "@/generated/prisma";
 import { getStripe, isStripeConfigured } from "@/lib/stripe";
-import { getAppUrl } from "@/lib/app-url";
+import { getAppUrl, withVercelProtectionBypass } from "@/lib/app-url";
 import { getPricingConfig } from "@/lib/pricing";
 import { STRIPE_CURRENCY, formatMoney } from "@/lib/money";
 import { markMarketplacePaymentSucceeded } from "@/lib/marketplace-payments";
@@ -24,7 +24,8 @@ function round2(n: number) {
 export async function createHomeownerCheckoutSession(
   jobId: string,
   clientUserId: string,
-  payAmount?: number | null
+  payAmount?: number | null,
+  returnPath?: string | null
 ) {
   if (!isStripeConfigured()) {
     throw new Error("Stripe is not configured.");
@@ -33,6 +34,7 @@ export async function createHomeownerCheckoutSession(
   const job = await prisma.marketplaceJob.findUnique({
     where: { id: jobId },
     include: {
+      serviceRequest: { select: { id: true } },
       payments: {
         where: { status: MarketplacePaymentStatus.SUCCEEDED },
         orderBy: { createdAt: "asc" },
@@ -204,6 +206,18 @@ export async function createHomeownerCheckoutSession(
       ? `Payment ${sequence} · ${formatMoney(charge)} of ${formatMoney(dealTotal)}`
       : `Full payment · ${formatMoney(charge)}`;
 
+  const safeReturn =
+    returnPath &&
+    returnPath.startsWith("/") &&
+    !returnPath.startsWith("//") &&
+    (returnPath.startsWith("/customer/jobs/") ||
+      returnPath.startsWith("/customer/requests/"))
+      ? returnPath
+      : job.serviceRequest
+        ? `/customer/requests/${job.serviceRequest.id}/pay`
+        : `/customer/jobs/${job.id}/pay`;
+  const payReturnBase = `${base}${safeReturn}`;
+
   const session = await stripe.checkout.sessions.create(
     {
       mode: "payment",
@@ -216,14 +230,16 @@ export async function createHomeownerCheckoutSession(
             currency: STRIPE_CURRENCY,
             unit_amount: split.chargePence,
             product_data: {
-              name: `Job: ${job.title}`,
+              name: job.serviceRequest ? `Service: ${job.title}` : `Job: ${job.title}`,
               description: `${installmentLabel} · ${split.label}`,
             },
           },
         },
       ],
-      success_url: `${base}/customer/jobs/${job.id}/pay?paid=1&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${base}/customer/jobs/${job.id}/pay?cancelled=1`,
+      success_url: withVercelProtectionBypass(
+        `${payReturnBase}?paid=1&session_id={CHECKOUT_SESSION_ID}`
+      ),
+      cancel_url: withVercelProtectionBypass(`${payReturnBase}?cancelled=1`),
       metadata: {
         buildproKind: "homeowner_checkout",
         buildproAutoSplit: "1",

@@ -2,7 +2,7 @@ import { requireAuth } from "@/lib/auth-utils";
 import { UserRole, InvitationStatus, QuoteStatus } from "@/generated/prisma";
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, MapPin, Users, FileText } from "lucide-react";
 import { JobStatusTimeline } from "@/components/marketplace/job-status-timeline";
 import { BilingualAlert } from "@/components/ui/bilingual-alert";
@@ -37,6 +37,7 @@ export default async function CustomerJobDetailPage({
   const job = await prisma.marketplaceJob.findUnique({
     where: { id },
     include: {
+      serviceRequest: { select: { id: true } },
       quotes: {
         orderBy: { createdAt: "desc" },
         include: { trader: { select: { name: true, phone: true } } },
@@ -46,6 +47,10 @@ export default async function CustomerJobDetailPage({
   });
 
   if (!job || job.clientId !== session.user.id) notFound();
+
+  if (job.serviceRequest) {
+    redirect("/customer/requests");
+  }
 
   void processAutoConfirms(5);
   await maintainLiveInvitations(job.id);

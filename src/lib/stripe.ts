@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { getAppUrl } from "@/lib/app-url";
+import { getAppUrl, withVercelProtectionBypass } from "@/lib/app-url";
 
 export function isStripeConfigured() {
   return Boolean(process.env.STRIPE_SECRET_KEY?.trim());
@@ -37,11 +37,15 @@ export function getStripe(): Stripe {
 }
 
 export function connectReturnUrl() {
-  return `${getAppUrl()}/construction/payouts?connect=return`;
+  return withVercelProtectionBypass(
+    `${getAppUrl()}/construction/payouts?connect=return`
+  );
 }
 
 export function connectRefreshUrl() {
-  return `${getAppUrl()}/api/stripe/connect/refresh`;
+  return withVercelProtectionBypass(
+    `${getAppUrl()}/api/stripe/connect/refresh`
+  );
 }
 
 export type TraderConnectStatus = {

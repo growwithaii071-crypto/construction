@@ -27,6 +27,7 @@ export default async function JobPayPage({
   const job = await prisma.marketplaceJob.findUnique({
     where: { id },
     include: {
+      serviceRequest: { select: { id: true } },
       quotes: {
         where: { status: QuoteStatus.ACCEPTED },
         take: 1,
@@ -50,6 +51,16 @@ export default async function JobPayPage({
   });
 
   if (!job || job.clientId !== session.user.id) notFound();
+
+  if (job.serviceRequest) {
+    const qs = new URLSearchParams();
+    if (sp.paid) qs.set("paid", sp.paid);
+    if (sp.cancelled) qs.set("cancelled", sp.cancelled);
+    const q = qs.toString();
+    redirect(
+      `/customer/requests/${job.serviceRequest.id}/pay${q ? `?${q}` : ""}`
+    );
+  }
 
   const quote = job.quotes[0];
   const dealTotal = quote?.amount ?? 0;
