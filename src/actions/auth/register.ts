@@ -27,7 +27,7 @@ export async function registerAction(formData: unknown): Promise<ActionResult> {
     return { success: false, message: firstError };
   }
 
-  const { name, email, password, phone } = parsed.data;
+  const { name, email, password, phone, postcode } = parsed.data;
 
   const ip = await getClientIp();
   const limited = checkRateLimit(
@@ -53,6 +53,7 @@ export async function registerAction(formData: unknown): Promise<ActionResult> {
         email,
         password: hashedPassword,
         phone: phone ?? null,
+        postcode,
         role: UserRole.CLIENT,
         isActive: true,
         emailVerified: new Date(),

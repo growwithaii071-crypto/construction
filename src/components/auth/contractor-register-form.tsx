@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { contractorRegisterAction } from "@/actions/auth/contractor-register";
 import { cn } from "@/lib/utils";
+import { ukPostcodeSchema } from "@/lib/uk-postcode";
 
 const passwordSchema = z
   .string()
@@ -29,6 +30,7 @@ const ContractorRegisterSchema = z
     companyName: z.string().min(2, "Company name must be at least 2 characters").max(150),
     email: z.string().email("Invalid email address"),
     phone: z.string().min(10, "Please enter a valid phone number"),
+    postcode: ukPostcodeSchema,
     specialization: z.array(z.string()).min(1, "Select at least one specialization"),
     licenseNumber: z.string().optional(),
     password: passwordSchema,
@@ -101,6 +103,7 @@ export function ContractorRegisterForm() {
       companyName: "",
       email: "",
       phone: "",
+      postcode: "",
       specialization: [],
       licenseNumber: "",
       password: "",
@@ -163,14 +166,14 @@ export function ContractorRegisterForm() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="name" className="text-gray-700 font-medium text-sm">Contact person name</Label>
-            <Input id="name" placeholder="Arun Kumar" disabled={isPending}
+            <Input id="name" placeholder="James Smith" disabled={isPending}
               className={cn("h-10 rounded-xl border-gray-200 focus-visible:ring-orange-500 text-sm", errors.name && "border-red-400")}
               {...register("name")} />
             {errors.name && <p className="text-xs text-red-500">{errors.name.message}</p>}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="companyName" className="text-gray-700 font-medium text-sm">Company name</Label>
-            <Input id="companyName" placeholder="Arun Builders Pvt Ltd" disabled={isPending}
+            <Input id="companyName" placeholder="Smith Builders Ltd" disabled={isPending}
               className={cn("h-10 rounded-xl border-gray-200 focus-visible:ring-orange-500 text-sm", errors.companyName && "border-red-400")}
               {...register("companyName")} />
             {errors.companyName && <p className="text-xs text-red-500">{errors.companyName.message}</p>}
@@ -186,23 +189,44 @@ export function ContractorRegisterForm() {
           {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
         </div>
 
-        {/* Phone + License */}
+        {/* Phone + Postcode */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="phone" className="text-gray-700 font-medium text-sm">Phone number</Label>
-            <Input id="phone" type="tel" placeholder="+91 98765 43210" disabled={isPending}
+            <Input id="phone" type="tel" placeholder="+44 7700 900123" disabled={isPending}
               className={cn("h-10 rounded-xl border-gray-200 focus-visible:ring-orange-500 text-sm", errors.phone && "border-red-400")}
               {...register("phone")} />
             {errors.phone && <p className="text-xs text-red-500">{errors.phone.message}</p>}
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="licenseNumber" className="text-gray-700 font-medium text-sm">
-              License / Registration no. <span className="text-gray-400 font-normal">(optional)</span>
+            <Label htmlFor="postcode" className="text-gray-700 font-medium text-sm">
+              Postcode <span className="text-red-500">*</span>
             </Label>
-            <Input id="licenseNumber" placeholder="e.g. MH-CON-2024-0012" disabled={isPending}
-              className="h-10 rounded-xl border-gray-200 focus-visible:ring-orange-500 text-sm"
-              {...register("licenseNumber")} />
+            <Input
+              id="postcode"
+              type="text"
+              autoComplete="postal-code"
+              placeholder="e.g. SW1A 1AA"
+              disabled={isPending}
+              className={cn(
+                "h-10 rounded-xl border-gray-200 focus-visible:ring-orange-500 text-sm uppercase",
+                errors.postcode && "border-red-400"
+              )}
+              {...register("postcode")}
+            />
+            {errors.postcode && (
+              <p className="text-xs text-red-500">{errors.postcode.message}</p>
+            )}
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="licenseNumber" className="text-gray-700 font-medium text-sm">
+            License / Registration no. <span className="text-gray-400 font-normal">(optional)</span>
+          </Label>
+          <Input id="licenseNumber" placeholder="e.g. UK-CON-2024-0012" disabled={isPending}
+            className="h-10 rounded-xl border-gray-200 focus-visible:ring-orange-500 text-sm"
+            {...register("licenseNumber")} />
         </div>
 
         {/* Specializations — multi-select dropdown */}

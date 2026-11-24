@@ -148,6 +148,8 @@ model User {
   email         String    @unique
   emailVerified DateTime?
   phone         String?
+  /// UK postcode (required at registration for clients & contractors)
+  postcode      String?
   avatar        String?
   password      String?
   role          UserRole  @default(CLIENT)

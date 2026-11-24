@@ -50,7 +50,7 @@ export async function createProjectAction(_prevState: unknown, formData: FormDat
         location: d.location,
         city: d.city,
         state: d.state,
-        country: d.country ?? "India",
+        country: d.country ?? "United Kingdom",
         pincode: d.pincode,
       },
     });

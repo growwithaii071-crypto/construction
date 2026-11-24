@@ -87,8 +87,8 @@ export default function ConstructionPortalLayout({ children }: { children: React
                 <div className="flex items-center gap-2.5 mt-4">
                   <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">VK</div>
                   <div>
-                    <p className="text-white text-sm font-semibold">Vijay Kumar</p>
-                    <p className="text-white/40 text-xs">Contractor, Pune · 12 yrs experience</p>
+                    <p className="text-white text-sm font-semibold">James Wilson</p>
+                    <p className="text-white/40 text-xs">Contractor, London · 12 yrs experience</p>
                   </div>
                 </div>
               </div>
@@ -144,7 +144,7 @@ export default function ConstructionPortalLayout({ children }: { children: React
                 <BrandLogo size="sm" />
               </div>
               <p className="text-xs text-white/30 leading-relaxed">
-                India&apos;s most trusted contractor network. Find projects, build your reputation, get paid.
+                The UK&apos;s trusted contractor network. Find projects, build your reputation, get paid.
               </p>
             </div>
             <div>
@@ -162,14 +162,14 @@ export default function ConstructionPortalLayout({ children }: { children: React
             <div>
               <h4 className="text-white/60 font-semibold text-xs uppercase tracking-widest mb-3">Support</h4>
               <div className="space-y-1.5 text-xs text-white/30">
-                <a href="mailto:support@buildpro.in" className="flex items-center gap-1.5 hover:text-white/60 transition-colors">
-                  <Mail className="w-3 h-3" /> support@buildpro.in
+                <a href="mailto:support@homecreww.com" className="flex items-center gap-1.5 hover:text-white/60 transition-colors">
+                  <Mail className="w-3 h-3" /> support@homecreww.com
                 </a>
-                <a href="tel:+919876543210" className="flex items-center gap-1.5 hover:text-white/60 transition-colors">
-                  <Phone className="w-3 h-3" /> +91 98765 43210
+                <a href="tel:+442079460958" className="flex items-center gap-1.5 hover:text-white/60 transition-colors">
+                  <Phone className="w-3 h-3" /> +44 20 7946 0958
                 </a>
                 <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3 h-3" /> Mumbai, Maharashtra
+                  <MapPin className="w-3 h-3" /> United Kingdom
                 </div>
               </div>
             </div>

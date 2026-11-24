@@ -76,8 +76,9 @@ export function ServiceRequestForm({ serviceId, serviceTitle }: ServiceRequestFo
           />
           <input
             name="location"
-            placeholder="Your location / city (optional)"
-            className="w-full h-9 px-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Job postcode (e.g. SW1A 1AA)"
+            autoComplete="postal-code"
+            className="w-full h-9 px-3 rounded-xl border border-gray-200 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder:normal-case"
           />
           <input
             name="budget"

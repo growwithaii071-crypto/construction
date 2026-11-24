@@ -3,6 +3,7 @@ import { InvitationStatus, MarketplaceJobStatus, UserRole } from "@/generated/pr
 import { getPricingConfig } from "@/lib/pricing";
 import { createNotification } from "@/lib/notifications";
 import { computeVerified } from "@/lib/stripe";
+import { postcodesMatch } from "@/lib/uk-postcode";
 
 export type MatchCandidate = {
   traderId: string;
@@ -26,7 +27,7 @@ export async function findMatchingTraders(opts: {
   const exclude = new Set(opts.excludeTraderIds ?? []);
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const category = opts.category.trim();
-  const location = opts.location?.trim().toLowerCase() ?? "";
+  const location = opts.location?.trim() ?? "";
 
   const contractors = await prisma.user.findMany({
     where: {
@@ -37,6 +38,7 @@ export async function findMatchingTraders(opts: {
     select: {
       id: true,
       name: true,
+      postcode: true,
       stripeOnboardingDone: true,
       stripePayoutsEnabled: true,
       feePaymentMethodId: true,
@@ -79,11 +81,15 @@ export async function findMatchingTraders(opts: {
 
     let locationBoost = 0;
     if (location) {
-      const hay = c.contractorServices
-        .map((s) => `${s.title} ${s.description} ${s.category}`)
-        .join(" ")
-        .toLowerCase();
-      if (hay.includes(location)) locationBoost = 8;
+      if (c.postcode && postcodesMatch(c.postcode, location)) {
+        locationBoost = 25;
+      } else {
+        const hay = c.contractorServices
+          .map((s) => `${s.title} ${s.description} ${s.category}`)
+          .join(" ")
+          .toLowerCase();
+        if (hay.includes(location.toLowerCase())) locationBoost = 8;
+      }
     }
 
     // Prefer verified; unverified only used as backfill when not enough verified

@@ -12,6 +12,7 @@ import {
   rateLimitMessage,
   RATE_LIMITS,
 } from "@/lib/rate-limit";
+import { ukPostcodeSchema } from "@/lib/uk-postcode";
 
 const ContractorRegisterSchema = z
   .object({
@@ -19,6 +20,7 @@ const ContractorRegisterSchema = z
     companyName: z.string().min(2),
     email: z.string().email(),
     phone: z.string().min(10),
+    postcode: ukPostcodeSchema,
     specialization: z.array(z.string()).min(1, "Select at least one specialization"),
     licenseNumber: z.string().optional(),
     password: z
@@ -43,7 +45,16 @@ export async function contractorRegisterAction(formData: unknown) {
     return { success: false, message: firstError };
   }
 
-  const { name, companyName, email, phone, specialization, licenseNumber, password } = parsed.data;
+  const {
+    name,
+    companyName,
+    email,
+    phone,
+    postcode,
+    specialization,
+    licenseNumber,
+    password,
+  } = parsed.data;
 
   const ip = await getClientIp();
   const limited = checkRateLimit(
@@ -71,6 +82,7 @@ export async function contractorRegisterAction(formData: unknown) {
         email,
         password: hashedPassword,
         phone,
+        postcode,
         role: UserRole.CONTRACTOR,
         isActive: true,
         emailVerified: new Date(),

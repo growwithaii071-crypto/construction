@@ -337,8 +337,8 @@ export default async function LandingPage() {
                 <a href="mailto:support@buildpro.in" className="flex items-center gap-2 hover:text-white/80">
                   <Mail className="h-3.5 w-3.5" /> support@buildpro.in
                 </a>
-                <a href="tel:+919876543210" className="flex items-center gap-2 hover:text-white/80">
-                  <Phone className="h-3.5 w-3.5" /> +91 98765 43210
+                <a href="tel:+442079460958" className="flex items-center gap-2 hover:text-white/80">
+                  <Phone className="h-3.5 w-3.5" /> +44 20 7946 0958
                 </a>
               </div>
             </div>

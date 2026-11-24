@@ -84,12 +84,13 @@ export function PostJobForm({ categories }: { categories: string[] }) {
           </select>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="location">Location</Label>
+          <Label htmlFor="location">Postcode</Label>
           <Input
             id="location"
             name="location"
-            placeholder="City / area"
-            className="h-11 rounded-xl"
+            placeholder="e.g. SW1A 1AA"
+            autoComplete="postal-code"
+            className="h-11 rounded-xl uppercase"
             disabled={pending}
           />
         </div>

@@ -37,7 +37,14 @@ export function RegisterForm() {
     formState: { errors },
   } = useForm<RegisterInput>({
     resolver: zodResolver(RegisterSchema),
-    defaultValues: { name: "", email: "", password: "", confirmPassword: "", phone: "" },
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      phone: "",
+      postcode: "",
+    },
   });
 
   const passwordValue = useWatch({ control, name: "password", defaultValue: "" });
@@ -118,10 +125,32 @@ export function RegisterForm() {
           <Input
             id="phone"
             type="tel"
-            placeholder="+91 98765 43210"
+            placeholder="+44 7700 900123"
             disabled={isPending}
             {...register("phone")}
           />
+        </div>
+
+        {/* UK Postcode — required */}
+        <div className="space-y-1.5">
+          <Label htmlFor="postcode">
+            Postcode <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="postcode"
+            type="text"
+            autoComplete="postal-code"
+            placeholder="e.g. SW1A 1AA"
+            disabled={isPending}
+            className={cn(
+              "uppercase",
+              errors.postcode && "border-red-400 focus-visible:ring-red-400"
+            )}
+            {...register("postcode")}
+          />
+          {errors.postcode && (
+            <p className="text-xs text-red-500">{errors.postcode.message}</p>
+          )}
         </div>
 
         {/* Password */}

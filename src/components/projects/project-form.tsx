@@ -180,7 +180,7 @@ export function ProjectForm({ clients, managers, project }: ProjectFormProps) {
                 <Input
                   id="country"
                   name="country"
-                  defaultValue={project?.location ?? "India"}
+                  defaultValue={project?.location ?? "United Kingdom"}
                   placeholder="Country"
                   className="mt-1"
                 />

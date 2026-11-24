@@ -294,7 +294,7 @@ export function ServiceMCQModal({
                   <input
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    placeholder="e.g. Andheri West, Mumbai"
+                    placeholder="e.g. SW1A 1AA"
                     className="h-10 w-full rounded-xl border border-gray-200 px-3 text-sm focus:ring-2 focus:ring-orange-500 focus:outline-none"
                   />
                 </div>

@@ -12,13 +12,13 @@ export function SiteFooter() {
               <BrandLogo size="md" />
             </div>
             <p className="mb-5 text-sm leading-relaxed text-white/40">
-              India&apos;s leading platform connecting customers with trusted construction professionals.
+              The UK platform connecting customers with trusted construction professionals.
             </p>
             <div className="space-y-2 text-sm">
               {[
-                { icon: Mail, text: "support@buildpro.in", href: "mailto:support@buildpro.in" },
-                { icon: Phone, text: "+91 98765 43210", href: "tel:+919876543210" },
-                { icon: MapPin, text: "Mumbai, Maharashtra 400001", href: "#" },
+                { icon: Mail, text: "support@homecreww.com", href: "mailto:support@homecreww.com" },
+                { icon: Phone, text: "+44 20 7946 0958", href: "tel:+442079460958" },
+                { icon: MapPin, text: "United Kingdom", href: "#" },
               ].map((item) => {
                 const Icon = item.icon;
                 return (

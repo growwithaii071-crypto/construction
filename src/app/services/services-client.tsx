@@ -38,6 +38,7 @@ type Service = {
   years: number;
   distanceKm: string;
   city: string;
+  postcode?: string;
   online: boolean;
   availability: string;
   tags: string[];
@@ -48,7 +49,6 @@ type Service = {
 type Props = {
   services: Service[];
   categories: string[];
-  cities: string[];
   searchQuery: string;
   categoryFilter: string;
   locationFilter: string;
@@ -117,7 +117,6 @@ function TraderAvatar({
 export function ServicesClient({
   services,
   categories,
-  cities,
   searchQuery,
   categoryFilter,
   locationFilter,
@@ -221,20 +220,16 @@ export function ServicesClient({
       <div>
         <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-slate-800">
           <MapPin className="h-3.5 w-3.5 text-orange-600" />
-          Location
+          Postcode
         </label>
-        <select
+        <input
+          type="text"
           value={locationInput}
-          onChange={(e) => setLocationInput(e.target.value)}
-          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-        >
-          <option value="">All locations</option>
-          {cities.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
+          onChange={(e) => setLocationInput(e.target.value.toUpperCase())}
+          placeholder="e.g. SW1A 1AA"
+          autoComplete="postal-code"
+          className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm uppercase text-slate-700 placeholder:normal-case focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+        />
       </div>
 
       <div>
@@ -406,19 +401,14 @@ export function ServicesClient({
             </div>
             <div className="relative hidden w-48 shrink-0 md:block">
               <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-orange-600" />
-              <select
+              <input
+                type="text"
                 value={locationInput}
-                onChange={(e) => setLocationInput(e.target.value)}
-                className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white pl-9 pr-8 text-sm font-medium text-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
-              >
-                <option value="">All locations</option>
-                {cities.map((c) => (
-                  <option key={c} value={c}>
-                    {c}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                onChange={(e) => setLocationInput(e.target.value.toUpperCase())}
+                placeholder="Postcode"
+                autoComplete="postal-code"
+                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm font-medium uppercase text-slate-700 placeholder:normal-case focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20"
+              />
             </div>
           </form>
 
@@ -577,7 +567,9 @@ export function ServicesClient({
                           </span>
                           <span className="inline-flex items-center gap-1 text-slate-500">
                             <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                            {service.distanceKm} km away · {service.city}
+                            {service.postcode
+                              ? `${service.postcode}`
+                              : `${service.distanceKm} km away`}
                           </span>
                         </div>
 

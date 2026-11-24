@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ukPostcodeSchema } from "@/lib/uk-postcode";
 
 const passwordSchema = z
   .string()
@@ -21,6 +22,7 @@ export const RegisterSchema = z
     password: passwordSchema,
     confirmPassword: z.string().min(1, "Please confirm your password"),
     phone: z.string().optional(),
+    postcode: ukPostcodeSchema,
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",

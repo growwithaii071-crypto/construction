@@ -88,7 +88,7 @@ export default function CustomerPortalLayout({ children }: { children: React.Rea
                   <div className="w-8 h-8 bg-violet-600 rounded-full flex items-center justify-center text-white text-xs font-bold">RS</div>
                   <div>
                     <p className="text-white text-sm font-semibold">Rajesh Sharma</p>
-                    <p className="text-white/40 text-xs">Property Developer, Mumbai</p>
+                    <p className="text-white/40 text-xs">Homeowner, London</p>
                   </div>
                 </div>
               </div>
@@ -144,7 +144,7 @@ export default function CustomerPortalLayout({ children }: { children: React.Rea
                 <BrandLogo size="sm" />
               </div>
               <p className="text-xs text-white/30 leading-relaxed">
-                India&apos;s leading construction platform connecting customers with verified professionals.
+                The UK construction platform connecting customers with verified professionals.
               </p>
             </div>
             <div>
@@ -165,11 +165,11 @@ export default function CustomerPortalLayout({ children }: { children: React.Rea
                 <a href="mailto:support@buildpro.in" className="flex items-center gap-1.5 hover:text-white/60 transition-colors">
                   <Mail className="w-3 h-3" /> support@buildpro.in
                 </a>
-                <a href="tel:+919876543210" className="flex items-center gap-1.5 hover:text-white/60 transition-colors">
-                  <Phone className="w-3 h-3" /> +91 98765 43210
+                <a href="tel:+442079460958" className="flex items-center gap-1.5 hover:text-white/60 transition-colors">
+                  <Phone className="w-3 h-3" /> +44 20 7946 0958
                 </a>
                 <div className="flex items-center gap-1.5">
-                  <MapPin className="w-3 h-3" /> Mumbai, Maharashtra
+                  <MapPin className="w-3 h-3" /> United Kingdom
                 </div>
               </div>
             </div>

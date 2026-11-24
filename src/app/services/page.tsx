@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { Suspense } from "react";
 import { ServicesClient } from "./services-client";
 import { computeVerified } from "@/lib/stripe";
+import { normalizeUkPostcode, postcodesMatch } from "@/lib/uk-postcode";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Find Tradesmen — HomeCreww" };
@@ -50,6 +51,7 @@ export default async function PublicServicesPage({
             name: true,
             avatar: true,
             phone: true,
+            postcode: true,
             stripeOnboardingDone: true,
             stripePayoutsEnabled: true,
             feePaymentMethodId: true,
@@ -166,20 +168,11 @@ export default async function PublicServicesPage({
     );
   }
 
-  const cities = [
-    "Mumbai",
-    "Delhi",
-    "Bengaluru",
-    "Hyderabad",
-    "Pune",
-    "Chennai",
-    "Ahmedabad",
-    "Jaipur",
-  ];
-
   const serialized = filtered.map(({ s, rating, h, years, verified }) => {
     const distanceKm = (1.5 + (h % 80) / 10).toFixed(1);
-    const city = cities[h % cities.length]!;
+    const postcode = s.contractor.postcode
+      ? normalizeUkPostcode(s.contractor.postcode)
+      : "";
     const reviews = 5 + (h % 40) + s._count.requests * 2;
     const online = h % 3 !== 0;
     const availability =
@@ -214,7 +207,8 @@ export default async function PublicServicesPage({
       reviews,
       years,
       distanceKm,
-      city,
+      city: postcode || "UK",
+      postcode,
       online,
       availability,
       tags,
@@ -228,7 +222,9 @@ export default async function PublicServicesPage({
   });
 
   const locationMatched = locationFilter
-    ? serialized.filter((s) => s.city.toLowerCase() === locationFilter.toLowerCase())
+    ? serialized.filter(
+        (s) => s.postcode && postcodesMatch(s.postcode, locationFilter)
+      )
     : serialized;
 
   return (
@@ -236,7 +232,6 @@ export default async function PublicServicesPage({
       <ServicesClient
         services={locationMatched}
         categories={categories}
-        cities={cities}
         searchQuery={searchQuery}
         categoryFilter={categoryFilter}
         locationFilter={locationFilter}

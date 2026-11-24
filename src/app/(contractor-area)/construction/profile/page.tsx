@@ -228,7 +228,7 @@ export default async function ContractorProfilePage() {
                 <Phone className="h-4 w-4" /> +91 98765 43210
               </a>
               <p className="flex items-center gap-2 text-orange-700/80">
-                <MapPin className="h-4 w-4" /> Mumbai, India
+                <MapPin className="h-4 w-4" /> United Kingdom
               </p>
             </div>
           </div>
